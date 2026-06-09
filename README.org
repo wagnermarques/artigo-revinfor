@@ -1,5 +1,7 @@
 * Ruas do Ipiranga e Historia do Brasil
 
+(Elaborado pelo Gemini)
+
 Este projeto e uma estrutura modular em LaTeX para a escrita de um livro, utilizando Docker para garantir um ambiente de compilacao consistente e portatil.
 
 ** Fluxo de Desenvolvimento
@@ -7,11 +9,15 @@ Este projeto e uma estrutura modular em LaTeX para a escrita de um livro, utiliz
 O fluxo de trabalho foi desenhado para ser simples e eficiente, utilizando ferramentas modernas de software.
 
 *** 1. Escrevendo o Conteudo
+
 - Os capitulos estao localizados na pasta `chapters/`.
+
 - Cada arquivo `.tex` representa um capitulo ou secao.
+
 - Para adicionar um novo capitulo:
   1. Crie um novo arquivo em `chapters/` (ex: `02-historia.tex`).
   2. Adicione `\input{chapters/02-historia.tex}` no arquivo `main.tex` dentro do bloco de capitulos.
+
 - Configuracoes de pacotes e estilos devem ser feitas no arquivo `setup.tex`.
 
 *** 2. Gerando o PDF (Build)
@@ -27,12 +33,14 @@ Utilizamos Docker para evitar a necessidade de instalar o TeX Live localmente.
   make clean
   #+end_src
 
+
 *** 3. Compartilhando com o Overleaf
 O projeto e totalmente compativel com o Overleaf. Para levar seu trabalho para la:
 1. Compacte os arquivos do projeto em um arquivo `.zip` (ignore a pasta `.git`, o `Makefile` e o `.pdf`).
 2. No Overleaf, escolha "New Project" > "Upload Project".
 3. Envie o arquivo `.zip`.
 4. O Overleaf reconhecera o `main.tex` automaticamente e permitira a escrita colaborativa na nuvem.
+
 
 *** 4. Controle de Versao (Git)
 - Sempre faca commits de suas alteracoes:
