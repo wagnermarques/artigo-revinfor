@@ -13,11 +13,11 @@ build:
 
 # Convert LaTeX to DOCX (MS Word)
 docx:
-	docker run --rm -v "$(shell pwd):/data" $(DOCKER_IMAGE_PANDOC) -s $(PROJECT).tex -o $(PROJECT).docx --citeproc --bibliography=references.bib --toc
+	docker run --rm -v "$(shell pwd):/data" $(DOCKER_IMAGE_PANDOC) -s $(PROJECT).tex -o $(PROJECT).docx --citeproc --bibliography=references.bib --toc -M title="Ruas do Ipiranga e Historia do Brasil" -M author="Antonio"
 
 # Convert LaTeX to ODT (LibreOffice)
 odt:
-	docker run --rm -v "$(shell pwd):/data" $(DOCKER_IMAGE_PANDOC) -s $(PROJECT).tex -o $(PROJECT).odt --citeproc --bibliography=references.bib --toc
+	docker run --rm -v "$(shell pwd):/data" $(DOCKER_IMAGE_PANDOC) -s $(PROJECT).tex -o $(PROJECT).odt --citeproc --bibliography=references.bib --toc -M title="Ruas do Ipiranga e Historia do Brasil" -M author="Antonio"
 
 # Remove intermediate files
 clean:
