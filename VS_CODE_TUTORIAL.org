@@ -1,6 +1,9 @@
 * Tutorial: Configurando o VS Code para LaTeX
 
-Este guia explica como configurar o Visual Studio Code para editar seu livro e visualizar o PDF renderizado em tempo real.
+Este guia explica como configurar o Visual Studio Code para editar o
+livro e visualizar o PDF renderizado em tempo real.
+
+Para mais informacoes sobre o plugin, acessar: https://github.com/James-Yu/LaTeX-Workshop
 
 ** 1. Instalando a Extensao LaTeX Workshop
 
@@ -8,8 +11,6 @@ Este guia explica como configurar o Visual Studio Code para editar seu livro e v
 2. Clique no icone de **Extensoes** na barra lateral esquerda (ou pressione `Ctrl+Shift+X`).
 3. Na barra de busca, digite: `LaTeX Workshop`.
 4. Clique no botao **Install** na extensao publicada por /James Yu/.
-
-[IMAGEM: Barra lateral de extensoes com "LaTeX Workshop" selecionado e o botao Install em destaque]
 
 ** 2. Abrindo o Projeto
 

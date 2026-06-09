@@ -20,15 +20,31 @@ O fluxo de trabalho foi desenhado para ser simples e eficiente, utilizando ferra
 
 - Configuracoes de pacotes e estilos devem ser feitas no arquivo `setup.tex`.
 
-*** 2. Gerando o PDF (Build)
-Utilizamos Docker para evitar a necessidade de instalar o TeX Live localmente.
+*** 2. Gerando o PDF e Outros Formatos (Build)
+Utilizamos Docker para evitar a necessidade de instalar ferramentas localmente.
 - Certifique-se de que o Docker esta rodando em sua maquina.
 - No terminal, na raiz do projeto, execute:
+
+**** Gerar PDF (Padrao)
   #+begin_src bash
   make build
   #+end_src
-- O comando ira baixar a imagem `texlive/texlive` (se necessario) e gerar o arquivo `main.pdf`.
-- Para limpar os arquivos temporarios de compilacao, execute:
+- O comando gera o arquivo `main.pdf`.
+
+**** Gerar Microsoft Word (DOCX)
+  #+begin_src bash
+  make docx
+  #+end_src
+- O comando utiliza o Pandoc via Docker para gerar `main.docx`.
+
+**** Gerar LibreOffice (ODT)
+  #+begin_src bash
+  make odt
+  #+end_src
+- O comando utiliza o Pandoc via Docker para gerar `main.odt`.
+
+**** Limpeza
+- Para limpar os arquivos temporarios e os arquivos gerados, execute:
   #+begin_src bash
   make clean
   #+end_src
