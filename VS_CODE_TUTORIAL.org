@@ -41,8 +41,6 @@ Para ver o resultado sem sair do editor:
 1. Clique com o botao direito no arquivo `main.pdf` na barra lateral e escolha **Open to the Side**.
 2. *OU*: Clique no icone de "Lupa" (View LaTeX PDF) que aparece no canto superior direito quando um arquivo `.tex` esta aberto.
 
-[IMAGEM: Icone de lupa no canto superior direito da aba de edicao]
-
 ** 6. Dica: Auto-Refresh
 
 - O visualizador do VS Code e inteligente: sempre que voce rodar `make build` no terminal, o PDF aberto ao lado sera atualizado automaticamente com as novas alteracoes.

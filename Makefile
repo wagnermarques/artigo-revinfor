@@ -3,7 +3,7 @@
 # The filenames
 PROJECT = main
 
-# Docker images to use
+# Docker images we use in commands below
 DOCKER_IMAGE_LATEX = texlive/texlive:latest
 DOCKER_IMAGE_PANDOC = pandoc/core:latest
 
