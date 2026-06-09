@@ -1,0 +1,53 @@
+* Tutorial: Configurando o VS Code para LaTeX
+
+Este guia explica como configurar o Visual Studio Code para editar seu livro e visualizar o PDF renderizado em tempo real.
+
+** 1. Instalando a Extensao LaTeX Workshop
+
+1. Abra o **VS Code**.
+2. Clique no icone de **Extensoes** na barra lateral esquerda (ou pressione `Ctrl+Shift+X`).
+3. Na barra de busca, digite: `LaTeX Workshop`.
+4. Clique no botao **Install** na extensao publicada por /James Yu/.
+
+[IMAGEM: Barra lateral de extensoes com "LaTeX Workshop" selecionado e o botao Install em destaque]
+
+** 2. Abrindo o Projeto
+
+1. Va em `File > Open Folder...`.
+2. Selecione a pasta do seu projeto `ruasdoipirangaehistdobrasilcomtoninho`.
+3. Voce vera a estrutura de pastas (`chapters/`, `main.tex`, etc.) na barra lateral.
+
+** 3. Editando o Conteudo
+
+1. Abra o arquivo `main.tex` ou qualquer arquivo dentro de `chapters/`.
+2. O VS Code reconhecera automaticamente que e um arquivo LaTeX e ativara as ferramentas da extensao.
+
+** 4. Compilando e Visualizando o PDF
+
+Como estamos usando Docker para manter o projeto portatil e limpo, utilizaremos o terminal integrado do VS Code para gerar o PDF.
+
+1. Abra o terminal integrado (`Ctrl + '` ou `Terminal > New Terminal`).
+2. Digite o comando:
+   #+begin_src bash
+   make build
+   #+end_src
+3. Apos a conclusao, o arquivo `main.pdf` sera criado/atualizado.
+
+** 5. Visualizando o PDF dentro do VS Code
+
+Para ver o resultado sem sair do editor:
+
+1. Clique com o botao direito no arquivo `main.pdf` na barra lateral e escolha **Open to the Side**.
+2. *OU*: Clique no icone de "Lupa" (View LaTeX PDF) que aparece no canto superior direito quando um arquivo `.tex` esta aberto.
+
+[IMAGEM: Icone de lupa no canto superior direito da aba de edicao]
+
+** 6. Dica: Auto-Refresh
+
+- O visualizador do VS Code e inteligente: sempre que voce rodar `make build` no terminal, o PDF aberto ao lado sera atualizado automaticamente com as novas alteracoes.
+- Voce pode manter o PDF aberto em uma metade da tela e o codigo na outra para ver o progresso enquanto escreve.
+
+** 7. Atalhos Uteis
+
+- `Ctrl+Alt+V`: Abre o visualizador de PDF.
+- `Ctrl+Shift+P`: Abre a paleta de comandos (digite "LaTeX" para ver todas as opcoes da extensao).
