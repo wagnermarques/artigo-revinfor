@@ -1,0 +1,11 @@
+# Introdução {#chap:introducao}
+
+Esta é a introdução do livro sobre as ruas do Ipiranga e a história do
+Brasil.
+
+## O Bairro do Ipiranga
+
+O Ipiranga é um dos bairros mais históricos de São Paulo. Aqui foi
+proclamada a independência do Brasil.
+
+Como mencionado em [@sample], a história é fundamental.
