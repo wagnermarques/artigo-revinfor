@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# docker-chktex — proxy chktex to the project's texlive container.
+#
+# AUCTeX's flymake backend calls this for real-time syntax checking.
+# Stdin is forwarded so AUCTeX can pass the buffer content via pipe.
+
+set -euo pipefail
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+CWD_REL="$(realpath --relative-to="$PROJECT_ROOT" "$(pwd)")"
+
+exec docker run --rm -i \
+  -v "${PROJECT_ROOT}:/workdir" \
+  -w "/workdir/${CWD_REL}" \
+  texlive/texlive:latest \
+  chktex "$@"

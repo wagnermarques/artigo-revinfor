@@ -1,0 +1,197 @@
+#+TITLE: Project Analysis — artigo-revinfor
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-07-11
+#+OPTIONS: toc:t num:t
+
+* Overview
+
+Multi-article LaTeX monorepo for academic papers targeting *Revista InFor*,
+published by UNESP/CDeP3 at =https://ojs.ead.unesp.br/index.php/cdep3/index=.
+
+The repository provides:
+1. A reusable custom LaTeX class (~Article_Class_RevInfor.cls~) built on top of
+   =abntex2= (Brazilian ABNT academic standard).
+2. Shared assets (class file, journal header image, model bibliography) in one
+   central location.
+3. A Docker-based build pipeline so no local TeX installation is required.
+4. An article template and at least one real article in progress.
+
+Remote: =git@github.com:wagnermarques/artigo-revinfor.git=
+
+* Directory Structure
+
+#+begin_src
+artigo-revinfor/
+├── Makefile                            # Build orchestration (Docker + latexmk)
+├── README.org                          # One-line project description
+├── VS_CODE_TUTORIAL.org                # VS Code + LaTeX Workshop setup guide
+├── VS_CODE_TUTORIAL.html               # HTML export of the tutorial
+├── setup.tex                           # Experimental/spare setup snippet (not used by articles)
+├── references.bib                      # Root-level stub bibliography
+├── check.txt                           # Scratch/test file (leftover, safe to delete)
+├── .gitignore                          # Ignores all LaTeX intermediates and PDFs
+│
+├── common-shared/
+│   ├── cls/
+│   │   └── Article_Class_RevInfor.cls  # Custom LaTeX class (main shared asset)
+│   ├── img/
+│   │   └── cabecalho-img-revistainfor.png  # Journal header image
+│   └── bib/
+│       └── abntex2-modelo-references.bib   # ABNT model bibliography entries
+│
+├── artigo_modelo_revista_infor/        # Template / reference article
+│   ├── main.tex                        # Clean refactored template
+│   ├── maincopy.tex                    # Original abntex2 model (kept as reference)
+│   ├── abntex2-modelo-artigo.tex       # Upstream original source model
+│   └── references.bib                  # ABNT example bibliography
+│
+└── artigo_curso_defectologia_vigostky/ # Article in progress
+    ├── main.tex                        # "A Defectologia em Vigotski: Uma Perspectiva Histórico-Crítica"
+    └── references.bib                  # Article bibliography
+#+end_src
+
+* Custom LaTeX Class (~Article_Class_RevInfor.cls~)
+
+Built on =abntex2= with the following configuration:
+
+| Setting          | Value                               |
+|------------------+-------------------------------------|
+| Document type    | =article=                           |
+| Font size        | 12pt                                |
+| Paper            | A4                                  |
+| Print mode       | One-side                            |
+| Primary language | Brazilian Portuguese                |
+| Secondary lang   | English                             |
+| Font family      | Bookman                             |
+| Margins          | 3 cm (all sides)                    |
+| Paragraph indent | 1.3 cm                              |
+| Paragraph skip   | 0.2 cm                              |
+| Line spacing     | Single                              |
+| Section titles   | Uppercase (TITLE style)             |
+| Citation style   | ABNT author-date (=abntex2cite alf=)  |
+
+Key LaTeX packages loaded by the class: =nomencl=, =color=, =graphicx=, =array=,
+=hyperref=, =booktabs=, =ragged2e=, =tabularx=, =inputenc= (UTF-8), =fontenc= (T1),
+=indentfirst=, =microtype=, =lipsum=, =backref=, =abntex2cite=.
+
+* Build System
+
+** Docker Images
+
+| Role       | Image                    |
+|------------+--------------------------|
+| LaTeX/PDF  | =texlive/texlive:latest=   |
+| Conversion | =pandoc/core:latest=       |
+
+** Makefile Targets
+
+| Target                        | Description                              |
+|-------------------------------+------------------------------------------|
+| =make help=                   | List articles and available commands     |
+| =make build ART=<folder>=     | Build a single article to PDF            |
+| =make all=                    | Build all articles (auto-discovered)     |
+| =make clean=                  | Remove all build artifacts (*.aux, PDF…) |
+
+Article discovery: the Makefile auto-discovers any subdirectory containing a
+=main.tex= file (up to depth 2), excluding =shared/= and the root.
+
+** Build Command (internals)
+
+#+begin_src bash
+docker run --rm \
+  -v "$(pwd):/workdir" \
+  -w /workdir/<ART> \
+  texlive/texlive:latest \
+  latexmk -pdf -interaction=nonstopmode main.tex
+#+end_src
+
+** DOCX / ODT Export
+
+Git history shows Pandoc-based DOCX and ODT export was implemented and then
+refactored. The =clean= target still removes =*.docx= and =*.odt=, so these
+targets may be reintroduced. The workflow uses =pandoc/core:latest= in Docker.
+
+* Articles
+
+** artigo_modelo_revista_infor (Template)
+
+A clean, minimal template demonstrating the correct structure for a RevInfor
+submission. Use this as the starting point for every new article.
+
+Key features shown in =maincopy.tex= (the fuller reference copy):
+- =\resumoumacoluna= environment for the Portuguese abstract.
+- =\renewcommand{\resumoname}{Abstract}= + =otherlanguage*= for English abstract.
+- =\begin{apendicesenv}= / =\begin{anexosenv}= for appendices and annexes.
+- Two-column option via =twocolumn= class option + =\twocolumn[…]= macro.
+
+** artigo_curso_defectologia_vigostky (In Progress)
+
+Title: /A Defectologia em Vigotski: Uma Perspectiva Histórico-Crítica/
+
+Author: Antônio — structured with Introdução, Vigotski e a Defectologia,
+and Conclusão. Content is still placeholder (=\lipsum=).
+
+* Known Issues / Notes
+
+** Path mismatch (potential build failure)
+
+Both article =main.tex= files reference shared assets as:
+#+begin_src latex
+\documentclass{../shared/cls/Article_Class_RevInfor}
+\graphicspath{{../shared/img/}}
+#+end_src
+
+But the actual directory on disk is =common-shared/=, not =shared/=. This path
+discrepancy will cause a build failure. Either:
+- Rename the folder back to =shared/=, OR
+- Update both =main.tex= files to use =../common-shared/cls/= and =../common-shared/img/=.
+
+** =check.txt= (leftover)
+
+Contains Markdown/Pandoc prose about "Ruas do Ipiranga" — appears to be a
+leftover from a different project. Safe to delete.
+
+** =setup.tex= (unused)
+
+A generic LaTeX preamble snippet (=geometry=, =hyperref=, =babel= in Portuguese).
+Not included by any article. Kept as a spare reference or for future use.
+
+** =abntex2-modelo-artigo.tex= in model folder
+
+The upstream original ABNTeX2 model article, kept for reference alongside the
+refactored =main.tex= and =maincopy.tex=. Should not be built directly.
+
+* Workflow: Adding a New Article
+
+1. Create a new subdirectory: =mkdir artigo_<slug>=
+2. Copy =artigo_modelo_revista_infor/main.tex= into it and rename as needed.
+3. Fix the class path if the shared-folder name issue (above) is not yet resolved.
+4. Add a =references.bib= file for the article's bibliography.
+5. Build: =make build ART=artigo_<slug>=
+
+* VS Code Integration
+
+Install the *LaTeX Workshop* extension (James Yu). Key shortcuts:
+- =Ctrl+Alt+V= — open PDF preview
+- =Ctrl+Shift+P= → "LaTeX" — full command palette
+
+Build is done via =make build ART=<folder>= in the integrated terminal (not
+via the extension's internal recipe), so the PDF preview auto-refreshes after
+each =make= run.
+
+Full guide: =VS_CODE_TUTORIAL.org=.
+
+* Git History Summary
+
+| Hash      | Description                                               |
+|-----------+-----------------------------------------------------------|
+| =3500508= | Refactor code structure for improved readability          |
+| =68a7731= | Implement =make docx= and =make odt=                      |
+| =b2f8a51= | Refactor Makefile comments; clean up VS Code tutorial     |
+| =7a1a674= | Refine DOCX/ODT conversion with metadata                  |
+| =7152267= | Improve Pandoc conversion with TOC flag                   |
+| =5d57cf9= | Add DOCX and ODT export support via Pandoc and Docker     |
+| =70e616c= | Add VS Code tutorial for LaTeX Workshop                   |
+| =4640237= | Update README.org                                         |
+| =78fa3db= | Add workflow documentation in README.org                  |
+| =89295ca= | Initial commit: LaTeX book project structure              |
