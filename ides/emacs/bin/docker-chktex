@@ -12,5 +12,5 @@ CWD_REL="$(realpath --relative-to="$PROJECT_ROOT" "$(pwd)")"
 exec docker run --rm -i \
   -v "${PROJECT_ROOT}:/workdir" \
   -w "/workdir/${CWD_REL}" \
-  texlive/texlive:latest \
+  artigo-revinfor-latex:latest \
   chktex "$@"

@@ -1,1 +1,0 @@
-/run/media/wgn/ext4/Projects-Srcs/Projects-Srcs-CDeP3/artigo-revinfor/ides/emacs/.emacs-revinfor/straight/repos/use-package/use-package-core.el
