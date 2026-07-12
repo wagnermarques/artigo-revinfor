@@ -1,0 +1,1 @@
+/run/media/wgn/ext4/Projects-Srcs/Projects-Srcs-CDeP3/artigo-revinfor/ides/emacs/.emacs-revinfor/straight/repos/vertico/extensions/vertico-reverse.el

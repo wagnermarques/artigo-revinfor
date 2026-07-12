@@ -1,0 +1,1414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2026-07-11 sáb 23:10 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tutorial: Editando artigos com Emacs</title>
+<meta name="author" content="Wagner Marques &amp; Claude" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Tutorial: Editando artigos com Emacs</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgc36c31f">1. Visão Geral</a></li>
+<li><a href="#org6c22b68">2. 1. Iniciando o Emacs com a Configuração do Projeto</a>
+<ul>
+<li><a href="#org344589b">2.1. Primeira execução</a></li>
+</ul>
+</li>
+<li><a href="#org9266cac">3. 2. Estrutura de Arquivos no Emacs</a></li>
+<li><a href="#org87a6607">4. 3. Editando um Arquivo <code>.tex</code> (AUCTeX)</a>
+<ul>
+<li><a href="#org096d9ee">4.1. Projeto multi-arquivo e arquivo mestre</a></li>
+<li><a href="#orgb0abc80">4.2. Atalhos essenciais de edição</a>
+<ul>
+<li><a href="#org7075658">4.2.1. Ambientes</a></li>
+<li><a href="#orgb3d13a7">4.2.2. Seções</a></li>
+<li><a href="#orgc7f73e7">4.2.3. Fontes e formatação rápida</a></li>
+<li><a href="#org6afa188">4.2.4. Matemática (LaTeX-math-mode)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org546e428">5. 4. Compilando com Docker (<code>C-c C-c</code>)</a>
+<ul>
+<li><a href="#orgf7a9f6a">5.1. Resultado da compilação</a></li>
+<li><a href="#org56633cc">5.2. Equivalência com o Makefile</a></li>
+</ul>
+</li>
+<li><a href="#orgb7d5b64">6. 5. Visualizando o PDF (pdf-tools + SyncTeX)</a>
+<ul>
+<li><a href="#org27b3d66">6.1. Navegação no PDF</a></li>
+<li><a href="#org300f387">6.2. SyncTeX: do <code>.tex</code> para o PDF</a></li>
+<li><a href="#org10a4e46">6.3. SyncTeX: do PDF para o <code>.tex</code></a></li>
+</ul>
+</li>
+<li><a href="#orgf0912f3">7. 6. Verificação de Sintaxe em Tempo Real (Flymake + chktex)</a></li>
+<li><a href="#org7fe8b17">8. 7. Gerenciando a Bibliografia (ebib)</a>
+<ul>
+<li><a href="#org3607f18">8.1. Abrindo o ebib</a></li>
+<li><a href="#org1741376">8.2. Arquivos <code>.bib</code> pré-carregados</a></li>
+<li><a href="#orge6b5472">8.3. Navegação no ebib</a></li>
+<li><a href="#orgeb5690d">8.4. Adicionando uma entrada nova</a></li>
+<li><a href="#orgfffbf02">8.5. Editando uma entrada existente</a></li>
+<li><a href="#org659dc10">8.6. Inserindo uma citação no <code>.tex</code></a></li>
+</ul>
+</li>
+<li><a href="#orgdf87df2">9. 8. Inserindo Citações pelo RefTeX (alternativa rápida)</a>
+<ul>
+<li><a href="#org7585ca9">9.1. Labels e referências cruzadas</a></li>
+</ul>
+</li>
+<li><a href="#org3851ac1">10. 9. Correção Ortográfica (Flyspell)</a></li>
+<li><a href="#orgdb6afea">11. 10. Editando Arquivos <code>.org</code> (README, PROJECT<sub>ANALYSIS</sub>)</a></li>
+<li><a href="#org60d85a0">12. 11. Adicionando um Novo Artigo</a></li>
+<li><a href="#orgdbb9380">13. 12. Referência Rápida de Atalhos</a>
+<ul>
+<li><a href="#org89b5db3">13.1. LaTeX-mode</a></li>
+<li><a href="#orga0e72d0">13.2. pdf-view-mode</a></li>
+<li><a href="#orgf16773e">13.3. Navegação geral</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgc36c31f" class="outline-2">
+<h2 id="orgc36c31f"><span class="section-number-2">1.</span> Visão Geral</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Este tutorial explica como editar os artigos deste repositório usando o
+Emacs com a configuração em <code>ides/emacs/init.el</code>.
+</p>
+
+<p>
+A configuração é <b>autossuficiente</b>: toda compilação LaTeX e verificação de
+sintaxe rodam dentro dos containers Docker já definidos no <code>Makefile</code>. Não
+é necessário instalar nenhum pacote TeX localmente.
+</p>
+
+<pre class="example" id="orgd944ac4">
+Dependências locais necessárias:
+  - Emacs &gt;= 28
+  - Docker (em execução)
+  - git
+  - aspell + aspell-pt + aspell-en  (apenas para correção ortográfica)
+</pre>
+
+<p>
+pra installar o aspell utilize o ansible e execute este playbook
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell" id="org5effafb">ansible-playbook -i localhost, -K  ides/emacs/ansible/install-aspell.yml 
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org6c22b68" class="outline-2">
+<h2 id="org6c22b68"><span class="section-number-2">2.</span> 1. Iniciando o Emacs com a Configuração do Projeto</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Use sempre a flag <code>-q</code> para ignorar o seu <code>~/.emacs.d</code> pessoal, e <code>-l</code>
+para carregar o <code>init.el</code> do projeto:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">emacs -q -l /caminho/para/artigo-revinfor/ides-configuration/emacs/init.el
+</pre>
+</div>
+
+<p>
+Para não digitar isso toda vez, adicione um alias no seu <code>~/.bashrc</code> ou
+<code>~/.zshrc</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #c678dd;">alias</span> emacs-revinfor=<span style="color: #98be65;">'emacs -q -l ~/Projects/artigo-revinfor/ides-configuration/emacs/init.el'</span>
+</pre>
+</div>
+</div>
+<div id="outline-container-org344589b" class="outline-3">
+<h3 id="org344589b"><span class="section-number-3">2.1.</span> Primeira execução</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Na primeira vez, o <code>straight.el</code> baixa e compila todos os pacotes
+(AUCTeX, pdf-tools, ebib, etc.) em
+<code>ides-configuration/emacs/.emacs-revinfor/</code>. Isso leva alguns minutos.
+</p>
+
+<p>
+Nas execuções seguintes o Emacs abre normalmente.
+</p>
+
+<p>
+O <code>~/.emacs.d</code> pessoal <b>não é tocado</b>.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org9266cac" class="outline-2">
+<h2 id="org9266cac"><span class="section-number-2">3.</span> 2. Estrutura de Arquivos no Emacs</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Ao abrir o Emacs, use <code>C-x p p</code> (project.el) para navegar entre os
+projetos registrados. O repositório <code>artigo-revinfor</code> já estará listado.
+</p>
+
+<p>
+Dentro do projeto, use:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-x p f</code></td>
+<td class="org-left">Abrir arquivo do projeto (com autocompletar)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x p d</code></td>
+<td class="org-left">Abrir o diretório do projeto no Dired</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x p b</code></td>
+<td class="org-left">Listar buffers abertos do projeto</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x C-f</code></td>
+<td class="org-left">Abrir qualquer arquivo pelo caminho</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Os arquivos principais de cada artigo ficam em seus subdiretórios:
+</p>
+
+<pre class="example" id="org9bfc63a">
+artigo_modelo_revista_infor/main.tex
+artigo_curso_defectologia_vigostky/main.tex
+</pre>
+</div>
+</div>
+<div id="outline-container-org87a6607" class="outline-2">
+<h2 id="org87a6607"><span class="section-number-2">4.</span> 3. Editando um Arquivo <code>.tex</code> (AUCTeX)</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Ao abrir qualquer arquivo <code>.tex</code>, o Emacs entra automaticamente em
+<code>LaTeX-mode</code> (fornecido pelo AUCTeX). Você verá realce de sintaxe,
+indentação automática e os menus <code>LaTeX</code> e <code>Command</code> na barra de menus.
+</p>
+</div>
+<div id="outline-container-org096d9ee" class="outline-3">
+<h3 id="org096d9ee"><span class="section-number-3">4.1.</span> Projeto multi-arquivo e arquivo mestre</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+Na primeira vez que abrir um <code>main.tex</code>, o AUCTeX pergunta:
+</p>
+
+<pre class="example" id="org5b4e892">
+Please specify a master file: (default main.tex)
+</pre>
+
+<p>
+Pressione <code>Enter</code> para aceitar <code>main.tex</code> como mestre. Esta escolha é
+gravada automaticamente em um arquivo <code>.dir-locals.el</code> no diretório do
+artigo e não será perguntada novamente.
+</p>
+</div>
+</div>
+<div id="outline-container-orgb0abc80" class="outline-3">
+<h3 id="orgb0abc80"><span class="section-number-3">4.2.</span> Atalhos essenciais de edição</h3>
+<div class="outline-text-3" id="text-4-2">
+</div>
+<div id="outline-container-org7075658" class="outline-4">
+<h4 id="org7075658"><span class="section-number-4">4.2.1.</span> Ambientes</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-c C-e</code></td>
+<td class="org-left">Inserir/fechar ambiente (<code>\begin{}...\end{}</code>)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Exemplos de ambientes úteis: <code>figure</code>, <code>table</code>, <code>itemize</code>,
+<code>enumerate</code>, <code>equation</code>, <code>citacao</code>, <code>resumoumacoluna</code>.
+</p>
+</div>
+</div>
+<div id="outline-container-orgb3d13a7" class="outline-4">
+<h4 id="orgb3d13a7"><span class="section-number-4">4.2.2.</span> Seções</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-c C-s</code></td>
+<td class="org-left">Inserir seção/subseção</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgc7f73e7" class="outline-4">
+<h4 id="orgc7f73e7"><span class="section-number-4">4.2.3.</span> Fontes e formatação rápida</h4>
+<div class="outline-text-4" id="text-4-2-3">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-c C-f C-b</code></td>
+<td class="org-left"><code>\textbf{...}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-f C-i</code></td>
+<td class="org-left"><code>\textit{...}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-f C-e</code></td>
+<td class="org-left"><code>\emph{...}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-f C-t</code></td>
+<td class="org-left"><code>\texttt{...}</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org6afa188" class="outline-4">
+<h4 id="org6afa188"><span class="section-number-4">4.2.4.</span> Matemática (LaTeX-math-mode)</h4>
+<div class="outline-text-4" id="text-4-2-4">
+<p>
+O <code>LaTeX-math-mode</code> está ativo por padrão. Prefixo: <code>`</code> (acento grave).
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>` a</code></td>
+<td class="org-left"><code>\alpha</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>` b</code></td>
+<td class="org-left"><code>\beta</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>` i</code></td>
+<td class="org-left"><code>\infty</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>` =</code></td>
+<td class="org-left"><code>\equiv</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Use <code>C-c ~</code> para alternar o <code>LaTeX-math-mode</code> manualmente.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org546e428" class="outline-2">
+<h2 id="org546e428"><span class="section-number-2">5.</span> 4. Compilando com Docker (<code>C-c C-c</code>)</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Pressione <code>C-c C-c</code> dentro de qualquer buffer <code>.tex</code>. O AUCTeX exibirá:
+</p>
+
+<pre class="example" id="org93770fb">
+Command: (default docker-latexmk)
+</pre>
+
+<p>
+Pressione <code>Enter</code>. O AUCTeX executa:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">docker-latexmk -pdf -interaction=nonstopmode main.tex
+</pre>
+</div>
+
+<p>
+O wrapper <code>ides-configuration/emacs/bin/docker-latexmk</code> cuida de:
+</p>
+
+<ol class="org-ol">
+<li>Descobrir a raiz do repositório via <code>git rev-parse --show-toplevel</code>.</li>
+<li>Montar a raiz em <code>/workdir</code> dentro do container <code>texlive/texlive:latest</code>.</li>
+<li>Definir o diretório de trabalho do container como o subdiretório do
+artigo, garantindo que caminhos como <code>../common-shared/cls/</code> sejam
+resolvidos corretamente.</li>
+</ol>
+</div>
+<div id="outline-container-orgf7a9f6a" class="outline-3">
+<h3 id="orgf7a9f6a"><span class="section-number-3">5.1.</span> Resultado da compilação</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+O AUCTeX abre o buffer <code>*TeX compilation*</code> com a saída do <code>latexmk</code>. Se
+houver erros, use:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-c `</code></td>
+<td class="org-left">Ir para o próximo erro/aviso no <code>.tex</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-l</code></td>
+<td class="org-left">Exibir/ocultar o buffer de log de compilação</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Erros são anotados diretamente na linha do arquivo <code>.tex</code> com setas <code>=&gt;&lt;</code>.
+</p>
+</div>
+</div>
+<div id="outline-container-org56633cc" class="outline-3">
+<h3 id="org56633cc"><span class="section-number-3">5.2.</span> Equivalência com o Makefile</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+O comando executado pelo Emacs é equivalente a:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">make build <span style="color: #dcaeea;">ART</span>=artigo_curso_defectologia_vigostky
+</pre>
+</div>
+
+<p>
+A diferença é que o Emacs captura a saída e analisa os erros
+automaticamente.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb7d5b64" class="outline-2">
+<h2 id="orgb7d5b64"><span class="section-number-2">6.</span> 5. Visualizando o PDF (pdf-tools + SyncTeX)</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Após a compilação, pressione <code>C-c C-v</code> para abrir o PDF gerado no
+<code>pdf-view-mode</code> (pdf-tools), diretamente dentro do Emacs.
+</p>
+
+<p>
+O PDF é atualizado automaticamente sempre que uma compilação for
+concluída com sucesso.
+</p>
+</div>
+<div id="outline-container-org27b3d66" class="outline-3">
+<h3 id="org27b3d66"><span class="section-number-3">6.1.</span> Navegação no PDF</h3>
+<div class="outline-text-3" id="text-6-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>n</code></td>
+<td class="org-left">Próxima página</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>p</code></td>
+<td class="org-left">Página anterior</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>+</code></td>
+<td class="org-left">Ampliar</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>-</code></td>
+<td class="org-left">Reduzir</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>s w</code></td>
+<td class="org-left">Ajustar à largura da janela</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>s f</code></td>
+<td class="org-left">Ajustar à janela inteira</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>g g</code></td>
+<td class="org-left">Ir para a primeira página</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>G</code></td>
+<td class="org-left">Ir para a última página</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>M-g g</code></td>
+<td class="org-left">Ir para uma página específica</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org300f387" class="outline-3">
+<h3 id="org300f387"><span class="section-number-3">6.2.</span> SyncTeX: do <code>.tex</code> para o PDF</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+Com o cursor em qualquer linha do arquivo <code>.tex</code>, pressione <code>C-c C-v</code>:
+o pdf-tools abre o PDF e destaca o trecho correspondente.
+</p>
+</div>
+</div>
+<div id="outline-container-org10a4e46" class="outline-3">
+<h3 id="org10a4e46"><span class="section-number-3">6.3.</span> SyncTeX: do PDF para o <code>.tex</code></h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+Dentro do <code>pdf-view-mode</code>, pressione <code>C-c C-g</code> sobre qualquer parte do
+PDF: o Emacs abre o <code>.tex</code> correspondente e posiciona o cursor na linha
+exata.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf0912f3" class="outline-2">
+<h2 id="orgf0912f3"><span class="section-number-2">7.</span> 6. Verificação de Sintaxe em Tempo Real (Flymake + chktex)</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+O <code>flymake-mode</code> é ativado automaticamente ao abrir um <code>.tex</code>. Ele chama
+<code>docker-chktex</code> em segundo plano enquanto você digita e marca problemas
+diretamente no buffer.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>M-n</code></td>
+<td class="org-left">Ir para o próximo diagnóstico</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>M-p</code></td>
+<td class="org-left">Ir para o diagnóstico anterior</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c ! l</code></td>
+<td class="org-left">Listar todos os diagnósticos do buffer</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c ! n</code></td>
+<td class="org-left">Próximo diagnóstico (alternativo)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Passe o mouse sobre um sublinhado para ver a descrição do aviso em um
+tooltip, ou posicione o cursor e aguarde o <code>echo area</code> exibir a mensagem.
+</p>
+
+<p>
+O <code>docker-chktex</code> roda dentro do mesmo container <code>texlive/texlive:latest</code>
+do processo de compilação — sem instalação local necessária.
+</p>
+</div>
+</div>
+<div id="outline-container-org7fe8b17" class="outline-2">
+<h2 id="org7fe8b17"><span class="section-number-2">8.</span> 7. Gerenciando a Bibliografia (ebib)</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+O <code>ebib</code> é o gerenciador de bibliografias integrado, equivalente ao
+BibDesk no macOS. Ele lê diretamente os arquivos <code>.bib</code> do projeto.
+</p>
+</div>
+<div id="outline-container-org3607f18" class="outline-3">
+<h3 id="org3607f18"><span class="section-number-3">8.1.</span> Abrindo o ebib</h3>
+<div class="outline-text-3" id="text-8-1">
+<pre class="example" id="orgb3ab108">
+C-c e
+</pre>
+
+<p>
+O ebib abre em duas janelas: a lista de entradas (índice) acima e os
+campos da entrada selecionada abaixo.
+</p>
+</div>
+</div>
+<div id="outline-container-org1741376" class="outline-3">
+<h3 id="org1741376"><span class="section-number-3">8.2.</span> Arquivos <code>.bib</code> pré-carregados</h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+A configuração carrega automaticamente:
+</p>
+
+<ul class="org-ul">
+<li><code>artigo_modelo_revista_infor/references.bib</code></li>
+<li><code>artigo_curso_defectologia_vigostky/references.bib</code></li>
+<li><code>common-shared/bib/abntex2-modelo-references.bib</code></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orge6b5472" class="outline-3">
+<h3 id="orge6b5472"><span class="section-number-3">8.3.</span> Navegação no ebib</h3>
+<div class="outline-text-3" id="text-8-3">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>n</code> / <code>p</code></td>
+<td class="org-left">Próxima / entrada anterior</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>g</code> / <code>G</code></td>
+<td class="org-left">Primeira / última entrada</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>/</code></td>
+<td class="org-left">Buscar por campo (autor, título…)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>l</code></td>
+<td class="org-left">Alternar para outro arquivo <code>.bib</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgeb5690d" class="outline-3">
+<h3 id="orgeb5690d"><span class="section-number-3">8.4.</span> Adicionando uma entrada nova</h3>
+<div class="outline-text-3" id="text-8-4">
+<ol class="org-ol">
+<li>Pressione <code>a</code> no índice do ebib.</li>
+<li>Escolha o tipo (<code>article</code>, <code>book</code>, =misc=…).</li>
+<li>Preencha os campos com <code>e</code> (editar campo) em cada linha.</li>
+<li>Pressione <code>C-x C-s</code> para salvar o <code>.bib</code>.</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orgfffbf02" class="outline-3">
+<h3 id="orgfffbf02"><span class="section-number-3">8.5.</span> Editando uma entrada existente</h3>
+<div class="outline-text-3" id="text-8-5">
+<ol class="org-ol">
+<li>Selecione a entrada com <code>n</code> / <code>p</code>.</li>
+<li>Na janela de campos, mova com <code>TAB</code> e pressione <code>e</code> para editar.</li>
+<li><code>C-x C-s</code> para salvar.</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org659dc10" class="outline-3">
+<h3 id="org659dc10"><span class="section-number-3">8.6.</span> Inserindo uma citação no <code>.tex</code></h3>
+<div class="outline-text-3" id="text-8-6">
+<p>
+Com o ebib aberto e uma entrada selecionada, pressione <code>i</code> (insert):
+o ebib pergunta qual comando de citação usar. Para ABNT/abntex2:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Comando</th>
+<th scope="col" class="org-left">Quando usar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\cite{key}</code></td>
+<td class="org-left">Citação entre parênteses padrão</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\citeonline{key}</code></td>
+<td class="org-left">Citação integrada ao texto (nome, ano)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\citeauthor{key}</code></td>
+<td class="org-left">Apenas o nome do autor</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\citeyear{key}</code></td>
+<td class="org-left">Apenas o ano</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Feche o ebib com <code>q</code> para voltar ao <code>.tex</code>.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgdf87df2" class="outline-2">
+<h2 id="orgdf87df2"><span class="section-number-2">9.</span> 8. Inserindo Citações pelo RefTeX (alternativa rápida)</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+Sem sair do buffer <code>.tex</code>, pressione <code>C-c [</code>. O RefTeX abre um prompt de
+busca nos arquivos <code>.bib</code> associados.
+</p>
+
+<ol class="org-ol">
+<li>Digite parte do autor ou título.</li>
+<li>Selecione a entrada na lista.</li>
+<li>Escolha o formato de citação no menu:</li>
+</ol>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Tecla</th>
+<th scope="col" class="org-left">Comando inserido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>Enter</code></td>
+<td class="org-left"><code>\cite{key}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>o</code></td>
+<td class="org-left"><code>\citeonline{key}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>a</code></td>
+<td class="org-left"><code>\citeauthor{key}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>y</code></td>
+<td class="org-left"><code>\citeyear{key}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>f</code></td>
+<td class="org-left"><code>\citefullauthor{key}</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="outline-container-org7585ca9" class="outline-3">
+<h3 id="org7585ca9"><span class="section-number-3">9.1.</span> Labels e referências cruzadas</h3>
+<div class="outline-text-3" id="text-9-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-c (</code></td>
+<td class="org-left">Inserir <code>\label{}</code> com autocompletar</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c )</code></td>
+<td class="org-left">Inserir <code>\ref{}</code> ou <code>\eqref{}</code> com busca</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-org3851ac1" class="outline-2">
+<h2 id="org3851ac1"><span class="section-number-2">10.</span> 9. Correção Ortográfica (Flyspell)</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+O <code>flyspell-mode</code> é ativado automaticamente em <code>LaTeX-mode</code> usando o
+dicionário <code>pt_BR</code> via <code>aspell</code>.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-c $</code></td>
+<td class="org-left">Corrigir palavra sob o cursor</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>M-$</code></td>
+<td class="org-left">Corrigir palavra sob o cursor (alternativo)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-b</code></td>
+<td class="org-left">Verificar o buffer inteiro</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Para alternar para inglês temporariamente:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-nil">M-x ispell-change-dictionary RET en RET
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgdb6afea" class="outline-2">
+<h2 id="orgdb6afea"><span class="section-number-2">11.</span> 10. Editando Arquivos <code>.org</code> (README, PROJECT<sub>ANALYSIS</sub>)</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+Arquivos <code>.org</code> abrem automaticamente em <code>org-mode</code>. Recursos úteis:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>TAB</code></td>
+<td class="org-left">Expandir / recolher seção</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>S-TAB</code></td>
+<td class="org-left">Expandir / recolher tudo</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-n</code></td>
+<td class="org-left">Próximo cabeçalho</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-p</code></td>
+<td class="org-left">Cabeçalho anterior</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-t</code></td>
+<td class="org-left">Alternar estado de tarefa (TODO/DONE)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-e h h</code></td>
+<td class="org-left">Exportar para HTML</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-e l p</code></td>
+<td class="org-left">Exportar para PDF via LaTeX</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c '</code></td>
+<td class="org-left">Editar bloco de código em modo dedicado</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org60d85a0" class="outline-2">
+<h2 id="org60d85a0"><span class="section-number-2">12.</span> 11. Adicionando um Novo Artigo</h2>
+<div class="outline-text-2" id="text-12">
+<ol class="org-ol">
+<li><p>
+Crie o diretório do novo artigo:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">mkdir artigo_meu_novo_tema
+</pre>
+</div></li>
+
+<li><p>
+Copie o template:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">cp artigo_modelo_revista_infor/main.tex artigo_meu_novo_tema/main.tex
+cp artigo_modelo_revista_infor/references.bib artigo_meu_novo_tema/references.bib
+</pre>
+</div></li>
+
+<li><p>
+Abra o <code>main.tex</code> no Emacs e ajuste os metadados:
+</p>
+<div class="org-src-container">
+<pre class="src src-latex"><span style="color: #51afef;">\titulo</span>{T&#237;tulo do Seu Artigo}
+<span style="color: #51afef;">\autor</span>{Seu Nome}
+<span style="color: #51afef;">\local</span>{Brasil}
+<span style="color: #51afef;">\data</span>{<span style="color: #51afef;">\today</span>}
+</pre>
+</div></li>
+
+<li>Ao compilar pela primeira vez (<code>C-c C-c</code>), confirme <code>main.tex</code> como
+arquivo mestre quando solicitado.</li>
+
+<li>O <code>docker-latexmk</code> descobrirá automaticamente o novo diretório —
+nenhuma alteração no <code>Makefile</code> ou na configuração do Emacs é
+necessária.</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orgdbb9380" class="outline-2">
+<h2 id="orgdbb9380"><span class="section-number-2">13.</span> 12. Referência Rápida de Atalhos</h2>
+<div class="outline-text-2" id="text-13">
+</div>
+<div id="outline-container-org89b5db3" class="outline-3">
+<h3 id="org89b5db3"><span class="section-number-3">13.1.</span> LaTeX-mode</h3>
+<div class="outline-text-3" id="text-13-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-c C-c</code></td>
+<td class="org-left">Compilar com docker-latexmk</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-v</code></td>
+<td class="org-left">Abrir / sincronizar PDF (SyncTeX)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c `</code></td>
+<td class="org-left">Ir para o próximo erro de compilação</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-e</code></td>
+<td class="org-left">Inserir ambiente LaTeX</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-s</code></td>
+<td class="org-left">Inserir seção</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c [</code></td>
+<td class="org-left">Inserir citação via RefTeX</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c (</code></td>
+<td class="org-left">Inserir label via RefTeX</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c )</code></td>
+<td class="org-left">Inserir referência cruzada via RefTeX</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c e</code></td>
+<td class="org-left">Abrir ebib (gerenciador de bibliografias)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>M-n</code> / <code>M-p</code></td>
+<td class="org-left">Próximo / anterior diagnóstico Flymake</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-f C-b</code></td>
+<td class="org-left"><code>\textbf{}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-f C-i</code></td>
+<td class="org-left"><code>\textit{}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-f C-e</code></td>
+<td class="org-left"><code>\emph{}</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orga0e72d0" class="outline-3">
+<h3 id="orga0e72d0"><span class="section-number-3">13.2.</span> pdf-view-mode</h3>
+<div class="outline-text-3" id="text-13-2">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>n</code> / <code>p</code></td>
+<td class="org-left">Próxima / página anterior</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>s w</code></td>
+<td class="org-left">Ajustar à largura</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>+</code> / <code>-</code></td>
+<td class="org-left">Zoom in / out</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-c C-g</code></td>
+<td class="org-left">SyncTeX: PDF → código-fonte</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgf16773e" class="outline-3">
+<h3 id="orgf16773e"><span class="section-number-3">13.3.</span> Navegação geral</h3>
+<div class="outline-text-3" id="text-13-3">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-x p p</code></td>
+<td class="org-left">Escolher projeto</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x p f</code></td>
+<td class="org-left">Abrir arquivo do projeto</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x p b</code></td>
+<td class="org-left">Listar buffers do projeto</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x 1</code></td>
+<td class="org-left">Janela única</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x 2</code></td>
+<td class="org-left">Dividir horizontalmente</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x 3</code></td>
+<td class="org-left">Dividir verticalmente</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C-x o</code></td>
+<td class="org-left">Alternar entre janelas</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2026-07-11</p>
+<p class="author">Author: Wagner Marques &amp; Claude</p>
+<p class="date">Created: 2026-07-11 sáb 23:10</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

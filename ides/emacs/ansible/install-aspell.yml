@@ -1,0 +1,71 @@
+---
+# install-aspell.yml
+#
+# Installs aspell and the Portuguese / English dictionaries required by
+# the Flyspell spell-checker configured in ides/emacs/init.el.
+#
+# Usage (run from any directory):
+#   ansible-playbook -i localhost, --ask-become-pass \
+#     ides/emacs/ansible/install-aspell.yml
+#
+# The trailing comma after "localhost" is intentional — it tells Ansible
+# to treat the string as an inline inventory rather than a file path.
+# --ask-become-pass (or -K) prompts for your sudo password.
+
+- name: Install aspell spell-checking dictionaries for Emacs
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    packages_fedora:
+      - aspell
+      - aspell-en
+      - aspell-pt
+
+    packages_debian:
+      - aspell
+      - aspell-en
+      - aspell-pt
+
+  tasks:
+
+    - name: Gather OS facts
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - distribution
+
+    - name: Install aspell dictionaries on Fedora / RHEL
+      ansible.builtin.dnf:
+        name: "{{ packages_fedora }}"
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install aspell dictionaries on Debian / Ubuntu
+      ansible.builtin.apt:
+        name: "{{ packages_debian }}"
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Verify aspell binary is available
+      ansible.builtin.command:
+        cmd: aspell --version
+      register: aspell_version
+      changed_when: false
+
+    - name: Show installed aspell version
+      ansible.builtin.debug:
+        msg: "{{ aspell_version.stdout_lines[0] }}"
+
+    - name: List installed aspell dictionaries
+      ansible.builtin.command:
+        cmd: aspell dicts
+      register: aspell_dicts
+      changed_when: false
+
+    - name: Show available dictionaries
+      ansible.builtin.debug:
+        msg: "{{ aspell_dicts.stdout_lines }}"

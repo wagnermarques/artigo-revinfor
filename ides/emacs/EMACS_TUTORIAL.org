@@ -1,0 +1,415 @@
+#+TITLE: Tutorial: Editando artigos com Emacs
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-07-11
+#+OPTIONS: toc:t num:t
+
+* Visão Geral
+
+Este tutorial explica como editar os artigos deste repositório usando o
+Emacs com a configuração em =ides/emacs/init.el=.
+
+A configuração é *autossuficiente*: toda compilação LaTeX e verificação de
+sintaxe rodam dentro dos containers Docker já definidos no =Makefile=. Não
+é necessário instalar nenhum pacote TeX localmente.
+
+#+begin_example
+Dependências locais necessárias:
+  - Emacs >= 28
+  - Docker (em execução)
+  - git
+  - aspell + aspell-pt + aspell-en  (apenas para correção ortográfica)
+#+end_example
+
+pra installar o aspell utilize o ansible e execute este playbook
+
+#+name: 
+#+begin_src shell
+  ansible-playbook -i localhost, -K  ides/emacs/ansible/install-aspell.yml 
+#+end_src
+
+
+* 1. Iniciando o Emacs com a Configuração do Projeto
+
+Use sempre a flag =-q= para ignorar o seu =~/.emacs.d= pessoal, e =-l=
+para carregar o =init.el= do projeto:
+
+#+begin_src bash
+emacs -q -l /caminho/para/artigo-revinfor/ides-configuration/emacs/init.el
+#+end_src
+
+Para não digitar isso toda vez, adicione um alias no seu =~/.bashrc= ou
+=~/.zshrc=:
+
+#+begin_src bash
+alias emacs-revinfor='emacs -q -l ~/Projects/artigo-revinfor/ides-configuration/emacs/init.el'
+#+end_src
+
+
+** Primeira execução
+
+Na primeira vez, o =straight.el= baixa e compila todos os pacotes
+(AUCTeX, pdf-tools, ebib, etc.) em
+=ides-configuration/emacs/.emacs-revinfor/=. Isso leva alguns minutos.
+
+Nas execuções seguintes o Emacs abre normalmente.
+
+O =~/.emacs.d= pessoal *não é tocado*.
+
+
+* 2. Estrutura de Arquivos no Emacs
+
+Ao abrir o Emacs, use =C-x p p= (project.el) para navegar entre os
+projetos registrados. O repositório =artigo-revinfor= já estará listado.
+
+Dentro do projeto, use:
+
+| Atalho      | Ação                                              |
+|-------------+---------------------------------------------------|
+| =C-x p f=   | Abrir arquivo do projeto (com autocompletar)      |
+| =C-x p d=   | Abrir o diretório do projeto no Dired             |
+| =C-x p b=   | Listar buffers abertos do projeto                 |
+| =C-x C-f=   | Abrir qualquer arquivo pelo caminho               |
+
+Os arquivos principais de cada artigo ficam em seus subdiretórios:
+
+#+begin_example
+artigo_modelo_revista_infor/main.tex
+artigo_curso_defectologia_vigostky/main.tex
+#+end_example
+
+* 3. Editando um Arquivo =.tex= (AUCTeX)
+
+Ao abrir qualquer arquivo =.tex=, o Emacs entra automaticamente em
+=LaTeX-mode= (fornecido pelo AUCTeX). Você verá realce de sintaxe,
+indentação automática e os menus =LaTeX= e =Command= na barra de menus.
+
+** Projeto multi-arquivo e arquivo mestre
+
+Na primeira vez que abrir um =main.tex=, o AUCTeX pergunta:
+
+#+begin_example
+Please specify a master file: (default main.tex)
+#+end_example
+
+Pressione =Enter= para aceitar =main.tex= como mestre. Esta escolha é
+gravada automaticamente em um arquivo =.dir-locals.el= no diretório do
+artigo e não será perguntada novamente.
+
+** Atalhos essenciais de edição
+
+*** Ambientes
+
+| Atalho    | Ação                                        |
+|-----------+---------------------------------------------|
+| =C-c C-e= | Inserir/fechar ambiente (=\begin{}...\end{}=) |
+
+Exemplos de ambientes úteis: =figure=, =table=, =itemize=,
+=enumerate=, =equation=, =citacao=, =resumoumacoluna=.
+
+*** Seções
+
+| Atalho    | Ação                    |
+|-----------+-------------------------|
+| =C-c C-s= | Inserir seção/subseção  |
+
+*** Fontes e formatação rápida
+
+| Atalho      | Resultado           |
+|-------------+---------------------|
+| =C-c C-f C-b= | =\textbf{...}=    |
+| =C-c C-f C-i= | =\textit{...}=    |
+| =C-c C-f C-e= | =\emph{...}=      |
+| =C-c C-f C-t= | =\texttt{...}=    |
+
+*** Matemática (LaTeX-math-mode)
+
+O =LaTeX-math-mode= está ativo por padrão. Prefixo: =`= (acento grave).
+
+| Atalho  | Resultado   |
+|---------+-------------|
+| =` a=   | =\alpha=    |
+| =` b=   | =\beta=     |
+| =` i=   | =\infty=    |
+| =` ==   | =\equiv=    |
+
+Use =C-c ~= para alternar o =LaTeX-math-mode= manualmente.
+
+* 4. Compilando com Docker (=C-c C-c=)
+
+Pressione =C-c C-c= dentro de qualquer buffer =.tex=. O AUCTeX exibirá:
+
+#+begin_example
+Command: (default docker-latexmk)
+#+end_example
+
+Pressione =Enter=. O AUCTeX executa:
+
+#+begin_src bash
+docker-latexmk -pdf -interaction=nonstopmode main.tex
+#+end_src
+
+O wrapper =ides-configuration/emacs/bin/docker-latexmk= cuida de:
+
+1. Descobrir a raiz do repositório via =git rev-parse --show-toplevel=.
+2. Montar a raiz em =/workdir= dentro do container =texlive/texlive:latest=.
+3. Definir o diretório de trabalho do container como o subdiretório do
+   artigo, garantindo que caminhos como =../common-shared/cls/= sejam
+   resolvidos corretamente.
+
+** Resultado da compilação
+
+O AUCTeX abre o buffer =*TeX compilation*= com a saída do =latexmk=. Se
+houver erros, use:
+
+| Atalho    | Ação                                             |
+|-----------+--------------------------------------------------|
+| =C-c `=   | Ir para o próximo erro/aviso no =.tex=           |
+| =C-c C-l= | Exibir/ocultar o buffer de log de compilação     |
+
+Erros são anotados diretamente na linha do arquivo =.tex= com setas ==><=.
+
+** Equivalência com o Makefile
+
+O comando executado pelo Emacs é equivalente a:
+
+#+begin_src bash
+make build ART=artigo_curso_defectologia_vigostky
+#+end_src
+
+A diferença é que o Emacs captura a saída e analisa os erros
+automaticamente.
+
+* 5. Visualizando o PDF (pdf-tools + SyncTeX)
+
+Após a compilação, pressione =C-c C-v= para abrir o PDF gerado no
+=pdf-view-mode= (pdf-tools), diretamente dentro do Emacs.
+
+O PDF é atualizado automaticamente sempre que uma compilação for
+concluída com sucesso.
+
+** Navegação no PDF
+
+| Atalho  | Ação                          |
+|---------+-------------------------------|
+| =n=     | Próxima página                |
+| =p=     | Página anterior               |
+| =+=     | Ampliar                       |
+| =-=     | Reduzir                       |
+| =s w=   | Ajustar à largura da janela   |
+| =s f=   | Ajustar à janela inteira      |
+| =g g=   | Ir para a primeira página     |
+| =G=     | Ir para a última página       |
+| =M-g g= | Ir para uma página específica |
+
+** SyncTeX: do =.tex= para o PDF
+
+Com o cursor em qualquer linha do arquivo =.tex=, pressione =C-c C-v=:
+o pdf-tools abre o PDF e destaca o trecho correspondente.
+
+** SyncTeX: do PDF para o =.tex=
+
+Dentro do =pdf-view-mode=, pressione =C-c C-g= sobre qualquer parte do
+PDF: o Emacs abre o =.tex= correspondente e posiciona o cursor na linha
+exata.
+
+* 6. Verificação de Sintaxe em Tempo Real (Flymake + chktex)
+
+O =flymake-mode= é ativado automaticamente ao abrir um =.tex=. Ele chama
+=docker-chktex= em segundo plano enquanto você digita e marca problemas
+diretamente no buffer.
+
+| Atalho        | Ação                                      |
+|---------------+-------------------------------------------|
+| =M-n=         | Ir para o próximo diagnóstico             |
+| =M-p=         | Ir para o diagnóstico anterior            |
+| =C-c ! l=     | Listar todos os diagnósticos do buffer    |
+| =C-c ! n=     | Próximo diagnóstico (alternativo)         |
+
+Passe o mouse sobre um sublinhado para ver a descrição do aviso em um
+tooltip, ou posicione o cursor e aguarde o =echo area= exibir a mensagem.
+
+O =docker-chktex= roda dentro do mesmo container =texlive/texlive:latest=
+do processo de compilação — sem instalação local necessária.
+
+* 7. Gerenciando a Bibliografia (ebib)
+
+O =ebib= é o gerenciador de bibliografias integrado, equivalente ao
+BibDesk no macOS. Ele lê diretamente os arquivos =.bib= do projeto.
+
+** Abrindo o ebib
+
+#+begin_example
+C-c e
+#+end_example
+
+O ebib abre em duas janelas: a lista de entradas (índice) acima e os
+campos da entrada selecionada abaixo.
+
+** Arquivos =.bib= pré-carregados
+
+A configuração carrega automaticamente:
+
+- =artigo_modelo_revista_infor/references.bib=
+- =artigo_curso_defectologia_vigostky/references.bib=
+- =common-shared/bib/abntex2-modelo-references.bib=
+
+** Navegação no ebib
+
+| Atalho  | Ação                              |
+|---------+-----------------------------------|
+| =n= / =p= | Próxima / entrada anterior      |
+| =g= / =G= | Primeira / última entrada       |
+| =/=     | Buscar por campo (autor, título…) |
+| =l=     | Alternar para outro arquivo =.bib= |
+
+** Adicionando uma entrada nova
+
+1. Pressione =a= no índice do ebib.
+2. Escolha o tipo (=article=, =book=, =misc=…).
+3. Preencha os campos com =e= (editar campo) em cada linha.
+4. Pressione =C-x C-s= para salvar o =.bib=.
+
+** Editando uma entrada existente
+
+1. Selecione a entrada com =n= / =p=.
+2. Na janela de campos, mova com =TAB= e pressione =e= para editar.
+3. =C-x C-s= para salvar.
+
+** Inserindo uma citação no =.tex=
+
+Com o ebib aberto e uma entrada selecionada, pressione =i= (insert):
+o ebib pergunta qual comando de citação usar. Para ABNT/abntex2:
+
+| Comando          | Quando usar                              |
+|------------------+------------------------------------------|
+| =\cite{key}=     | Citação entre parênteses padrão          |
+| =\citeonline{key}= | Citação integrada ao texto (nome, ano) |
+| =\citeauthor{key}= | Apenas o nome do autor                 |
+| =\citeyear{key}= | Apenas o ano                             |
+
+Feche o ebib com =q= para voltar ao =.tex=.
+
+* 8. Inserindo Citações pelo RefTeX (alternativa rápida)
+
+Sem sair do buffer =.tex=, pressione =C-c [=. O RefTeX abre um prompt de
+busca nos arquivos =.bib= associados.
+
+1. Digite parte do autor ou título.
+2. Selecione a entrada na lista.
+3. Escolha o formato de citação no menu:
+
+| Tecla    | Comando inserido         |
+|----------+--------------------------|
+| =Enter=  | =\cite{key}=             |
+| =o=      | =\citeonline{key}=       |
+| =a=      | =\citeauthor{key}=       |
+| =y=      | =\citeyear{key}=         |
+| =f=      | =\citefullauthor{key}=   |
+
+** Labels e referências cruzadas
+
+| Atalho    | Ação                                       |
+|-----------+--------------------------------------------|
+| =C-c (=   | Inserir =\label{}= com autocompletar       |
+| =C-c )=   | Inserir =\ref{}= ou =\eqref{}= com busca   |
+
+* 9. Correção Ortográfica (Flyspell)
+
+O =flyspell-mode= é ativado automaticamente em =LaTeX-mode= usando o
+dicionário =pt_BR= via =aspell=.
+
+| Atalho        | Ação                                          |
+|---------------+-----------------------------------------------|
+| =C-c $=       | Corrigir palavra sob o cursor                 |
+| =M-$=         | Corrigir palavra sob o cursor (alternativo)   |
+| =C-c C-b=     | Verificar o buffer inteiro                    |
+
+Para alternar para inglês temporariamente:
+
+#+begin_src
+M-x ispell-change-dictionary RET en RET
+#+end_src
+
+* 10. Editando Arquivos =.org= (README, PROJECT_ANALYSIS)
+
+Arquivos =.org= abrem automaticamente em =org-mode=. Recursos úteis:
+
+| Atalho          | Ação                                      |
+|-----------------+-------------------------------------------|
+| =TAB=           | Expandir / recolher seção                 |
+| =S-TAB=         | Expandir / recolher tudo                  |
+| =C-c C-n=       | Próximo cabeçalho                         |
+| =C-c C-p=       | Cabeçalho anterior                        |
+| =C-c C-t=       | Alternar estado de tarefa (TODO/DONE)     |
+| =C-c C-e h h=   | Exportar para HTML                        |
+| =C-c C-e l p=   | Exportar para PDF via LaTeX               |
+| =C-c '=         | Editar bloco de código em modo dedicado   |
+
+* 11. Adicionando um Novo Artigo
+
+1. Crie o diretório do novo artigo:
+   #+begin_src bash
+   mkdir artigo_meu_novo_tema
+   #+end_src
+
+2. Copie o template:
+   #+begin_src bash
+   cp artigo_modelo_revista_infor/main.tex artigo_meu_novo_tema/main.tex
+   cp artigo_modelo_revista_infor/references.bib artigo_meu_novo_tema/references.bib
+   #+end_src
+
+3. Abra o =main.tex= no Emacs e ajuste os metadados:
+   #+begin_src latex
+   \titulo{Título do Seu Artigo}
+   \autor{Seu Nome}
+   \local{Brasil}
+   \data{\today}
+   #+end_src
+
+4. Ao compilar pela primeira vez (=C-c C-c=), confirme =main.tex= como
+   arquivo mestre quando solicitado.
+
+5. O =docker-latexmk= descobrirá automaticamente o novo diretório —
+   nenhuma alteração no =Makefile= ou na configuração do Emacs é
+   necessária.
+
+* 12. Referência Rápida de Atalhos
+
+** LaTeX-mode
+
+| Atalho      | Ação                                              |
+|-------------+---------------------------------------------------|
+| =C-c C-c=   | Compilar com docker-latexmk                       |
+| =C-c C-v=   | Abrir / sincronizar PDF (SyncTeX)                 |
+| =C-c `=     | Ir para o próximo erro de compilação              |
+| =C-c C-e=   | Inserir ambiente LaTeX                            |
+| =C-c C-s=   | Inserir seção                                     |
+| =C-c [=     | Inserir citação via RefTeX                        |
+| =C-c (=     | Inserir label via RefTeX                          |
+| =C-c )=     | Inserir referência cruzada via RefTeX             |
+| =C-c e=     | Abrir ebib (gerenciador de bibliografias)         |
+| =M-n= / =M-p= | Próximo / anterior diagnóstico Flymake          |
+| =C-c C-f C-b= | =\textbf{}=                                     |
+| =C-c C-f C-i= | =\textit{}=                                     |
+| =C-c C-f C-e= | =\emph{}=                                       |
+
+** pdf-view-mode
+
+| Atalho      | Ação                                  |
+|-------------+---------------------------------------|
+| =n= / =p=   | Próxima / página anterior             |
+| =s w=       | Ajustar à largura                     |
+| =+= / =-=   | Zoom in / out                         |
+| =C-c C-g=   | SyncTeX: PDF → código-fonte           |
+
+** Navegação geral
+
+| Atalho      | Ação                                  |
+|-------------+---------------------------------------|
+| =C-x p p=   | Escolher projeto                      |
+| =C-x p f=   | Abrir arquivo do projeto              |
+| =C-x p b=   | Listar buffers do projeto             |
+| =C-x 1=     | Janela única                          |
+| =C-x 2=     | Dividir horizontalmente               |
+| =C-x 3=     | Dividir verticalmente                 |
+| =C-x o=     | Alternar entre janelas                |

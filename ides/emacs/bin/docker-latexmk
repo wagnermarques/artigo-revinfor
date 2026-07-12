@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# docker-latexmk — proxy latexmk to the project's texlive container.
+#
+# AUCTeX calls this from the article directory (e.g. artigo_modelo_revista_infor/).
+# We mount the repo root so the container can resolve ../common-shared/ paths.
+
+set -euo pipefail
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+CWD_REL="$(realpath --relative-to="$PROJECT_ROOT" "$(pwd)")"
+
+exec docker run --rm \
+  -v "${PROJECT_ROOT}:/workdir" \
+  -w "/workdir/${CWD_REL}" \
+  artigo-revinfor-latex:latest \
+  latexmk "$@"
