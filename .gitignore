@@ -1,21 +1,87 @@
-# LaTeX intermediate files
+# =============================================================================
+# .gitignore for LaTeX (ABNTeX2) projects
+# -----------------------------------------------------------------------------
+# Goal: ignore INTERMEDIATE build artifacts (regenerated on every compile),
+#       but KEEP the FINAL artifact (the .pdf) under version control.
+#
+# Think of it like a compiled language: we commit the source (.tex, .bib,
+# images, .cls) and the final "binary" (.pdf), but not the object files.
+#
+# NOTE: in .gitignore each line is a single pattern. Comments (#) must be on
+# their own line -- there are no trailing/inline comments.
+# =============================================================================
+
+# --- Core auxiliary files (structure, labels, page layout) -------------------
+# .aux  = cross-references, \label/\ref, \cite bookkeeping
+# .log  = full compiler log
+# .out  = hyperref bookmarks/outline
+# .toc/.lof/.lot = table of contents / list of figures / list of tables
+# .fls/.fdb_latexmk = latexmk file list and build database
+# .synctex.gz/.pdfsync = editor <-> pdf position sync
 *.aux
 *.log
 *.out
 *.toc
 *.lof
 *.lot
-*.bbl
-*.blg
 *.fls
 *.fdb_latexmk
-*.pdfsync
 *.synctex.gz
-*.alg
-*.acr
+*.synctex(busy)
+*.pdfsync
+
+# --- Intermediate output formats ---------------------------------------------
+# .dvi/.xdv = pre-PDF output; *-converted-to.* = images auto-converted
+*.dvi
+*.xdv
+*-converted-to.*
+
+# --- Bibliography (BibTeX / Biber) -------------------------------------------
+# .bbl = formatted bibliography, .blg = its log, rest = biblatex/biber files
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*-blx.aux
+*-blx.bib
+
+# --- Index (makeindex) -------------------------------------------------------
+*.idx
+*.ind
+*.ilg
+*.ist
+
+# --- Nomenclature / list of symbols (nomencl, used by ABNTeX2) ---------------
+*.nlo
+*.nls
+*.nlg
+
+# --- Glossaries / acronyms (glossaries package) ------------------------------
 *.acn
+*.acr
+*.alg
 *.glg
 *.glo
-*.ist
-*.pdf
+*.gls
+*.glsdefs
+*.slg
+*.slo
+*.sls
+
+# --- Miscellaneous package leftovers -----------------------------------------
+# .brf = hyperref backrefs, .tdo = todonotes, .xdy = xindy, .bak = editor backup
+*.brf
+*.tdo
+*.xdy
+*.bak
+
+# --- Editor / IDE config -----------------------------------------------------
+# Local Emacs project config kept out of version control
 ides/emacs/.emacs-revinfor/
+
+# =============================================================================
+# FINAL PDF: in this project the built PDF is treated as a regenerable
+# artifact and is NOT committed. Remove the line below if you decide to
+# version the final PDF instead.
+# =============================================================================
+*.pdf
