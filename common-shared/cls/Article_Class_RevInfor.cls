@@ -154,6 +154,19 @@
 % ---------------------------------------------------------------------------
 %  Página de título
 % ---------------------------------------------------------------------------
+% O abnTeX2 imprime, logo abaixo do título, um "título estrangeiro" (o título
+% em outra língua) por meio do gancho \maketitlehookb, que usa \theforeigntitle.
+% Esse comando só passa a existir se o artigo chamar \tituloestrangeiro{...}.
+% Sem esse ajuste, um artigo que NÃO informa o título estrangeiro quebra com o
+% erro "Undefined control sequence \theforeigntitle". Redefinimos o gancho para
+% imprimir o título estrangeiro apenas quando ele tiver sido informado, tornando
+% \tituloestrangeiro{} opcional.
+\renewcommand{\maketitlehookb}{%
+    \ifcsname theforeigntitle\endcsname
+        \LARGE\center\textit{\theforeigntitle}%
+    \fi
+}
+
 % Gera o título automaticamente no início do documento, sem precisar escrever
 % \maketitle em cada artigo. O título/autor vêm de \titulo{}, \autor{}, etc.,
 % definidos no main.tex.
