@@ -1,0 +1,276 @@
+#+TITLE: Tutorial: como criar e gerar o main.tex de um artigo da Revista InFor
+#+AUTHOR: Projeto artigo-revinfor
+#+OPTIONS: toc:2 num:t
+
+* Objetivo deste tutorial
+
+Este guia mostra, passo a passo e para quem está começando em LaTeX, como o
+arquivo =artigos/artigo_modelo_revista_infor/main.tex= é construído e como
+transformá-lo em um PDF pronto para leitura.
+
+Ao final você vai saber:
+
+1. Qual a estrutura mínima de um artigo desta revista.
+2. O que cada linha do =main.tex= faz.
+3. Como gerar (compilar) o PDF usando o Docker + Makefile do projeto.
+4. Como resolver os erros mais comuns.
+
+* Pré-requisitos
+
+- *Docker* instalado e em execução. Todo o LaTeX roda dentro de um contêiner,
+  então você NÃO precisa instalar TeX Live na sua máquina.
+- Estar na *raiz do repositório* (a pasta =artigo-revinfor/=) ao rodar os
+  comandos =make=.
+- Entender a estrutura de pastas do projeto:
+
+  #+begin_example
+  artigo-revinfor/
+  ├── Makefile                 <- comandos de build
+  ├── Dockerfile               <- imagem LaTeX personalizada
+  ├── common-shared/           <- recursos compartilhados por TODOS os artigos
+  │   ├── cls/Article_Class_RevInfor.cls   (a classe/molde do documento)
+  │   ├── img/cabecalho-img-revistainfor.png (imagem de cabeçalho)
+  │   └── bib/references.bib    (bibliografia compartilhada)
+  └── artigos/
+      └── artigo_modelo_revista_infor/
+          ├── main.tex          <- O ARQUIVO DESTE TUTORIAL
+          └── references.bib    <- bibliografia específica deste artigo
+  #+end_example
+
+  Repare: o artigo fica *dois níveis abaixo* da raiz
+  (=artigos/artigo_modelo_revista_infor/=). Por isso, dentro do =main.tex=, os
+  caminhos para a pasta compartilhada começam com =../../= (subir dois níveis).
+
+* Anatomia do main.tex (linha por linha)
+
+Abaixo está o conteúdo completo do =main.tex=, seguido da explicação de cada
+bloco.
+
+#+begin_src latex
+% Article: Modelo Revista InFor
+\documentclass{../../common-shared/cls/Article_Class_RevInfor}
+
+% Search path for images
+\graphicspath{{../../common-shared/img/}}
+
+\titulo{Título do artigo: Subtítulo}
+\autor{Antônio}
+\local{Brasil}
+\data{\today}
+
+\begin{document}
+
+% Header Image from shared folder
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\paperwidth]{cabecalho-img-revistainfor.png}
+    \label{fig:header-image}
+\end{figure}
+
+\setlength{\headheight}{2cm}
+\addtolength{\topmargin}{-2cm}
+
+\textual
+
+\section{Introdução}
+Este é o modelo refatorado para a Revista InFor. ...
+
+\section{Desenvolvimento}
+\lipsum[1-2]
+
+\section{Considerações Finais}
+\lipsum[3]
+
+\postextual
+% Shared bibliography (common to all articles) + this article's own references
+\bibliography{../../common-shared/bib/references,references}
+
+\end{document}
+#+end_src
+
+** 1. A classe do documento
+
+#+begin_src latex
+\documentclass{../../common-shared/cls/Article_Class_RevInfor}
+#+end_src
+
+Define o "molde" do documento. Em vez de uma classe padrão (como =article=),
+usamos a classe personalizada do projeto, que já traz todas as normas da ABNT
+e os ajustes da revista prontos. O =../../= sobe da pasta do artigo até a raiz
+para encontrar =common-shared/cls/=.
+
+*Dica:* leia os comentários do próprio arquivo =Article_Class_RevInfor.cls=;
+ele está documentado em português e explica tudo o que já vem configurado.
+
+** 2. Caminho das imagens
+
+#+begin_src latex
+\graphicspath{{../../common-shared/img/}}
+#+end_src
+
+Diz ao LaTeX onde procurar as figuras. Com isso, ao inserir uma imagem, basta
+escrever o nome do arquivo (ex.: =cabecalho-img-revistainfor.png=), sem repetir
+o caminho longo toda vez.
+
+** 3. Metadados do artigo
+
+#+begin_src latex
+\titulo{Título do artigo: Subtítulo}
+\autor{Antônio}
+\local{Brasil}
+\data{\today}
+#+end_src
+
+São comandos do abnTeX2 que guardam título, autor, local e data. O título
+aparece automaticamente no início do documento (a classe chama =\maketitle= por
+você). =\today= insere a data atual da compilação.
+
+** 4. Início do corpo e imagem de cabeçalho
+
+#+begin_src latex
+\begin{document}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\paperwidth]{cabecalho-img-revistainfor.png}
+    \label{fig:header-image}
+\end{figure}
+
+\setlength{\headheight}{2cm}
+\addtolength{\topmargin}{-2cm}
+#+end_src
+
+- =\begin{document}= marca o fim do preâmbulo e o começo do conteúdo.
+- O ambiente =figure= insere a imagem de cabeçalho da revista, esticada até a
+  largura da página (=\paperwidth=).
+- As duas linhas de =\setlength=/=\addtolength= ajustam a área do cabeçalho
+  para acomodar essa imagem.
+
+** 5. Divisão em partes e seções
+
+#+begin_src latex
+\textual
+
+\section{Introdução}
+...
+\section{Desenvolvimento}
+\lipsum[1-2]
+
+\section{Considerações Finais}
+\lipsum[3]
+#+end_src
+
+- =\textual= (comando do abnTeX2) marca o início dos *elementos textuais* — a
+  parte principal do artigo.
+- =\section{...}= cria cada seção numerada.
+- =\lipsum[1-2]= gera "texto de mentira" (parágrafos de exemplo) só para
+  preencher e visualizar o layout. Substitua pelo seu conteúdo real.
+
+** 6. Elementos pós-textuais e bibliografia
+
+#+begin_src latex
+\postextual
+\bibliography{../../common-shared/bib/references,references}
+
+\end{document}
+#+end_src
+
+- =\postextual= marca o início dos *elementos pós-textuais* (referências,
+  apêndices, etc.).
+- =\bibliography{...}= carrega DUAS bibliografias, separadas por vírgula:
+  1. =../../common-shared/bib/references= — a bibliografia *compartilhada* por
+     todos os artigos;
+  2. =references= — o arquivo =references.bib= *deste* artigo.
+
+  O BibTeX junta as duas e mostra apenas as obras que você de fato citar com
+  =\cite{...}=. *Regra importante:* mantenha as chaves de citação únicas entre
+  os dois arquivos, senão o BibTeX avisa "repeated entry".
+- =\end{document}= encerra o documento.
+
+* Como criar um main.tex do zero
+
+Se você quiser criar um novo artigo com base neste modelo:
+
+1. Crie a pasta do artigo dentro de =artigos/=:
+   #+begin_src bash
+   mkdir -p artigos/meu_novo_artigo
+   #+end_src
+
+2. Copie o modelo como ponto de partida:
+   #+begin_src bash
+   cp artigos/artigo_modelo_revista_infor/main.tex artigos/meu_novo_artigo/main.tex
+   touch artigos/meu_novo_artigo/references.bib
+   #+end_src
+
+3. Edite o =main.tex= novo: troque =\titulo=, =\autor= e o conteúdo das seções.
+   Não precisa mudar os caminhos =../../common-shared/...= — eles continuam
+   válidos porque todo artigo fica no mesmo nível de pasta.
+
+4. O Makefile descobre o novo artigo automaticamente (veja abaixo).
+
+* Como gerar o PDF (compilação)
+
+Todos os comandos são executados na *raiz do repositório*.
+
+** Passo 1 (só na primeira vez): construir a imagem Docker
+
+A classe usa pacotes do abnTeX2 que já vêm em uma imagem LaTeX personalizada.
+Construa-a uma única vez (ou quando o =Dockerfile= mudar):
+
+#+begin_src bash
+make docker-build
+#+end_src
+
+** Passo 2: compilar o artigo
+
+#+begin_src bash
+make build ART=artigos/artigo_modelo_revista_infor
+#+end_src
+
+Esse comando roda o =latexmk= dentro do Docker, que executa quantas passadas
+forem necessárias (LaTeX → BibTeX → LaTeX → LaTeX) e produz o arquivo
+=artigos/artigo_modelo_revista_infor/main.pdf=.
+
+*Comandos úteis:*
+
+#+begin_src bash
+make help    # lista os artigos que o Makefile encontrou e os comandos
+make all     # compila TODOS os artigos de uma vez
+make clean   # remove os arquivos intermediários (.aux, .log, .bbl, ...)
+#+end_src
+
+* Fluxo de trabalho recomendado
+
+1. Edite o =main.tex= (conteúdo) e o =references.bib= (fontes citadas).
+2. Rode =make build ART=artigos/artigo_modelo_revista_infor=.
+3. Abra o =main.pdf= gerado e confira o resultado.
+4. Repita. Ao terminar, rode =make clean= para deixar a pasta limpa (o PDF e os
+   arquivos intermediários são ignorados pelo Git; veja o =.gitignore=).
+
+* Erros comuns e como resolver
+
+- *"Cannot determine size of graphic" / imagem não aparece:* verifique se o
+  nome em =\includegraphics{...}= bate exatamente com o arquivo em
+  =common-shared/img/= (maiúsculas/minúsculas contam).
+
+- *Citação aparece como "[?]" no PDF:* você citou uma chave que não existe em
+  nenhum dos =.bib=, ou esqueceu de rodar o build completo. O =latexmk= já
+  cuida das passadas; rode o =make build= novamente.
+
+- *Aviso "repeated entry" do BibTeX:* a mesma chave existe na bibliografia
+  compartilhada E na local. Deixe cada chave em apenas um dos arquivos.
+
+- *A bibliografia sai vazia:* isso é normal se você ainda não usou nenhum
+  =\cite{...}=. No estilo autor-data da ABNT, só aparecem as obras citadas.
+
+- *Docker não encontrado / permissão negada:* confirme que o Docker está em
+  execução. Se necessário, rode com o serviço do Docker ativo.
+
+* Para saber mais
+
+- Classe do projeto: =common-shared/cls/Article_Class_RevInfor.cls= (comentada
+  em português).
+- Bibliografia: =common-shared/bib/references.bib= (compartilhada) e o
+  =references.bib= de cada artigo.
+- Modelo canônico do abnTeX2 e manual da classe abntex2 (referência completa de
+  comandos e ambientes).
