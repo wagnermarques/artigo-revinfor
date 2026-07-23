@@ -1,0 +1,38 @@
+% Article: Modelo Revista InFor
+\documentclass{../shared/cls/Article_Class_RevInfor}
+
+% Search path for images
+\graphicspath{{../shared/img/}}
+
+\titulo{Título do artigo: Subtítulo}
+\autor{Antônio}
+\local{Brasil}
+\data{\today}
+
+\begin{document}
+
+% Header Image from shared folder
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\paperwidth]{cabecalho-img-revistainfor.png}
+    \label{fig:header-image}
+\end{figure}
+
+\setlength{\headheight}{2cm}
+\addtolength{\topmargin}{-2cm}
+
+\textual
+
+\section{Introdução}
+Este é o modelo refatorado para a Revista InFor. O conteúdo foi organizado para permitir múltiplos artigos no mesmo repositório compartilhando a mesma classe e imagens de cabeçalho.
+
+\section{Desenvolvimento}
+\lipsum[1-2]
+
+\section{Considerações Finais}
+\lipsum[3]
+
+\postextual
+\bibliography{references}
+
+\end{document}
