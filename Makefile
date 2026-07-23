@@ -4,6 +4,12 @@
 DOCKER_IMAGE_LATEX = artigo-revinfor-latex:latest
 DOCKER_IMAGE_PANDOC = pandoc/core:latest
 
+# LaTeX engine: pdf (default) | xe (XeLaTeX) | lua (LuaLaTeX)
+# Choose at build time, e.g.:  make build ART=... ENGINE=xe
+# All three engines live in the same image; this only changes a latexmk flag.
+ENGINE ?= pdf
+LATEXMK_FLAG := $(if $(filter xe,$(ENGINE)),-pdfxe,$(if $(filter lua,$(ENGINE)),-pdflua,-pdf))
+
 # Find all directories containing a main.tex file (articles live under artigos/)
 ARTICLES = $(shell find . -maxdepth 3 -name "main.tex" -not -path "./common-shared/*" -not -path "./ides/*" -not -path "./main.tex" | xargs -n1 dirname | sed 's|./||')
 
@@ -18,6 +24,10 @@ help:
 	@echo "  make build ART=<folder_name>   Build a specific article PDF"
 	@echo "  make all                       Build all articles"
 	@echo "  make clean                     Remove all build artifacts"
+	@echo ""
+	@echo "Options:"
+	@echo "  ENGINE=pdf|xe|lua              LaTeX engine (default: pdf)"
+	@echo "                                 e.g. make build ART=<folder> ENGINE=xe"
 
 # Build the custom image (texlive + abntex2 + babel-portuges)
 # Only needs to be run once, or after changes to the Dockerfile.
@@ -31,12 +41,13 @@ build:
 		echo "Error: Please specify the article folder using ART=<folder_name>"; \
 		exit 1; \
 	fi
+	@case "$(ENGINE)" in pdf|xe|lua) ;; *) echo "Error: ENGINE must be pdf, xe or lua (got '$(ENGINE)')"; exit 1 ;; esac
 	@if ! docker image inspect $(DOCKER_IMAGE_LATEX) >/dev/null 2>&1; then \
 		echo "LaTeX image '$(DOCKER_IMAGE_LATEX)' not found locally."; \
 		echo ">> First-time setup: run 'make docker-build' before building."; \
 		exit 1; \
 	fi
-	docker run --rm -v "$(shell pwd):/workdir" -w /workdir/$(ART) $(DOCKER_IMAGE_LATEX) latexmk -pdf -interaction=nonstopmode main.tex
+	docker run --rm -v "$(shell pwd):/workdir" -w /workdir/$(ART) $(DOCKER_IMAGE_LATEX) latexmk $(LATEXMK_FLAG) -interaction=nonstopmode main.tex
 
 # Build all articles
 all:

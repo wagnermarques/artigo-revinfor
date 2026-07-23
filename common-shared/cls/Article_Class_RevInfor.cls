@@ -114,24 +114,31 @@
 %  de ilustrações e tabelas.
 % =============================================================================
 
-% Permite digitar acentos direto no teclado (á, ç, ã) tratados como UTF-8.
-\RequirePackage[utf8]{inputenc}
+% Esta classe funciona com TRÊS motores de compilação: pdfLaTeX (padrão),
+% XeLaTeX e LuaLaTeX. Cada um precisa de pacotes de fonte diferentes, então
+% detectamos o motor com o pacote iftex e carregamos o que for adequado.
+% O motor é escolhido no build, ex.:  make build ART=... ENGINE=xe
+\RequirePackage{iftex}
 
-% Codificação da fonte T1: hifenização correta de palavras acentuadas e
-% acentos "de verdade" (não sobrepostos) no PDF.
-\RequirePackage[T1]{fontenc}
-
-% OBSERVAÇÃO sobre fontes modernas (fontspec/Arial): o pacote fontspec só
-% funciona com XeLaTeX ou LuaLaTeX, não com o pdfLaTeX usado aqui. Por isso
-% as linhas abaixo ficam desativadas (comentadas).
-%\RequirePackage{fontspec}
-%\RequirePackage{courier}			% usaria a fonte Latin Modern
-%\RequirePackage{uarial}
-% Se um dia migrar para XeLaTeX/LuaLaTeX:
-%\setmainfont{Arial}
-
-% Fonte adotada no corpo do texto (família Bookman, com boa legibilidade).
-\RequirePackage{bookman}
+\ifpdftex
+    % ----- pdfLaTeX (motor padrão do projeto) -----
+    % Permite digitar acentos direto no teclado (á, ç, ã) tratados como UTF-8.
+    \RequirePackage[utf8]{inputenc}
+    % Codificação T1: hifenização correta e acentos "de verdade" no PDF.
+    \RequirePackage[T1]{fontenc}
+    % Fonte do corpo do texto: família Bookman (boa legibilidade).
+    \RequirePackage{bookman}
+\else
+    % ----- XeLaTeX ou LuaLaTeX -----
+    % Estes motores já são nativamente UTF-8: NÃO se usa inputenc/fontenc.
+    % O fontspec permite usar fontes OpenType/TrueType do sistema/imagem.
+    \RequirePackage{fontspec}
+    % TeX Gyre Bonum é o equivalente OpenType do Bookman (vem no TeX Live),
+    % mantendo uma aparência parecida com a do modo pdfLaTeX.
+    \setmainfont{TeX Gyre Bonum}
+    % Para usar Arial (se estiver instalada na imagem/sistema), troque por:
+    % \setmainfont{Arial}
+\fi
 
 % Indenta também o PRIMEIRO parágrafo de cada seção (padrão ABNT).
 \RequirePackage{indentfirst}
