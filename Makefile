@@ -1,7 +1,14 @@
 .PHONY: build clean all help docker-build
 
+# Container flavor: abnt (default, custom image) | overleaf (Overleaf-compatible)
+# Choose at build time, e.g.:  make build ART=... FLAVOR=overleaf
+#   abnt     -> ./Dockerfile          (texlive:latest + abntex2 + babel-portuges)
+#   overleaf -> ./Dockerfile.overleaf (full TeX Live pinned to Overleaf's year)
+FLAVOR ?= abnt
+DOCKER_IMAGE_LATEX = $(if $(filter overleaf,$(FLAVOR)),artigo-revinfor-overleaf:latest,artigo-revinfor-latex:latest)
+DOCKERFILE         = $(if $(filter overleaf,$(FLAVOR)),Dockerfile.overleaf,Dockerfile)
+
 # Docker images
-DOCKER_IMAGE_LATEX = artigo-revinfor-latex:latest
 DOCKER_IMAGE_PANDOC = pandoc/core:latest
 
 # LaTeX engine: pdf (default) | xe (XeLaTeX) | lua (LuaLaTeX)
@@ -15,7 +22,7 @@ ARTICLES = $(shell find . -maxdepth 3 -name "main.tex" -not -path "./common-shar
 
 help:
 	@echo "First-time setup:"
-	@echo "  make docker-build              Build the custom LaTeX image (run once)"
+	@echo "  make docker-build [FLAVOR=abnt|overleaf]   Build the LaTeX image (once per flavor)"
 	@echo ""
 	@echo "Available articles to build:"
 	@for art in $(ARTICLES); do echo "  - $$art"; done
@@ -28,11 +35,14 @@ help:
 	@echo "Options:"
 	@echo "  ENGINE=pdf|xe|lua              LaTeX engine (default: pdf)"
 	@echo "                                 e.g. make build ART=<folder> ENGINE=xe"
+	@echo "  FLAVOR=abnt|overleaf           Container image (default: abnt)"
+	@echo "                                 overleaf = Overleaf-compatible TeX Live"
 
-# Build the custom image (texlive + abntex2 + babel-portuges)
-# Only needs to be run once, or after changes to the Dockerfile.
+# Build the LaTeX image for the chosen FLAVOR (abnt or overleaf).
+# Only needs to be run once per flavor, or after changes to its Dockerfile.
 docker-build:
-	docker build -t $(DOCKER_IMAGE_LATEX) .
+	@case "$(FLAVOR)" in abnt|overleaf) ;; *) echo "Error: FLAVOR must be abnt or overleaf (got '$(FLAVOR)')"; exit 1 ;; esac
+	docker build -t $(DOCKER_IMAGE_LATEX) -f $(DOCKERFILE) .
 
 # Build a specific article
 # Usage: make build ART=artigo_modelo_revista_infor
@@ -42,9 +52,10 @@ build:
 		exit 1; \
 	fi
 	@case "$(ENGINE)" in pdf|xe|lua) ;; *) echo "Error: ENGINE must be pdf, xe or lua (got '$(ENGINE)')"; exit 1 ;; esac
+	@case "$(FLAVOR)" in abnt|overleaf) ;; *) echo "Error: FLAVOR must be abnt or overleaf (got '$(FLAVOR)')"; exit 1 ;; esac
 	@if ! docker image inspect $(DOCKER_IMAGE_LATEX) >/dev/null 2>&1; then \
 		echo "LaTeX image '$(DOCKER_IMAGE_LATEX)' not found locally."; \
-		echo ">> First-time setup: run 'make docker-build' before building."; \
+		echo ">> First-time setup: run 'make docker-build FLAVOR=$(FLAVOR)' before building."; \
 		exit 1; \
 	fi
 	docker run --rm -v "$(shell pwd):/workdir" -w /workdir/$(ART) $(DOCKER_IMAGE_LATEX) latexmk $(LATEXMK_FLAG) -interaction=nonstopmode main.tex

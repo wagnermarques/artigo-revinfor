@@ -1,0 +1,14 @@
+# Overleaf-compatible LaTeX image
+# -----------------------------------------------------------------------------
+# "Overleaf-compatible" here means: a FULL TeX Live installation pinned to the
+# same TeX Live year that Overleaf runs, so that local builds closely match the
+# output you would get on Overleaf.
+#
+# The official texlive/texlive images use the full scheme, so abntex2, fontspec
+# and the Portuguese hyphenation patterns are already included -- no tlmgr
+# install step is needed (unlike the custom abnt image in ./Dockerfile).
+#
+# The '-historic' tags are frozen snapshots, which gives reproducible builds.
+# Adjust the year below to match the TeX Live version Overleaf is currently
+# using (e.g. TL2023-historic, TL2024-historic, ...).
+FROM texlive/texlive:TL2024-historic
