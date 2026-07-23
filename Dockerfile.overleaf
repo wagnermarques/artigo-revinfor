@@ -1,16 +1,20 @@
-# Overleaf-compatible LaTeX image (official Overleaf compile image)
+# Overleaf-compatible LaTeX image
 # -----------------------------------------------------------------------------
-# This builds on the SAME TeX Live images that Overleaf runs for its "Sandboxed
-# Compiles" (one container per compile), published under quay.io/sharelatex.
-# Using it makes local output match Overleaf as closely as possible.
+# WHY NOT THE LITERAL OVERLEAF IMAGE?
+# Overleaf's own compile images (quay.io/sharelatex/texlive-full) are NOT
+# publicly pullable -- they are gated behind Overleaf Server Pro. Verified:
+# `docker manifest inspect` returns "no such manifest" for their tags.
+#
+# So we use ghcr.io/ayaka-notes/texlive-full: a full TeX Live image built
+# specifically to MIRROR Overleaf's environment (Overleaf CE/Pro). It IS
+# publicly pullable (verified) and tagged by TeX Live year.
 #
 # >> CHOOSE THE RIGHT YEAR <<
-# The tag must match the TeX Live version of YOUR Overleaf project. Find it in
-# Overleaf under:  Menu > Settings > TeX Live version.
-# Then set the tag below to that year (e.g. 2023.1, 2024.1, 2025.1).
-# Available tags: https://quay.io/repository/sharelatex/texlive-full?tab=tags
+# Match the tag to your Overleaf project's TeX Live version
+# (Overleaf: Menu > Settings > TeX Live version). Tags: 2020.1 ... 2026.1.
+# Reference: https://github.com/ayaka-notes/texlive-full
 #
-# Note: this is the FULL TeX Live scheme, so abntex2, fontspec and the
-# Portuguese hyphenation patterns are already included (no tlmgr install step).
-# The image is public (no docker login needed) but large on first pull.
-FROM quay.io/sharelatex/texlive-full:2024.1
+# Full TeX Live scheme, so abntex2, fontspec and babel-portuges are already
+# included (no tlmgr install). Public pull (no docker login), multi-arch
+# (amd64/arm64), large on first pull.
+FROM ghcr.io/ayaka-notes/texlive-full:2024.1
