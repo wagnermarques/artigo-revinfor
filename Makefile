@@ -31,6 +31,11 @@ build:
 		echo "Error: Please specify the article folder using ART=<folder_name>"; \
 		exit 1; \
 	fi
+	@if ! docker image inspect $(DOCKER_IMAGE_LATEX) >/dev/null 2>&1; then \
+		echo "LaTeX image '$(DOCKER_IMAGE_LATEX)' not found locally."; \
+		echo ">> First-time setup: run 'make docker-build' before building."; \
+		exit 1; \
+	fi
 	docker run --rm -v "$(shell pwd):/workdir" -w /workdir/$(ART) $(DOCKER_IMAGE_LATEX) latexmk -pdf -interaction=nonstopmode main.tex
 
 # Build all articles
