@@ -1,203 +1,267 @@
-%https://www.overleaf.com/learn/latex/Writing_your_own_class
+% =============================================================================
+%  Article_Class_RevInfor.cls
+%  Classe LaTeX personalizada para artigos da Revista InFor
+% -----------------------------------------------------------------------------
+%  O QUE É ESTE ARQUIVO?
+%  Um arquivo .cls é uma "classe de documento" — o molde que define a aparência
+%  e o comportamento de um documento LaTeX. É o que você escolhe na primeira
+%  linha de um artigo, com \documentclass{...}.
+%
+%  Esta classe NÃO começa do zero: ela se apoia em outras classes, em camadas:
+%
+%        Article_Class_RevInfor   (este arquivo — ajustes da Revista InFor)
+%                 |  herda de
+%              abntex2             (normas da ABNT: NBR 6022, 10520, 6023, ...)
+%                 |  herda de
+%              memoir             (classe base, muito poderosa para livros/artigos)
+%
+%  Ou seja: aqui só definimos o que é ESPECÍFICO da revista; tudo o que é padrão
+%  ABNT já vem pronto do abntex2, e os recursos de diagramação vêm do memoir.
+%
+%  COMO USAR (no início do main.tex de cada artigo):
+%      \documentclass{../../common-shared/cls/Article_Class_RevInfor}
+%
+%  O caminho relativo ../../ existe porque os artigos ficam em
+%  artigos/<nome-do-artigo>/, dois níveis abaixo da raiz do repositório.
+%
+%  Referência para quem quer aprender a escrever classes:
+%      https://www.overleaf.com/learn/latex/Writing_your_own_class
+% =============================================================================
 
+% Exige uma versão razoavelmente moderna do LaTeX (LaTeX2e é o padrão atual).
 \NeedsTeXFormat{LaTeX2e}
+
+% Declara o nome da classe e uma data/descrição. Esse nome deve bater com o
+% nome do arquivo (Article_Class_RevInfor.cls).
 \ProvidesClass{Article_Class_RevInfor}[2023/10/27 Minimal ABNT class]
 
 
-% Load basic document class
-\LoadClass[            
+% =============================================================================
+%  1. CARREGAMENTO DA CLASSE-BASE (abntex2)
+% -----------------------------------------------------------------------------
+%  \LoadClass é como um \documentclass usado DENTRO de uma classe: ele carrega
+%  a classe abntex2 já com as opções abaixo. As opções entre colchetes são
+%  repassadas em cascata para o abntex2, para o memoir e para o babel.
+% =============================================================================
+\LoadClass[
     %%%%%%%%%%%%%%%%% -- opções da classe memoir --
-	article,			% indica que é um artigo acadêmico
-	12pt,				% tamanho da fonte [varFontSize]
-	oneside,			% twoside configura a impressão para frente e verso.
-	a4paper,			% tamanho do papel. 
+	article,			% formata como ARTIGO acadêmico (e não livro/tese)
+	12pt,				% tamanho base da fonte do corpo do texto (12 pontos)
+	oneside,			% impressão só na frente (use twoside para frente e verso)
+	a4paper,			% tamanho do papel: A4
 	%
     %%%%%%%%%%%%%%%%% -- opções da classe abntex2 --
-	chapter=TITLE,		% títulos de capítulos convertidos em letras maiúsculas
-	section=TITLE,		% títulos de seções convertidos em letras maiúsculas
-	subsection=TITLE,	% títulos de subseções convertidos em letras maiúsculas
-	subsubsection=TITLE % títulos de subsubseções convertidos em letras maiúsculas
+	chapter=TITLE,		% títulos de capítulo em MAIÚSCULAS
+	section=TITLE,		% títulos de seção em MAIÚSCULAS
+	subsection=TITLE,	% títulos de subseção em MAIÚSCULAS
+	subsubsection=TITLE % títulos de subsubseção em MAIÚSCULAS
     %
 	%%%%%%%%%%%%%%%%% -- opções do pacote babel --
-	english,			% idioma adicional para hifenização
-	brazil,				% o último idioma é o principal do documento
-	sumario=tradicional %
+	english,			% idioma secundário (usado só para hifenização)
+	brazil,				% idioma PRINCIPAL do documento (o último listado vence)
+	sumario=tradicional %  estilo do sumário no padrão tradicional da ABNT
     %
 	]{abntex2}
 
-% ---
-% Pacotes fundamentais 
-% ---
 
-%%%%%%%%%%%%%%%%%%% 
-%SUPORTE INICIAL
-%%%%%%%%%%%%%%%%%%%
+% =============================================================================
+%  2. PACOTES FUNDAMENTAIS
+% -----------------------------------------------------------------------------
+%  \RequirePackage é o \usepackage usado dentro de uma classe. Cada pacote
+%  adiciona recursos. Carregamos aqui, de uma vez, tudo o que os artigos da
+%  revista costumam precisar — assim cada main.tex fica curto e limpo.
+% =============================================================================
 
-
-% Lista de simbolos
+% Lista de símbolos/nomenclatura (ex.: lista de siglas e símbolos).
 \RequirePackage{nomencl}
 
-
-% Controle das cores
+% Suporte a cores (permite \textcolor, colorir links, etc.).
 \RequirePackage{color}
 
+% Inclusão de figuras e imagens (fornece o comando \includegraphics).
+\RequirePackage{graphicx}
 
-% Inclusão de graficos e imagens
-\RequirePackage{graphicx}		
-
+% Colunas mais flexíveis em tabelas (tipos de coluna >{...}, m{}, etc.).
 \RequirePackage{array}
+
+% Cria hiperlinks clicáveis (sumário, citações, URLs) no PDF gerado.
 \RequirePackage{hyperref}
 
 
-%tabelas
-%https://linorg.usp.br/CTAN/macros/latex/contrib/booktabs/booktabs.pdf
+% Tabelas com traços horizontais profissionais (\toprule, \midrule, \bottomrule).
+% Manual: https://linorg.usp.br/CTAN/macros/latex/contrib/booktabs/booktabs.pdf
 \RequirePackage{booktabs}
 
-%https://br.mirrors.cicku.me/ctan/macros/latex/contrib/ragged2e/ragged2e.pdf
+% Controle fino de alinhamento/justificação (\Centering, \RaggedRight, ...).
+% Manual: https://br.mirrors.cicku.me/ctan/macros/latex/contrib/ragged2e/ragged2e.pdf
 \RequirePackage{ragged2e}
 
-%tabularx package, which allows you to create a table with a specified total width. Here's an updated LaTeX 
-%https://texdoc.org/serve/tabularx.pdf/0
+% Tabelas com LARGURA TOTAL definida: a coluna do tipo X estica para preencher.
+% Manual: https://texdoc.org/serve/tabularx.pdf/0
 \RequirePackage{tabularx}
 
 
 
-%to ensure header is visible
+% (Opcional) Espessura da linha do cabeçalho — descomente para ativar.
 %\renewcommand{\headrulewidth}{0.4pt}
 
 
-%%%%%%%%%%%%%%%%%%% 
-%      FONTES
-%%%%%%%%%%%%%%%%%%%
-%Segundo a NBR 14724 (ABNT, 2011), deve-se usar a fonte 12 para o texto e para as %referências. Para as citações longas, notas de fim de página (fonte 10), paginação, %legendas das ilustrações e tabelas, usar tamanho menor (1 ponto menor). 
+% =============================================================================
+%  3. FONTES E CODIFICAÇÃO
+% -----------------------------------------------------------------------------
+%  Segundo a NBR 14724 (ABNT, 2011): fonte 12 para o texto e as referências;
+%  fonte 10 (menor) para citações longas, notas de rodapé, paginação, legendas
+%  de ilustrações e tabelas.
+% =============================================================================
 
-
-% Codificacao do documento (conversão automática dos acentos)
+% Permite digitar acentos direto no teclado (á, ç, ã) tratados como UTF-8.
 \RequirePackage[utf8]{inputenc}
 
-% Selecao de codigos de fonte.
+% Codificação da fonte T1: hifenização correta de palavras acentuadas e
+% acentos "de verdade" (não sobrepostos) no PDF.
 \RequirePackage[T1]{fontenc}
 
-% For more advanced font management
-%Fatal Package fontspec Error: The fontspec package requires either XeTeX or
-%\RequirePackage{fontspec}  
-
-%\RequirePackage{courier}			% Usa a fonte Latin Modern
+% OBSERVAÇÃO sobre fontes modernas (fontspec/Arial): o pacote fontspec só
+% funciona com XeLaTeX ou LuaLaTeX, não com o pdfLaTeX usado aqui. Por isso
+% as linhas abaixo ficam desativadas (comentadas).
+%\RequirePackage{fontspec}
+%\RequirePackage{courier}			% usaria a fonte Latin Modern
 %\RequirePackage{uarial}
-%Fatal Package fontspec Error: The fontspec package requires either XeTeX or
-% If using XeLaTeX or LuaLaTeX
-%\setmainfont{Arial}  
+% Se um dia migrar para XeLaTeX/LuaLaTeX:
+%\setmainfont{Arial}
 
+% Fonte adotada no corpo do texto (família Bookman, com boa legibilidade).
 \RequirePackage{bookman}
 
-% Indenta o primeiro parágrafo de cada seção.
-\RequirePackage{indentfirst}		
+% Indenta também o PRIMEIRO parágrafo de cada seção (padrão ABNT).
+\RequirePackage{indentfirst}
 
-% para melhorias de justificação
-\RequirePackage{microtype} 			
+% Melhora sutil da justificação e do espaçamento entre letras/palavras.
+\RequirePackage{microtype}
 
 
-%%%%%%%%%%%%%%%%%%% 
-% LAYOUT DA PAGINA 
-%%%%%%%%%%%%%%%%%%% 
+% =============================================================================
+%  4. LAYOUT DA PÁGINA
+% =============================================================================
 
-% % % % % % % % % % % % 
-%   página de titulo
-% % % % % % % % % % % % 
+% ---------------------------------------------------------------------------
+%  Página de título
+% ---------------------------------------------------------------------------
+% Gera o título automaticamente no início do documento, sem precisar escrever
+% \maketitle em cada artigo. O título/autor vêm de \titulo{}, \autor{}, etc.,
+% definidos no main.tex.
 \AtBeginDocument{
     \maketitle
 }
 
 
-% % % % % % % % % % % % 
-% margem da pagina
-%% % % % % % % % % % % % 
-%\setlrmarginsandblock{MargemEsquerda em cm}{MargemEsquerda em cm}{*}
-% no modelo tava 3cm 3cm
+% ---------------------------------------------------------------------------
+%  Margens da página (comandos do memoir)
+% ---------------------------------------------------------------------------
+% \setlrmarginsandblock{esquerda}{direita}{*}  -> margens laterais
+% \setulmarginsandblock{superior}{inferior}{*} -> margens superior/inferior
+% O * pede ao memoir para calcular a dimensão restante automaticamente.
 \setlrmarginsandblock{3cm}{3cm}{*}
 \setulmarginsandblock{3cm}{3cm}{*}
+% APLICA de fato as margens acima e recalcula o layout. Sempre necessário
+% depois de mexer nas margens do memoir.
 \checkandfixthelayout
-% ---
 
-% % % % % % % % % % % % 
-%   Cabecalho
-% % % % % % % % % % % % 
 
-%% Criar um novo estilo de cabeçalhos e rodapés
+% ---------------------------------------------------------------------------
+%  Cabeçalhos e rodapés
+% ---------------------------------------------------------------------------
+% Aqui DEFINIMOS um estilo de página chamado "meuestilo". Atenção: definir não
+% é ativar! Para usá-lo, escreva \pagestyle{meuestilo} no main.tex (após
+% \begin{document}). Os textos abaixo são exemplos/placeholders — troque-os
+% pelo conteúdo real do cabeçalho/rodapé do seu artigo.
+
+%% Cria o novo estilo de cabeçalhos e rodapés
 \makepagestyle{meuestilo}
 
-%% Configuração dos cabeçalhos
-% Definir cabeçalho para páginas pares (even pages)
-\makeevenhead{meuestilo} % página par
-    {Texto no topo, à esquerda (página par)} % Esquerda
-    {Centro - \thepage} % Centro (número da página)
-    {Texto à direita (página par)} % Direita
+%% Cabeçalho das páginas PARES (só aparece no modo twoside)
+\makeevenhead{meuestilo}
+    {Texto no topo, à esquerda (página par)} % à esquerda
+    {Centro - \thepage} % ao centro (\thepage = número da página)
+    {Texto à direita (página par)} % à direita
 
-% Definir cabeçalho para páginas ímpares (odd pages) ou com opção 'oneside'
-\makeoddhead{meuestilo} % página ímpar ou 'oneside'
-    {Texto no topo, à esquerda (página ímpar/oneside)} % Esquerda
-    {Centro - \thepage} % Centro (número da página)
-    {Texto à direita (página ímpar/oneside)} % Direita
+%% Cabeçalho das páginas ÍMPARES (ou de todas, no modo 'oneside' usado aqui)
+\makeoddhead{meuestilo}
+    {Texto no topo, à esquerda (página ímpar/oneside)} % à esquerda
+    {Centro - \thepage} % ao centro (número da página)
+    {Texto à direita (página ímpar/oneside)} % à direita
 
-% Adicionar uma linha ao cabeçalho
+%% Linha horizontal separando o cabeçalho do texto
 \makeheadrule{meuestilo}{\textwidth}{\normalrulethickness}
 
-%% Configuração dos rodapés
-% Definir rodapé para páginas pares (even pages)
-\makeevenfoot{meuestilo} % página par
-    {Texto no rodapé, à esquerda (página par)} % Esquerda
-    {Centro - \thepage} % Centro (número da página)
-    {Texto à direita (página par)} % Direita
+%% Rodapé das páginas PARES
+\makeevenfoot{meuestilo}
+    {Texto no rodapé, à esquerda (página par)} % à esquerda
+    {Centro - \thepage} % ao centro (número da página)
+    {Texto à direita (página par)} % à direita
 
-% Definir rodapé para páginas ímpares (odd pages) ou com opção 'oneside'
-\makeoddfoot{meuestilo} % página ímpar ou 'oneside'
-    {Texto no rodapé, à esquerda (página ímpar/oneside)} % Esquerda
-    {Centro - \thepage} % Centro (número da página)
-    {Texto à direita (página ímpar/oneside)} % Direita
-
+%% Rodapé das páginas ÍMPARES (ou de todas, no modo 'oneside')
+\makeoddfoot{meuestilo}
+    {Texto no rodapé, à esquerda (página ímpar/oneside)} % à esquerda
+    {Centro - \thepage} % ao centro (número da página)
+    {Texto à direita (página ímpar/oneside)} % à direita
 
 
 
 
-% --- 
-% PARAGRAFOS (Espaçamentos entre linhas e parágrafos )
-% --- 
 
-% O tamanho do parágrafo é dado por:
+% ---------------------------------------------------------------------------
+%  Parágrafos: recuo e espaçamentos
+% ---------------------------------------------------------------------------
+
+% Tamanho do recuo (indentação) da primeira linha de cada parágrafo.
 \setlength{\parindent}{1.3cm}
 
-% Controle do espaçamento entre um parágrafo e outro:
-\setlength{\parskip}{0.2cm}  % tente também \onelineskip
+% Espaço vertical adicional entre um parágrafo e outro.
+\setlength{\parskip}{0.2cm}  % alternativa: \onelineskip
 
-% Espaçamento simples
+% Espaçamento simples entre linhas (comando do memoir).
 \SingleSpacing
 
-% Retira espaço extra obsoleto entre as frases.
-\frenchspacing 
-
-		
-% ---
-% Pacotes adicionais, usados apenas no âmbito do Modelo Canônico do abnteX2
-% ---
-\RequirePackage{lipsum}				% para geração de dummy text
-% ---
-		
-% ---
-% Pacotes de citações
-% ---
-\RequirePackage[brazilian,hyperpageref]{backref}	 % Paginas com as citações na bibl
-\RequirePackage[alf]{abntex2cite}	% Citações padrão ABNT
-% ---
+% Remove o espaço extra (obsoleto) que o LaTeX antigo colocava após o ponto
+% final de cada frase — padrão tipográfico correto para o português.
+\frenchspacing
 
 
-% ---
-% Configurações do pacote backref
-% Usado sem a opção hyperpageref de backref
+% ---------------------------------------------------------------------------
+%  Pacote usado apenas no Modelo Canônico do abnTeX2
+% ---------------------------------------------------------------------------
+% Gera "texto de mentira" (\lipsum) para preencher exemplos e testar o layout.
+\RequirePackage{lipsum}
+
+
+% =============================================================================
+%  5. CITAÇÕES E REFERÊNCIAS (padrão ABNT)
+% =============================================================================
+
+% backref: nas referências ao fim do documento, mostra em quais páginas cada
+% obra foi citada. Opções: brazilian (textos em português) e hyperpageref
+% (os números de página viram links).
+\RequirePackage[brazilian,hyperpageref]{backref}
+
+% abntex2cite com a opção 'alf' = sistema AUTOR-DATA (alfabético), conforme a
+% ABNT NBR 6023/10520. Habilita \cite, \citeonline, \citeauthor, etc.
+\RequirePackage[alf]{abntex2cite}
+
+
+% ---------------------------------------------------------------------------
+%  Personalização dos textos do backref
+% ---------------------------------------------------------------------------
+% Rótulo usado quando NÃO se usa a opção hyperpageref.
 \renewcommand{\backrefpagesname}{Citado na(s) página(s):~}
-% Texto padrão antes do número das páginas
+% Texto que apareceria ANTES dos números de página (vazio aqui).
 \renewcommand{\backref}{}
 
-% Define os textos da citação
+% Define, de forma condicional, a frase mostrada conforme o número de citações:
+%   0  -> "Nenhuma citação no texto."
+%   1  -> "Citado na página X."
+%   >1 -> "Citado N vezes nas páginas ..."
+% Os #1 (quantidade) e #2 (páginas) são preenchidos automaticamente.
 \renewcommand*{\backrefalt}[4]{
 	\ifcase #1 %
 		Nenhuma citação no texto.%
@@ -206,145 +270,75 @@
 	\else
 		Citado #1 vezes nas páginas #2.%
 	\fi}%
-% ---
 
-% informações do PDF (usar qdo preciso)
-% https://www.overleaf.com/learn/latex/Hyperlinks
-% configura links no pdf
+
+% =============================================================================
+%  6. METADADOS E APARÊNCIA DO PDF (exemplos opcionais)
+% -----------------------------------------------------------------------------
+%  As configurações abaixo estão DESATIVADAS (comentadas). Descomente e ajuste
+%  se quiser gravar título/autor no PDF e escolher as cores dos links.
+%  \@title e \@author referem-se ao que foi definido com \titulo{} e \autor{}.
+%  Documentação: https://www.overleaf.com/learn/latex/Hyperlinks
+% =============================================================================
 %\hypersetup{
 %     	%pagebackref=true,
-%		pdftitle={\@title}, 
+%		pdftitle={\@title},
 %		pdfauthor={\@author},
 %    	pdfsubject={Modelo de artigo científico com abnTeX2},
 %	    pdfcreator={LaTeX with abnTeX2},
-%		pdfkeywords={abnt}{latex}{abntex}{abntex2}{atigo científico}, 
-%		colorlinks=true,       		% false: boxed links; true: colored links
-%    	linkcolor=blue,          	% color of internal links
-%    	citecolor=blue,        		% color of links to bibliography
-%    	filecolor=magenta,      		% color of file links
-%		urlcolor=blue,
-%		bookmarksdepth=4
+%		pdfkeywords={abnt}{latex}{abntex}{abntex2}{artigo científico},
+%		colorlinks=true,       		% true: links coloridos; false: links em caixa
+%    	linkcolor=blue,          	% cor dos links internos
+%    	citecolor=blue,        		% cor dos links de citação
+%    	filecolor=magenta,      		% cor dos links de arquivos
+%		urlcolor=blue,				% cor dos links de URL
+%		bookmarksdepth=4			% profundidade dos marcadores no PDF
 %}
 
-% End of Aticle_Class_RevInfor.cls{Aticle_Class_RevInfor}
-
-
-
-% ---
-% Configurações de aparência do PDF final
-
-% alterando o aspecto da cor azul
+% (Opcional) Redefinir o tom exato do azul usado nos links:
 %\definecolor{blue}{RGB}{41,5,195}
 
-% testar depois pra ver se he realmente necessario
-% constrola o uso do caractere "@" 
-% pois he um caractere especifico pro latex para macros
-% he usado em conjunto com \makeatother
+% NOTA sobre \makeatletter / \makeatother: em arquivos .cls o caractere "@" já
+% é tratado como letra, então esses comandos NÃO são necessários aqui (eles só
+% fazem falta dentro de um .tex comum quando se usa macros internas com "@").
 %\makeatletter
-
 %\makeatother
-% --- 
 
 
-% ----------------------------------------------------------
-% Seção de explicações
-% ----------------------------------------------------------
+% =============================================================================
+%  7. GUIA RÁPIDO (referência para o autor do artigo)
+% -----------------------------------------------------------------------------
+%  Trechos de apoio retirados do Modelo Canônico do abnTeX2. Estão comentados
+%  de propósito: servem como "cola" de como usar os recursos no main.tex.
+% =============================================================================
 
-%\subsection{Recuo do ambiente \texttt{citacao}}
-
-%Na produção de artigos (opção \texttt{article}), pode ser útil alterar o recuo
-%do ambiente \texttt{citacao}. Nesse caso, utilize o comando:
-
-%\begin{verbatim}
+% --- Recuo do ambiente citacao ---
+% Em artigos (opção 'article'), pode ser útil ajustar o recuo das citações
+% longas. No preâmbulo do main.tex, use:
 %   \setlength{\ABNTEXcitacaorecuo}{1.8cm}
-%\end{verbatim}
+% (No modo 'twocolumn', o abntex2 já reduz o recuo de 4 cm para 1.8 cm.)
 
-%Quando um documento é produzido com a opção \texttt{twocolumn}, a classe
-%\textsf{abntex2} automaticamente altera o recuo padrão de 4 cm, definido pela
-%ABNT NBR 10520:2002 seção 5.3, para 1.8 cm.
-
-%\section{Cabeçalhos e rodapés customizados}
-
-%Diferentes estilos de cabeçalhos e rodapés podem ser criados usando os
-%recursos padrões do \textsf{memoir}.
-
-%Um estilo próprio de cabeçalhos e rodapés pode ser diferente para páginas pares
-%e ímpares. Observe que a diferenciação entre páginas pares e ímpares só é
-%utilizada se a opção \texttt{twoside} da classe \textsf{abntex2} for utilizado.
-%Caso contrário, apenas o cabeçalho padrão da página par (\emph{even}) é usado.
-
-%Veja o exemplo abaixo cria um estilo chamado \texttt{meuestilo}. O código deve
-%ser inserido no preâmbulo do documento.
-
-
-%Para usar o estilo criado, use o comando abaixo imediatamente após um dos
-%comandos de divisão do documento. Por exemplo:
-
-%\begin{verbatim}
-%  \begin{document}
-     %%usar o estilo criado na primeira página do artigo:
+% --- Cabeçalhos e rodapés customizados ---
+% O estilo "meuestilo" definido na seção 4 só é aplicado quando você escreve
+% \pagestyle{meuestilo} logo após um comando de divisão do documento. Exemplo:
+%   \begin{document}
 %     \pretextual
-%     \pagestyle{meuestilo}
-%     
+%     \pagestyle{meuestilo}   % estilo na primeira página
 %     \maketitle
 %     ...
-%     
-     %%usar o estilo criado nas páginas textuais
 %     \textual
-%     \pagestyle{meuestilo}
-%     
-%     \chapter{Novo capítulo}
+%     \pagestyle{meuestilo}   % estilo nas páginas de texto
+%     \section{Nova seção}
 %     ...
-%   \end{document}  
-%\end{verbatim}
-   
-%Outras informações sobre cabeçalhos e rodapés estão disponíveis na seção 7.3 do
-%manual do \textsf{memoir} \cite{memoir}.
+%   \end{document}
+% A diferença entre páginas pares e ímpares só vale no modo 'twoside'. No modo
+% 'oneside' (usado aqui), apenas o cabeçalho/rodapé "odd" é aplicado.
+% Mais detalhes: seção 7.3 do manual do memoir.
 
-%\section{Mais exemplos no Modelo Canônico de Trabalhos Acadêmicos}
+% --- Mais exemplos ---
+% Para figuras, fórmulas, citações e outros recursos, consulte o Modelo
+% Canônico de Trabalhos Acadêmicos do abnTeX2 e o manual da classe abntex2.
 
-%Este modelo de artigo é limitado em número de exemplos de comandos, pois são
-%apresentados exclusivamente comandos diretamente relacionados com a produção de
-%artigos.
-
-%Para exemplos adicionais de \abnTeX\ e \LaTeX, como inclusão de figuras,
-%%fórmulas matemáticas, citações, e outros, consulte o documento
-%\citeonline{abntex2modelo}.
-
-%\section{Consulte o manual da classe \textsf{abntex2}}
-
-%Consulte o manual da classe \textsf{abntex2} \cite{abntex2classe} para uma
-%referência completa das macros e ambientes disponíveis.
-
-% ---
-% Finaliza a parte no bookmark do PDF, para que se inicie o bookmark na raiz
-% ---
-%\bookmarksetup{startatroot}% 
-% ---
-
-% ---
-% Conclusão
-% ---
-%\section*{Considerações finais}
-%\addcontentsline{toc}{section}{Considerações finais}
-
-%\lipsum[1]
-
-%\begin{citacao}
-%\lipsum[2]
-%\end{citacao}
-
-%\lipsum[3]
-
-% % % % % % % % % % % % % % % % % % % % % % % % 
-%           ELEMENTOS PÓS-TEXTUAIS
-% % % % % % % % % % % % % % % % % % % % % % % % 
-%\postextual
-
-% ----------------------------------------------------------
-% Referências bibliográficas
-% ----------------------------------------------------------
-%\bibliography{abntex2-modelo-references}
-
-%\end{document}
-
+% =============================================================================
+%  FIM de Article_Class_RevInfor.cls
+% =============================================================================
