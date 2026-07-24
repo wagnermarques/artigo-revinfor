@@ -17,6 +17,11 @@ DOCKER_IMAGE_PANDOC = pandoc/core:latest
 ENGINE ?= pdf
 LATEXMK_FLAG := $(if $(filter xe,$(ENGINE)),-pdfxe,$(if $(filter lua,$(ENGINE)),-pdflua,-pdf))
 
+# Output PDF base name encodes the flavor + engine that produced it, e.g.
+# main-abnt-pdf.pdf, main-overleaf-xe.pdf. latexmk's -jobname renames all
+# generated files (pdf, aux, log, ...) to this, so each combo stays separate.
+PDF_NAME = main-$(FLAVOR)-$(ENGINE)
+
 # Find all directories containing a main.tex file (articles live under artigos/)
 ARTICLES = $(shell find . -maxdepth 3 -name "main.tex" -not -path "./common-shared/*" -not -path "./ides/*" -not -path "./main.tex" | xargs -n1 dirname | sed 's|./||')
 
@@ -58,7 +63,8 @@ build:
 		echo ">> First-time setup: run 'make docker-build FLAVOR=$(FLAVOR)' before building."; \
 		exit 1; \
 	fi
-	docker run --rm -v "$(shell pwd):/workdir" -w /workdir/$(ART) $(DOCKER_IMAGE_LATEX) latexmk $(LATEXMK_FLAG) -interaction=nonstopmode main.tex
+	docker run --rm -v "$(shell pwd):/workdir" -w /workdir/$(ART) $(DOCKER_IMAGE_LATEX) latexmk $(LATEXMK_FLAG) -jobname=$(PDF_NAME) -interaction=nonstopmode main.tex
+	@echo ">> Generated: $(ART)/$(PDF_NAME).pdf  (flavor=$(FLAVOR), engine=$(ENGINE))"
 
 # Build all articles
 all:
@@ -71,7 +77,9 @@ all:
 clean:
 	@for art in $(ARTICLES); do \
 		echo "Cleaning $$art..."; \
-		docker run --rm -v "$(shell pwd):/workdir" -w /workdir/$$art $(DOCKER_IMAGE_LATEX) latexmk -C main.tex; \
-		rm -rf $$art/*.aux $$art/*.log $$art/*.out $$art/*.toc $$art/*.bbl $$art/*.blg $$art/*.fls $$art/*.fdb_latexmk; \
+		rm -rf $$art/*.aux $$art/*.log $$art/*.out $$art/*.toc $$art/*.lof $$art/*.lot \
+			$$art/*.bbl $$art/*.blg $$art/*.fls $$art/*.fdb_latexmk $$art/*.synctex.gz \
+			$$art/*.idx $$art/*.ilg $$art/*.ind $$art/*.nlo $$art/*.nls $$art/*.xdv \
+			$$art/*.pdfxref $$art/main*.pdf; \
 	done
 	rm -rf *.aux *.log *.out *.toc *.bbl *.blg *.fls *.fdb_latexmk *.synctex.gz *.docx *.odt
