@@ -120,23 +120,28 @@
 % O motor é escolhido no build, ex.:  make build ART=... ENGINE=xe
 \RequirePackage{iftex}
 
+% A Revista InFor usa a fonte Arial (sans-serif) em todo o texto. Reproduzimos
+% isso com a fonte livre Arimo, clone metricamente compatível com a Arial.
 \ifpdftex
     % ----- pdfLaTeX (motor padrão do projeto) -----
     % Permite digitar acentos direto no teclado (á, ç, ã) tratados como UTF-8.
     \RequirePackage[utf8]{inputenc}
     % Codificação T1: hifenização correta e acentos "de verdade" no PDF.
     \RequirePackage[T1]{fontenc}
-    % Fonte do corpo do texto: família Bookman (boa legibilidade).
-    \RequirePackage{bookman}
+    % No pdfLaTeX usamos o helvet (Nimbus Sans, clone de Helvetica) como fonte
+    % principal -- próximo da Arial. Para a Arial "de verdade" (Arimo), compile
+    % com XeLaTeX/LuaLaTeX (ENGINE=xe ou ENGINE=lua).
+    \RequirePackage{helvet}
+    \renewcommand{\familydefault}{\sfdefault}
 \else
     % ----- XeLaTeX ou LuaLaTeX -----
     % Estes motores já são nativamente UTF-8: NÃO se usa inputenc/fontenc.
-    % O fontspec permite usar fontes OpenType/TrueType do sistema/imagem.
+    % O fontspec permite usar fontes OpenType/TrueType.
     \RequirePackage{fontspec}
-    % TeX Gyre Bonum é o equivalente OpenType do Bookman (vem no TeX Live),
-    % mantendo uma aparência parecida com a do modo pdfLaTeX.
-    \setmainfont{TeX Gyre Bonum}
-    % Para usar Arial (se estiver instalada na imagem/sistema), troque por:
+    % Arimo = clone livre e metricamente compatível com a Arial (vem no TeX
+    % Live). É a reprodução mais fiel do padrão da Revista InFor.
+    \setmainfont{Arimo}
+    % Para a Arial original (se instalada na imagem/sistema), troque por:
     % \setmainfont{Arial}
 \fi
 
@@ -240,8 +245,8 @@
 % Espaço vertical adicional entre um parágrafo e outro.
 \setlength{\parskip}{0.2cm}  % alternativa: \onelineskip
 
-% Espaçamento simples entre linhas (comando do memoir).
-\SingleSpacing
+% Espaçamento entre linhas 1,5 -- exigido pelas normas da Revista InFor.
+\OnehalfSpacing
 
 % Remove o espaço extra (obsoleto) que o LaTeX antigo colocava após o ponto
 % final de cada frase — padrão tipográfico correto para o português.
