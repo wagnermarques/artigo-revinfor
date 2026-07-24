@@ -214,11 +214,13 @@ Todos os comandos são executados na *raiz do repositório*.
 
 ** Passo 1 (só na primeira vez): construir a imagem Docker
 
-A classe usa pacotes do abnTeX2 que já vêm em uma imagem LaTeX personalizada.
-Construa-a uma única vez (ou quando o =Dockerfile= mudar):
+A compilação roda dentro de uma imagem Docker. Há duas imagens (FLAVOR)
+disponíveis; construa a que você vai usar uma única vez (ou quando o
+=Dockerfile= correspondente mudar):
 
 #+begin_src bash
-make docker-build
+make docker-build                   # imagem padrão 'abnt' (TeX Live completo)
+make docker-build FLAVOR=overleaf   # imagem compatível com o Overleaf
 #+end_src
 
 ** Passo 2: compilar o artigo
@@ -228,24 +230,61 @@ make build ART=artigos/artigo_modelo_revista_infor
 #+end_src
 
 Esse comando roda o =latexmk= dentro do Docker, que executa quantas passadas
-forem necessárias (LaTeX → BibTeX → LaTeX → LaTeX) e produz o arquivo
-=artigos/artigo_modelo_revista_infor/main.pdf=.
+forem necessárias (LaTeX → BibTeX → LaTeX → LaTeX) e produz o PDF. O nome do
+arquivo *indica o flavor e o motor usados* — veja o Passo 3.
+
+** Passo 3 (opcional): escolher o motor (ENGINE) e a imagem (FLAVOR)
+
+Duas variáveis controlam como o artigo é compilado; elas são independentes e
+podem ser combinadas:
+
+#+begin_src bash
+# ENGINE = pdf (padrão) | xe (XeLaTeX) | lua (LuaLaTeX)
+make build ART=artigos/artigo_modelo_revista_infor ENGINE=xe
+
+# FLAVOR = abnt (padrão) | overleaf (imagem compatível com o Overleaf)
+make build ART=artigos/artigo_modelo_revista_infor FLAVOR=overleaf
+
+# combinando os dois:
+make build ART=artigos/artigo_modelo_revista_infor FLAVOR=overleaf ENGINE=lua
+#+end_src
+
+Observações:
+- Os três motores vivem na *mesma* imagem — trocar o =ENGINE= só muda um
+  parâmetro do =latexmk=, não exige outra imagem.
+- Com =ENGINE=xe= ou =ENGINE=lua=, a classe carrega automaticamente o
+  =fontspec= (em vez do =inputenc=), o que permite usar fontes do sistema como
+  a Arial. Com =ENGINE=pdf= (padrão) usa-se a fonte Bookman.
+- Valores inválidos de =ENGINE= ou =FLAVOR= são recusados com uma mensagem
+  clara; use =make help= para ver as opções.
+
+*** Nome do PDF gerado
+
+O PDF recebe o nome =main-<FLAVOR>-<ENGINE>.pdf=, para você identificar como ele
+foi gerado. Ao final, o =make= também imprime o caminho do arquivo.
+
+| Comando                                        | PDF gerado            |
+|------------------------------------------------+-----------------------|
+| make build ART=...                             | main-abnt-pdf.pdf     |
+| make build ART=... ENGINE=xe                   | main-abnt-xe.pdf      |
+| make build ART=... FLAVOR=overleaf             | main-overleaf-pdf.pdf |
+| make build ART=... FLAVOR=overleaf ENGINE=lua  | main-overleaf-lua.pdf |
 
 *Comandos úteis:*
 
 #+begin_src bash
-make help    # lista os artigos que o Makefile encontrou e os comandos
+make help    # lista os artigos, os comandos e as opções ENGINE/FLAVOR
 make all     # compila TODOS os artigos de uma vez
-make clean   # remove os arquivos intermediários (.aux, .log, .bbl, ...)
+make clean   # remove os PDFs gerados e os arquivos intermediários
 #+end_src
 
 * Fluxo de trabalho recomendado
 
 1. Edite o =main.tex= (conteúdo) e o =references.bib= (fontes citadas).
 2. Rode =make build ART=artigos/artigo_modelo_revista_infor=.
-3. Abra o =main.pdf= gerado e confira o resultado.
-4. Repita. Ao terminar, rode =make clean= para deixar a pasta limpa (o PDF e os
-   arquivos intermediários são ignorados pelo Git; veja o =.gitignore=).
+3. Abra o PDF gerado (ex.: =main-abnt-pdf.pdf=) e confira o resultado.
+4. Repita. Ao terminar, rode =make clean= para deixar a pasta limpa (os PDFs e
+   os arquivos intermediários são ignorados pelo Git; veja o =.gitignore=).
 
 * Erros comuns e como resolver
 
