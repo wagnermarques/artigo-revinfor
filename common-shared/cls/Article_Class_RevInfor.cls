@@ -87,6 +87,11 @@
 % Cria hiperlinks clicáveis (sumário, citações, URLs) no PDF gerado.
 \RequirePackage{hyperref}
 
+% Permite desenhar em coordenadas absolutas do papel (usado no banner de
+% cabeçalho full-bleed, colado às bordas da folha). Fornece \AddToShipoutPictureBG
+% e \AtPageUpperLeft.
+\RequirePackage{eso-pic}
+
 
 % Tabelas com traços horizontais profissionais (\toprule, \midrule, \bottomrule).
 % Manual: https://linorg.usp.br/CTAN/macros/latex/contrib/booktabs/booktabs.pdf
@@ -169,6 +174,46 @@
 \renewcommand{\maketitlehookb}{%
     \ifcsname theforeigntitle\endcsname
         \LARGE\center\textit{\theforeigntitle}%
+    \fi
+}
+
+% ---------------------------------------------------------------------------
+%  Banner de cabeçalho da revista (full-bleed / margem zero)
+% ---------------------------------------------------------------------------
+% A Revista InFor imprime, no topo da primeira página, uma faixa (banner) com
+% a identidade visual da revista. Aqui o banner é colado às bordas SUPERIOR e
+% LATERAIS do papel, SEM nenhuma margem (full-bleed), e o título do artigo passa
+% a fluir logo abaixo dele.
+%
+% COMO USAR (no preâmbulo do main.tex, junto de \titulo{}, \autor{}, ...):
+%     \cabecalhoRevInfor{cabecalho-img-revistainfor.png}
+% O arquivo é procurado nos diretórios de \graphicspath. Se \cabecalhoRevInfor
+% NÃO for chamado, nenhum banner é impresso (comportamento neutro).
+
+% Guarda o nome do arquivo de imagem do banner (vazio = sem banner).
+\newcommand{\@cabecalhoRevInforImg}{}
+% Setter usado no preâmbulo para escolher a imagem do banner.
+\newcommand{\cabecalhoRevInfor}[1]{\renewcommand{\@cabecalhoRevInforImg}{#1}}
+
+% O gancho \maketitlehooka é executado pelo memoir DENTRO do \maketitle, em modo
+% vertical, ANTES do título — o lugar exato para o banner nascer acima do título.
+\renewcommand{\maketitlehooka}{%
+    \ifx\@cabecalhoRevInforImg\empty\else
+        % (1) Desenha a imagem no canto SUPERIOR-ESQUERDO do papel, em largura
+        %     total, apenas nesta página (o '*' restringe à página corrente).
+        %     \raisebox{-\height} baixa a imagem para que seu TOPO encoste na
+        %     borda superior da folha (margem zero no topo). width=\paperwidth
+        %     faz a imagem ir de uma borda lateral à outra (margem zero nas laterais).
+        \AddToShipoutPictureBG*{%
+            \AtPageUpperLeft{\raisebox{-\height}{%
+                \includegraphics[width=\paperwidth]{\@cabecalhoRevInforImg}}}%
+        }%
+        % (2) O desenho acima é uma camada de fundo e NÃO ocupa espaço no texto.
+        %     Reservamos aqui a altura do banner que ultrapassa a margem superior,
+        %     empurrando o título para baixo do banner (sem sobreposição).
+        \settoheight{\@tempdima}{%
+            \includegraphics[width=\paperwidth]{\@cabecalhoRevInforImg}}%
+        \vspace*{\dimexpr\@tempdima-1in-\topmargin-\headheight-\headsep\relax}%
     \fi
 }
 

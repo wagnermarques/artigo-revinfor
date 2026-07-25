@@ -75,6 +75,15 @@
 *.xdy
 *.bak
 
+# --- Overleaf-specific leftovers ---------------------------------------------
+# .pdfxref = Overleaf's PDF cross-reference cache (uncompressed/compressed
+# object offsets); regenerated on every Overleaf compile.
+*.pdfxref
+
+# --- Temporary / scratch files -----------------------------------------------
+# A local 'temp' directory for scratch files that must never be committed.
+/temp/
+
 # --- Editor / IDE config -----------------------------------------------------
 # Local Emacs project config kept out of version control
 ides/emacs/.emacs-revinfor/
