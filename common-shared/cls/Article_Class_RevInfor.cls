@@ -92,6 +92,12 @@
 % e \AtPageUpperLeft.
 \RequirePackage{eso-pic}
 
+% Recorte de caixas em COORDENADAS FINAIS (\clipbox). Usado para aparar a base do
+% banner. Preferido ao "trim" do \includegraphics porque, neste conjunto de
+% pacotes (memoir + hyperref + ...), o analisador de trim/viewport do graphicx
+% (\Gread@parse@vp) falha; o \clipbox não depende dele.
+\RequirePackage{trimclip}
+
 
 % Tabelas com traços horizontais profissionais (\toprule, \midrule, \bottomrule).
 % Manual: https://linorg.usp.br/CTAN/macros/latex/contrib/booktabs/booktabs.pdf
@@ -178,6 +184,18 @@
 }
 
 % ---------------------------------------------------------------------------
+%  Fonte do TÍTULO (padrão Revista InFor)
+% ---------------------------------------------------------------------------
+% Na revista, o título vem em Arial (sans-serif, já é a fonte da classe), NEGRITO,
+% CAIXA ALTA e corpo 12 — o MESMO tamanho do texto (e não grande como o padrão do
+% memoir). Centralizado e com entrelinha 1,5 (herdada de \OnehalfSpacing).
+% \pretitle/\posttitle são os ganchos do memoir que envolvem \@title.
+% \MakeUppercase (recebe \@title como argumento único) força a caixa alta mesmo
+% que o autor digite o título em caixa mista.
+\pretitle{\begin{center}\normalfont\bfseries\normalsize\MakeUppercase}
+\posttitle{\par\end{center}}
+
+% ---------------------------------------------------------------------------
 %  Banner de cabeçalho da revista (full-bleed / margem zero)
 % ---------------------------------------------------------------------------
 % A Revista InFor imprime, no topo da primeira página, uma faixa (banner) com
@@ -195,25 +213,74 @@
 % Setter usado no preâmbulo para escolher a imagem do banner.
 \newcommand{\cabecalhoRevInfor}[1]{\renewcommand{\@cabecalhoRevInforImg}{#1}}
 
-% O gancho \maketitlehooka é executado pelo memoir DENTRO do \maketitle, em modo
-% vertical, ANTES do título — o lugar exato para o banner nascer acima do título.
+% Por que recortar o banner? A arte oficial da Revista InFor é mais ACHATADA do
+% que a nossa imagem. Em largura total a nossa renderiza ~4,6 cm de altura; a
+% oficial tem ~3,7 cm. Como não dá para reduzir a altura mantendo a largura total
+% sem distorcer, aparamos a BASE da imagem (some parte do globo do rodapé).
+%
+% O recorte é uma FRAÇÃO (19,4%) da altura do banner JÁ em largura total, então é
+% independente do DPI embutido no PNG. Sobra 80,6% -> 0,806 x 4,6 cm ≈ 3,7 cm.
+% Para ajustar a altura, mude apenas a fração 0.194 (maior = banner mais baixo).
+%
+% Papéis:
+%   \@cabecalhoRevInforTrim    = quantos pt aparar da base (calculado)
+%   \@cabecalhoRevInforInc     = comando que insere a imagem já recortada, largura total
+%   \@cabecalhoRevInforReserve = espaço vertical a reservar p/ o título não sobrepor
+% Todos são calculados UMA vez em \AtBeginDocument (contexto de topo, seguro),
+% NÃO dentro de \maketitlehooka — ali medir a imagem e recortar falha (modo LR /
+% expansão do gancho). \xdef/\global fazem os valores sobreviverem até o \shipout.
+\newlength{\@cabecalhoRevInforTrim}
+\newlength{\@cabecalhoRevInforReserve}
+\newcommand{\@cabecalhoRevInforInc}{}
+
+% O gancho \maketitlehooka roda DENTRO do \maketitle, em modo vertical, ANTES do
+% título — lugar certo para (a) desenhar o banner no fundo da página e (b) reservar
+% o espaço que empurra o título para baixo dele. Aqui NÃO medimos nem montamos nada:
+% só usamos o que \AtBeginDocument já preparou. O desenho é adiado para o \shipout.
 \renewcommand{\maketitlehooka}{%
     \ifx\@cabecalhoRevInforImg\empty\else
         % (1) Desenha a imagem no canto SUPERIOR-ESQUERDO do papel, em largura
         %     total, apenas nesta página (o '*' restringe à página corrente).
         %     \raisebox{-\height} baixa a imagem para que seu TOPO encoste na
-        %     borda superior da folha (margem zero no topo). width=\paperwidth
-        %     faz a imagem ir de uma borda lateral à outra (margem zero nas laterais).
+        %     borda superior da folha (margem zero no topo); width=\paperwidth
+        %     leva a imagem de uma borda lateral à outra (margem zero nas laterais).
         \AddToShipoutPictureBG*{%
-            \AtPageUpperLeft{\raisebox{-\height}{%
-                \includegraphics[width=\paperwidth]{\@cabecalhoRevInforImg}}}%
+            \AtPageUpperLeft{\raisebox{-\height}{\@cabecalhoRevInforInc}}%
         }%
-        % (2) O desenho acima é uma camada de fundo e NÃO ocupa espaço no texto.
-        %     Reservamos aqui a altura do banner que ultrapassa a margem superior,
-        %     empurrando o título para baixo do banner (sem sobreposição).
-        \settoheight{\@tempdima}{%
+        % (2) O desenho acima é camada de fundo e NÃO ocupa espaço no texto:
+        %     reservamos aqui a altura do banner que passa da margem superior.
+        \vspace*{\@cabecalhoRevInforReserve}%
+    \fi
+}
+
+% Preparação do banner (uma vez, em contexto de topo seguro). Precisa rodar ANTES
+% do \maketitle abaixo — e roda, porque os ganchos \AtBeginDocument executam na
+% ordem de declaração e este vem primeiro.
+%   - mede a altura do banner em LARGURA TOTAL e apara 19,4% da base;
+%   - monta \@cabecalhoRevInforInc = \clipbox{...}{\includegraphics[...]}, com os
+%     valores de recorte JÁ expandidos em números literais (o \xdef evita que o
+%     analisador de argumentos separe mal os campos e o torna global p/ o \shipout);
+%   - calcula \@cabecalhoRevInforReserve = altura do banner recortado menos a
+%     margem superior, ou seja, o quanto o título deve descer.
+% \clipbox{esq base dir topo}{conteúdo}: apara essas medidas das bordas do
+% conteúdo já composto (coordenadas finais) — aqui só a BASE (2º valor).
+\AtBeginDocument{%
+    \ifx\@cabecalhoRevInforImg\empty\else
+        \settoheight{\@cabecalhoRevInforTrim}{%
             \includegraphics[width=\paperwidth]{\@cabecalhoRevInforImg}}%
-        \vspace*{\dimexpr\@tempdima-1in-\topmargin-\headheight-\headsep\relax}%
+        \setlength{\@cabecalhoRevInforTrim}{0.194\@cabecalhoRevInforTrim}%
+        \xdef\@cabecalhoRevInforInc{%
+            \noexpand\clipbox{0pt \the\@cabecalhoRevInforTrim\space 0pt 0pt}%
+                {\noexpand\includegraphics[width=\noexpand\paperwidth]%
+                {\@cabecalhoRevInforImg}}}%
+        \settoheight{\@tempdima}{\@cabecalhoRevInforInc}%
+        % Reserva = (altura do banner) - (offset do topo do texto) - AJUSTE.
+        % O AJUSTE (54pt) desconta o espaço que o \maketitle do memoir já coloca
+        % acima do título (\null+\topskip, \vskip 2em, o \topsep do center e a
+        % subida das maiúsculas), deixando um respiro de ~8pt entre o banner e o
+        % título — como na Revista InFor. Aumente/diminua o 54pt p/ menos/mais gap.
+        \global\@cabecalhoRevInforReserve=%
+            \dimexpr\@tempdima-1in-\topmargin-\headheight-\headsep-54pt\relax
     \fi
 }
 
