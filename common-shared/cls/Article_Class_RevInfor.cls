@@ -87,6 +87,20 @@
 % Cria hiperlinks clicáveis (sumário, citações, URLs) no PDF gerado.
 \RequirePackage{hyperref}
 
+% Ícone verde do ORCID + link (\orcidlink{0000-...}), desenhado com TikZ (não
+% precisa de imagem externa). Usado no bloco de autoria (padrão Revista InFor).
+\RequirePackage{orcidlink}
+
+% Aparência dos links: texto colorido em vez de caixas. URLs (e-mail/ORCID) em
+% azul, como no PDF oficial da revista; links internos e de citação em preto,
+% para não poluir o corpo do texto.
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue,
+    linkcolor=black,
+    citecolor=black
+}
+
 % Permite desenhar em coordenadas absolutas do papel (usado no banner de
 % cabeçalho full-bleed, colado às bordas da folha). Fornece \AddToShipoutPictureBG
 % e \AtPageUpperLeft.
@@ -194,6 +208,39 @@
 % que o autor digite o título em caixa mista.
 \pretitle{\begin{center}\normalfont\bfseries\normalsize\MakeUppercase}
 \posttitle{\par\end{center}}
+
+% ---------------------------------------------------------------------------
+%  Bloco de AUTORIA (padrão Revista InFor)
+% ---------------------------------------------------------------------------
+% No PDF oficial o bloco do autor é centralizado, corpo 12, entrelinha SIMPLES
+% (mais junto que o título 1,5), com:
+%   - nome em NEGRITO;
+%   - afiliação em ITÁLICO (quebra em mais de uma linha se for longa);
+%   - e-mail em itálico, como link (azul);
+%   - ORCID em itálico, como link, precedido do ícone verde \orcidlink.
+%
+% Ganchos \preauthor/\postauthor do memoir: trocamos a tabela padrão por um
+% ambiente centralizado com \SingleSpacing (assim a afiliação longa quebra sozinha
+% e as linhas ficam juntas). \normalsize = corpo 12.
+\preauthor{\begin{center}\normalfont\normalsize\SingleSpacing}
+\postauthor{\par\end{center}}
+
+% \autorRevInfor{nome}{afiliação}{e-mail}{ORCID iD}
+% Monta o bloco já formatado e o registra como autor (o \maketitle o imprime).
+% O ORCID é só o identificador (ex.: 0000-0001-5858-2507); montamos a URL.
+\newcommand{\autorRevInfor}[4]{%
+    \autor{%
+        {\bfseries #1}\\%
+        {\itshape #2}\\%
+        {\itshape\href{mailto:#3}{#3}}\\%
+        \orcidlink{#4}~{\itshape\href{https://orcid.org/#4}{http://orcid.org/#4}}%
+    }%
+}
+
+% A revista NÃO mostra data na abertura do artigo. Removemos a data do \maketitle
+% fazendo o gancho "antes da data" engolir \@date (\@gobble), sem imprimir nada.
+\predate{\@gobble}
+\postdate{}
 
 % ---------------------------------------------------------------------------
 %  Banner de cabeçalho da revista (full-bleed / margem zero)
