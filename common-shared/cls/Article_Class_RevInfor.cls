@@ -212,7 +212,8 @@
 % ---------------------------------------------------------------------------
 %  Bloco de AUTORIA (padrão Revista InFor)
 % ---------------------------------------------------------------------------
-% No PDF oficial o bloco do autor é centralizado, corpo 12, entrelinha SIMPLES
+% No PDF oficial o bloco do autor é ALINHADO À DIREITA (encostado na margem
+% direita do texto, com a esquerda irregular), corpo 12, entrelinha SIMPLES
 % (mais junto que o título 1,5), com:
 %   - nome em NEGRITO;
 %   - afiliação em ITÁLICO (quebra em mais de uma linha se for longa);
@@ -220,10 +221,11 @@
 %   - ORCID em itálico, como link, precedido do ícone verde \orcidlink.
 %
 % Ganchos \preauthor/\postauthor do memoir: trocamos a tabela padrão por um
-% ambiente centralizado com \SingleSpacing (assim a afiliação longa quebra sozinha
-% e as linhas ficam juntas). \normalsize = corpo 12.
-\preauthor{\begin{center}\normalfont\normalsize\SingleSpacing}
-\postauthor{\par\end{center}}
+% ambiente flushright (\raggedleft) com \SingleSpacing — a afiliação longa quebra
+% sozinha, as linhas ficam juntas e todas encostam na margem direita. \normalsize
+% = corpo 12.
+\preauthor{\begin{flushright}\normalfont\normalsize\SingleSpacing}
+\postauthor{\par\end{flushright}}
 
 % \autorRevInfor{nome}{afiliação}{e-mail}{ORCID iD}
 % Monta o bloco já formatado e o registra como autor (o \maketitle o imprime).
