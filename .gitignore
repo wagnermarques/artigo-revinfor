@@ -89,8 +89,15 @@
 ides/emacs/.emacs-revinfor/
 
 # =============================================================================
-# FINAL PDF: in this project the built PDF is treated as a regenerable
-# artifact and is NOT committed. Remove the line below if you decide to
-# version the final PDF instead.
+# FINAL PDF: by default every .pdf is ignored (regenerable artifact). The
+# exception below re-includes the generated article PDFs (main-<flavor>-<engine>.pdf,
+# e.g. main-overleaf-pdf.pdf) so they ARE version-controlled, while any OTHER
+# .pdf (reference material, etc.) stays ignored.
+#
+# How the two lines work together: git applies patterns top-to-bottom, and a
+# later "!" (negation) re-includes files matched by an earlier rule. So keep
+# "!main*.pdf" AFTER "*.pdf". (Negation cannot re-include a file inside an
+# ignored directory, but here the article folders are not ignored, so it works.)
 # =============================================================================
 *.pdf
+!main*.pdf
