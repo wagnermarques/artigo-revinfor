@@ -524,6 +524,27 @@
 
 
 % ---------------------------------------------------------------------------
+%  Numeração de página (padrão Revista InFor)
+% ---------------------------------------------------------------------------
+% No PDF oficial da revista, o número da página fica no RODAPÉ, alinhado à
+% DIREITA (na margem externa do texto), em todas as páginas.
+%
+% No modo 'article' (usado nesta classe), o abnTeX2 aplica o estilo de página
+% 'plain' aos elementos textuais (\pagestyle{plain} dentro de \textual). O
+% 'plain' do memoir imprime o número CENTRALIZADO no rodapé
+% (\makeoddfoot{plain}{}{\thepage}{}). Redefinimos o rodapé do 'plain' para
+% colocar o número no terceiro campo (à direita), mantendo o cabeçalho vazio.
+% Como as definições de estilo de página são globais e nada as reescreve depois,
+% o \pagestyle{plain} do \textual passa a usar este rodapé.
+%
+% \makeoddfoot/\makeevenfoot recebem {esquerda}{centro}{direita}; deixamos os
+% dois primeiros vazios e pomos \thepage à direita. (No modo 'oneside' usado
+% aqui, só o "odd" é aplicado; definimos o "even" também por robustez.)
+\makeoddfoot{plain}{}{}{\thepage}
+\makeevenfoot{plain}{}{}{\thepage}
+
+
+% ---------------------------------------------------------------------------
 %  Parágrafos: recuo e espaçamentos
 % ---------------------------------------------------------------------------
 
