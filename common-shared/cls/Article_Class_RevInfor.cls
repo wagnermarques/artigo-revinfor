@@ -245,6 +245,45 @@
 \postdate{}
 
 % ---------------------------------------------------------------------------
+%  RESUMO / ABSTRACT (padrão Revista InFor)
+% ---------------------------------------------------------------------------
+% O ambiente resumo do abnTeX2 usa o "abstract" do memoir. Por padrão o memoir
+% recua o resumo dos DOIS lados (\absleftindent/\absrightindent = \leftmargin),
+% usa \small e herda a entrelinha 1,5. No PDF oficial o resumo é:
+%   - LARGURA TOTAL do texto (sem recuo lateral),
+%   - corpo 12 (\normalsize), justificado,
+%   - entrelinha SIMPLES,
+%   - SEM recuo de parágrafo (primeira linha alinhada às demais).
+% Ajustamos os parâmetros do abstract do memoir para reproduzir isso.
+\setlength{\absleftindent}{0pt}   % remove o recuo à esquerda
+\setlength{\absrightindent}{0pt}  % remove o recuo à direita
+\renewcommand{\abstracttextfont}{\normalfont\normalsize\SingleSpacing}
+% \absparindent é fixado pelo memoir em \AtBeginDocument como \parindent (1,3 cm);
+% zeramos DEPOIS, com nosso próprio \AtBeginDocument (executa após o do memoir).
+\AtBeginDocument{\setlength{\absparindent}{0pt}}
+% O ambiente resumo do abnTeX2 força o cabeçalho na fonte de capítulo (\chaptitlefont,
+% grande). Redefinimos o ambiente para o cabeçalho "RESUMO" ficar em corpo 12 NEGRITO,
+% CAIXA ALTA e centralizado — como no oficial —, preservando o bookmark do abnTeX2.
+%
+% O espaço entre "RESUMO" e o texto vinha grande porque, no memoir, o cabeçalho fica
+% num center (trivlist) e o corpo num list, cada um somando \topsep/\parskip, ainda
+% esticados pela entrelinha 1,5. Zeramos esses espaçamentos dentro do ambiente e
+% deixamos \abstitleskip controlar o respiro (~uma linha), como no oficial.
+\renewenvironment{resumo}[1][\resumoname]{%
+    \PRIVATEbookmarkthis{#1}%
+    \renewcommand{\abstractnamefont}{\normalfont\bfseries\normalsize}%
+    \renewcommand{\abstractname}{\MakeUppercase{#1}}%
+    % -24pt aproxima o espaço "RESUMO"->texto do oficial (~uma linha). O valor é
+    % empírico (compensa o \parskip entre os ambientes e a entrelinha 1,5).
+    \setlength{\abstitleskip}{-24pt}%
+    \setlength{\topsep}{0pt}%
+    \setlength{\partopsep}{0pt}%
+    \begin{abstract}%
+}{%
+    \end{abstract}\PRIVATEclearpageifneeded%
+}
+
+% ---------------------------------------------------------------------------
 %  Banner de cabeçalho da revista (full-bleed / margem zero)
 % ---------------------------------------------------------------------------
 % A Revista InFor imprime, no topo da primeira página, uma faixa (banner) com
