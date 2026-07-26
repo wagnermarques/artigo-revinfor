@@ -283,6 +283,18 @@
     \end{abstract}\PRIVATEclearpageifneeded%
 }
 
+% Título em língua estrangeira (inglês), impresso ANTES do \begin{resumo}[Abstract].
+% No oficial ele aparece entre as palavras-chave e o cabeçalho "ABSTRACT", no mesmo
+% padrão do título principal: negrito, CAIXA ALTA, centralizado, entrelinha 1,5.
+% Uso no corpo do texto (parte pré-textual):
+%     \tituloestrangeiroRevInfor{Título traduzido do artigo}
+% Os \vspace* dão o respiro parecido com o do PDF oficial (antes e depois do título).
+\newcommand{\tituloestrangeiroRevInfor}[1]{%
+    \vspace{\onelineskip}%
+    {\centering\normalfont\bfseries\normalsize\MakeUppercase{#1}\par}%
+    \vspace{\onelineskip}%
+}
+
 % ---------------------------------------------------------------------------
 %  Banner de cabeçalho da revista (full-bleed / margem zero)
 % ---------------------------------------------------------------------------
