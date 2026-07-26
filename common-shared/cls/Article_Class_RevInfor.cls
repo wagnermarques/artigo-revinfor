@@ -91,6 +91,10 @@
 % precisa de imagem externa). Usado no bloco de autoria (padrão Revista InFor).
 \RequirePackage{orcidlink}
 
+% Selos Creative Commons como glifos de fonte (\ccbyncsa, \ccLogo, ...), sem
+% precisar de imagem externa. Usado no rodapé de licença da 1ª página.
+\RequirePackage{ccicons}
+
 % Aparência dos links: texto colorido em vez de caixas. URLs (e-mail/ORCID) em
 % azul, como no PDF oficial da revista; links internos e de citação em preto,
 % para não poluir o corpo do texto.
@@ -329,6 +333,7 @@
 % Todos são calculados UMA vez em \AtBeginDocument (contexto de topo, seguro),
 % NÃO dentro de \maketitlehooka — ali medir a imagem e recortar falha (modo LR /
 % expansão do gancho). \xdef/\global fazem os valores sobreviverem até o \shipout.
+% acho que agora é só deixar o banner mais claro pra ficar totalmente igual ao artigo original
 \newlength{\@cabecalhoRevInforTrim}
 \newlength{\@cabecalhoRevInforReserve}
 \newcommand{\@cabecalhoRevInforInc}{}
@@ -350,6 +355,50 @@
         % (2) O desenho acima é camada de fundo e NÃO ocupa espaço no texto:
         %     reservamos aqui a altura do banner que passa da margem superior.
         \vspace*{\@cabecalhoRevInforReserve}%
+    \fi
+    % (3) Rodapé de licença Creative Commons — só na 1ª página (aqui roda o
+    %     \maketitle). Definido logo abaixo.
+    \@rodapeCCRevInforPrint
+}
+
+% ---------------------------------------------------------------------------
+%  Rodapé de licença Creative Commons — 1ª página (padrão Revista InFor)
+% ---------------------------------------------------------------------------
+% No PDF oficial, o rodapé da PRIMEIRA página traz, junto à borda inferior da
+% mancha e alinhado à esquerda, o selo Creative Commons (CC BY-NC-SA) seguido
+% da frase "Artigo publicado em acesso aberto sob licença Creative Commons".
+% O selo aparece SÓ na 1ª página.
+%
+% O selo é desenhado com o pacote ccicons (\ccbyncsa = glifos CC/BY/NC/SA), sem
+% depender de imagem externa. O texto vem em corpo 9 (\footnotesize), entrelinha
+% simples.
+%
+% Vem LIGADO por padrão (é elemento padrão da revista). Para trocar a frase, use
+% \rodapeCCRevInfor{...} no preâmbulo; para DESATIVAR, passe vazio:
+% \rodapeCCRevInfor{}.
+\newcommand{\@rodapeCCRevInforText}{Artigo publicado em acesso aberto sob licença Creative Commons}
+\newcommand{\rodapeCCRevInfor}[1]{\renewcommand{\@rodapeCCRevInforText}{#1}}
+
+% Altura da linha de base do rodapé a partir da borda INFERIOR do papel.
+% Aumente para subir o selo; diminua para descê-lo.
+\newlength{\@rodapeCCRevInforRaise}
+\setlength{\@rodapeCCRevInforRaise}{1.5cm}
+
+% Desenha o rodapé como camada de FRENTE, só na página corrente (o '*' do
+% \AddToShipoutPictureFG* restringe à 1ª página, onde o \maketitle roda).
+% Alinha o selo à esquerda da mancha (1in + \oddsidemargin) e o fixa acima da
+% borda inferior. Nada é impresso se o texto estiver vazio.
+\newcommand{\@rodapeCCRevInforPrint}{%
+    \ifx\@rodapeCCRevInforText\empty\else
+        \AddToShipoutPictureFG*{%
+            \AtPageLowerLeft{%
+                \raisebox{\@rodapeCCRevInforRaise}{%
+                    \hspace*{\dimexpr1in+\oddsidemargin\relax}%
+                    {\normalfont\footnotesize
+                     {\large\ccbyncsa}\hspace{1ex}\@rodapeCCRevInforText}%
+                }%
+            }%
+        }%
     \fi
 }
 
