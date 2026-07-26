@@ -393,6 +393,33 @@
 
 
 % ---------------------------------------------------------------------------
+%  Títulos de SEÇÃO (padrão Revista InFor)
+% ---------------------------------------------------------------------------
+% No PDF oficial da revista, os títulos de seção (ex.: "1 INTRODUÇÃO",
+% "2 DA PESQUISA") são:
+%   - Arial (sans-serif, já é a fonte da classe), NEGRITO;
+%   - CORPO 12 — o MESMO tamanho do texto (e não grandes);
+%   - CAIXA ALTA nas seções primárias, alinhados à ESQUERDA;
+%   - com o número seguido de UM espaço simples até o título.
+%
+% Por padrão, o abnTeX2 imprime os títulos GRANDES: ele define
+% \ABNTEXsectionfontsize=\Large, \ABNTEXsubsectionfontsize=\large, etc., e os
+% aplica em \AtBeginDocument via \setsecheadstyle{...}. Como ele EXPANDE essas
+% macros de tamanho naquele momento, basta redefini-las aqui (depois do
+% \LoadClass e antes do \begin{document}) para que o corpo 12 negrito prevaleça.
+% \ABNTEXsectionfont já é \sffamily; acrescentamos \bfseries e forçamos o corpo.
+\renewcommand{\ABNTEXsectionfontsize}{\normalsize\bfseries}
+\renewcommand{\ABNTEXsubsectionfontsize}{\normalsize\bfseries}
+\renewcommand{\ABNTEXsubsubsectionfontsize}{\normalsize\bfseries}
+\renewcommand{\ABNTEXsubsubsubsectionfontsize}{\normalsize\bfseries}
+
+% Espaço entre o NÚMERO da seção e o TÍTULO. O memoir usa \quad (1 em) por
+% padrão; a revista usa apenas um espaço simples ("1 INTRODUÇÃO"). O #1 é o
+% nível (section, subsection, ...); \csname the#1\endcsname imprime o número.
+\setsecnumformat{\csname the#1\endcsname\space}
+
+
+% ---------------------------------------------------------------------------
 %  Margens da página (comandos do memoir)
 % ---------------------------------------------------------------------------
 % \setlrmarginsandblock{esquerda}{direita}{*}  -> margens laterais
