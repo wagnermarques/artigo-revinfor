@@ -35,7 +35,8 @@ help:
 	@echo "Commands:"
 	@echo "  make build ART=<folder_name>   Build a specific article PDF"
 	@echo "  make all                       Build all articles"
-	@echo "  make clean                     Remove all build artifacts"
+	@echo "  make clean                     Remove intermediate files from all articles"
+	@echo "  make clean ART=<folder_name>   Remove intermediate files from one article"
 	@echo ""
 	@echo "Options:"
 	@echo "  ENGINE=pdf|xe|lua              LaTeX engine (default: pdf)"
@@ -73,13 +74,21 @@ all:
 		$(MAKE) build ART=$$art; \
 	done
 
-# Clean all articles and root
+# Remove LaTeX intermediate files. Leaves the final main*.pdf in place.
+# Usage:
+#   make clean                 Clean every article (and the repo root)
+#   make clean ART=<folder>    Clean only that article's intermediates
+CLEAN_EXTS = aux log out toc lof lot bbl blg brf fls fdb_latexmk synctex.gz \
+	idx ilg ind nlo nls xdv pdfxref
+
 clean:
-	@for art in $(ARTICLES); do \
-		echo "Cleaning $$art..."; \
-		rm -rf $$art/*.aux $$art/*.log $$art/*.out $$art/*.toc $$art/*.lof $$art/*.lot \
-			$$art/*.bbl $$art/*.blg $$art/*.fls $$art/*.fdb_latexmk $$art/*.synctex.gz \
-			$$art/*.idx $$art/*.ilg $$art/*.ind $$art/*.nlo $$art/*.nls $$art/*.xdv \
-			$$art/*.pdfxref $$art/main*.pdf; \
-	done
-	rm -rf *.aux *.log *.out *.toc *.bbl *.blg *.fls *.fdb_latexmk *.synctex.gz *.docx *.odt
+	@if [ -n "$(ART)" ]; then \
+		echo "Cleaning $(ART)..."; \
+		for ext in $(CLEAN_EXTS); do rm -f $(ART)/*.$$ext; done; \
+	else \
+		for art in $(ARTICLES); do \
+			echo "Cleaning $$art..."; \
+			for ext in $(CLEAN_EXTS); do rm -f $$art/*.$$ext; done; \
+		done; \
+		for ext in $(CLEAN_EXTS) docx odt; do rm -f *.$$ext; done; \
+	fi
