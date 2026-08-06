@@ -99,7 +99,29 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 3. Theme
+;; 3. Fonts — Nerd Fonts installed on Fedora
+;;    Tries a list of fonts commonly installed via ~/.local/share/fonts
+;;    (manually unpacked Nerd Fonts) or `dnf install jetbrains-mono-fonts`
+;;    etc., falling back to DejaVu Sans Mono, which ships with Fedora.
+;;; ---------------------------------------------------------------
+
+(defun revinfor/set-font ()
+  "Set the default and fixed-pitch face to the first available font."
+  (let ((font (seq-find (lambda (f) (member f (font-family-list)))
+                         '("JetBrainsMono Nerd Font Mono"
+                           "FiraCode Nerd Font Mono"
+                           "Hack Nerd Font Mono"
+                           "CaskaydiaCove Nerd Font Mono"
+                           "DejaVu Sans Mono"))))
+    (when font
+      (set-face-attribute 'default nil :family font :height 110)
+      (set-face-attribute 'fixed-pitch nil :family font :height 110))))
+
+(add-hook 'after-init-hook #'revinfor/set-font)
+
+
+;;; ---------------------------------------------------------------
+;; 4. Theme
 ;;; ---------------------------------------------------------------
 
 (use-package modus-themes
@@ -109,7 +131,7 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 4. Completion framework (Vertico + Orderless + Marginalia)
+;; 5. Completion framework (Vertico + Orderless + Marginalia)
 ;;; ---------------------------------------------------------------
 
 (use-package vertico
@@ -125,7 +147,7 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 5. AUCTeX — LaTeX editing (all compilation via Docker)
+;; 6. AUCTeX — LaTeX editing (all compilation via Docker)
 ;;; ---------------------------------------------------------------
 
 ;; :straight auctex installs the package; :package-name tex tells
@@ -160,7 +182,7 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 6. PDF viewer — pdf-tools (in-Emacs viewer with SyncTeX support)
+;; 7. PDF viewer — pdf-tools (in-Emacs viewer with SyncTeX support)
 ;;; ---------------------------------------------------------------
 
 (use-package pdf-tools
@@ -177,7 +199,7 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 7. BibTeX / ebib — bibliography manager
+;; 8. BibTeX / ebib — bibliography manager
 ;;    ebib is the closest Linux equivalent to BibDesk.
 ;;; ---------------------------------------------------------------
 
@@ -209,7 +231,7 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 8. RefTeX — cross-references, citations, labels
+;; 9. RefTeX — cross-references, citations, labels
 ;;    Works alongside AUCTeX; aware of abntex2 cite commands.
 ;;; ---------------------------------------------------------------
 
@@ -229,23 +251,33 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 9. Flyspell — spell checking (Portuguese + English)
-;;    aspell is the only tool that still needs a local install;
+;; 10. Flyspell — spell checking (Brazilian Portuguese)
+;;    hunspell is the only tool that still needs a local install;
 ;;    it checks natural language, not LaTeX, so Docker is not useful here.
-;;    Install: sudo dnf install aspell aspell-pt aspell-en
+;;    Install: sudo dnf install hunspell hunspell-pt-BR
 ;;; ---------------------------------------------------------------
 
 (use-package flyspell
   :straight nil
   :hook (LaTeX-mode . flyspell-mode)
   :custom
-  (ispell-program-name "aspell")
-  (ispell-dictionary "pt_PT"))   ; aspell-pt on Fedora registers as "pt_PT"
+  (ispell-program-name "hunspell")
+  (ispell-dictionary "pt_BR")   ; hunspell-pt-BR on Fedora registers as "pt_BR"
                                  ; switch with M-x ispell-change-dictionary
+  :config
+  ;; Flyspell only marks a word when point moves onto it (its checking is
+  ;; driven by post-command-hook, not a scan of the whole buffer) — text
+  ;; already on disk stays unmarked until you happen to visit each word.
+  ;; Force a full check right when the mode turns on so every misspelling
+  ;; is already visible while just scrolling, without touching point.
+  (add-hook 'flyspell-mode-hook
+            (lambda ()
+              (when flyspell-mode
+                (flyspell-buffer)))))
 
 
 ;;; ---------------------------------------------------------------
-;; 10. Org-mode tweaks (for README.org / PROJECT_ANALYSIS.org)
+;; 11. Org-mode tweaks (for README.org / PROJECT_ANALYSIS.org)
 ;;; ---------------------------------------------------------------
 
 (use-package org
@@ -259,7 +291,7 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 11. Project navigation — project.el pointing at the repo root
+;; 12. Project navigation — project.el pointing at the repo root
 ;;; ---------------------------------------------------------------
 
 (use-package project
@@ -274,7 +306,61 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 12. Useful keybindings summary
+;; 13. Magit — Git porcelain
+;;; ---------------------------------------------------------------
+
+(use-package magit
+  :bind
+  ("C-x g" . magit-status))
+
+
+;;; ---------------------------------------------------------------
+;; 14. Treemacs — file/directory sidebar
+;;; ---------------------------------------------------------------
+
+(use-package treemacs
+  :bind
+  (("<f8>"    . treemacs-select-window)  ; C-c C-o was requested, but AUCTeX
+                                          ; (TeX-fold prefix) and org-mode
+                                          ; (org-open-at-point) already claim
+                                          ; it in .tex/.org buffers, so it
+                                          ; would silently do nothing there.
+   ("M-0"     . treemacs-select-window)
+   ("C-x t t" . treemacs)
+   ("C-x t d" . treemacs-select-directory)
+   ("C-x t B" . treemacs-bookmark)
+   ("C-x t C-t" . treemacs-find-file)
+   ("C-x t M-t" . treemacs-find-tag))
+  :custom
+  (treemacs-width 35)
+  (treemacs-is-never-other-window t)
+  (treemacs-sorting 'alphabetic-case-insensitive-asc)
+  :config
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t)
+  (treemacs-fringe-indicator-mode 'always)
+  (treemacs-git-mode 'deferred))
+
+(use-package treemacs-nerd-icons
+  :after treemacs
+  :config
+  (treemacs-load-theme "nerd-icons"))
+
+;; Open treemacs automatically at startup, pointed at the repo root.
+;; `treemacs-add-and-display-current-project-exclusively' resolves the
+;; project via project.el (registered in section 12) without ever
+;; prompting — unlike plain `treemacs', which asks for a root path
+;; interactively the first time the workspace is empty.
+;; default-directory at launch is the invoking shell's cwd, not the repo,
+;; so it's bound locally just for this call.
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (let ((default-directory (expand-file-name "../../" revinfor/config-dir)))
+              (treemacs-add-and-display-current-project-exclusively))))
+
+
+;;; ---------------------------------------------------------------
+;; 15. Useful keybindings summary
 ;;
 ;;  LaTeX editing (LaTeX-mode):
 ;;    C-c C-c       — compile via docker-latexmk (inside texlive container)
@@ -292,6 +378,16 @@
 ;;    n / p         — next / previous page
 ;;    + / -         — zoom in / out
 ;;    s w           — fit to window width
+;;
+;;  Treemacs (file/directory sidebar, opens automatically at startup):
+;;    <f8> / M-0    — jump to the treemacs window
+;;    C-x t t       — open/close treemacs
+;;    C-x t d       — open treemacs for a chosen directory
+;;    C-x t B       — treemacs bookmark
+;;    C-x t C-t     — find current file in treemacs
+;;
+;;  Magit (Git porcelain):
+;;    C-x g         — open magit-status
 ;;; ---------------------------------------------------------------
 
 (provide 'init)

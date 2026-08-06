@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-07-11 sáb 23:10 -->
+<!-- 2026-08-06 qui 15:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tutorial: Editando artigos com Emacs</title>
@@ -201,70 +201,81 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgc36c31f">1. Visão Geral</a></li>
-<li><a href="#org6c22b68">2. 1. Iniciando o Emacs com a Configuração do Projeto</a>
+<li><a href="#org2d8593d">1. Visão Geral</a></li>
+<li><a href="#org86fc0c5">2. 1. Iniciando o Emacs com a Configuração do Projeto</a>
 <ul>
-<li><a href="#org344589b">2.1. Primeira execução</a></li>
+<li><a href="#orgca6adb6">2.1. Primeira execução</a></li>
 </ul>
 </li>
-<li><a href="#org9266cac">3. 2. Estrutura de Arquivos no Emacs</a></li>
-<li><a href="#org87a6607">4. 3. Editando um Arquivo <code>.tex</code> (AUCTeX)</a>
+<li><a href="#org6d36dde">3. 2. Estrutura de Arquivos no Emacs</a></li>
+<li><a href="#org9595c17">4. 3. Editando um Arquivo <code>.tex</code> (AUCTeX)</a>
 <ul>
-<li><a href="#org096d9ee">4.1. Projeto multi-arquivo e arquivo mestre</a></li>
-<li><a href="#orgb0abc80">4.2. Atalhos essenciais de edição</a>
+<li><a href="#orge481d74">4.1. Projeto multi-arquivo e arquivo mestre</a></li>
+<li><a href="#orgcabc5db">4.2. Atalhos essenciais de edição</a>
 <ul>
-<li><a href="#org7075658">4.2.1. Ambientes</a></li>
-<li><a href="#orgb3d13a7">4.2.2. Seções</a></li>
-<li><a href="#orgc7f73e7">4.2.3. Fontes e formatação rápida</a></li>
-<li><a href="#org6afa188">4.2.4. Matemática (LaTeX-math-mode)</a></li>
+<li><a href="#orgb2dea7e">4.2.1. Ambientes</a></li>
+<li><a href="#org13d805a">4.2.2. Seções</a></li>
+<li><a href="#orge32014a">4.2.3. Fontes e formatação rápida</a></li>
+<li><a href="#orgb74ea52">4.2.4. Matemática (LaTeX-math-mode)</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org546e428">5. 4. Compilando com Docker (<code>C-c C-c</code>)</a>
+<li><a href="#orgfcf18be">5. 4. Compilando com Docker (<code>C-c C-c</code>)</a>
 <ul>
-<li><a href="#orgf7a9f6a">5.1. Resultado da compilação</a></li>
-<li><a href="#org56633cc">5.2. Equivalência com o Makefile</a></li>
+<li><a href="#orga149362">5.1. Resultado da compilação</a></li>
+<li><a href="#org9c3b2cd">5.2. Equivalência com o Makefile</a></li>
 </ul>
 </li>
-<li><a href="#orgb7d5b64">6. 5. Visualizando o PDF (pdf-tools + SyncTeX)</a>
+<li><a href="#org1d06de7">6. 5. Visualizando o PDF (pdf-tools + SyncTeX)</a>
 <ul>
-<li><a href="#org27b3d66">6.1. Navegação no PDF</a></li>
-<li><a href="#org300f387">6.2. SyncTeX: do <code>.tex</code> para o PDF</a></li>
-<li><a href="#org10a4e46">6.3. SyncTeX: do PDF para o <code>.tex</code></a></li>
+<li><a href="#org0ba6d46">6.1. Navegação no PDF</a></li>
+<li><a href="#orgd1534e0">6.2. SyncTeX: do <code>.tex</code> para o PDF</a></li>
+<li><a href="#org94d41a4">6.3. SyncTeX: do PDF para o <code>.tex</code></a></li>
 </ul>
 </li>
-<li><a href="#orgf0912f3">7. 6. Verificação de Sintaxe em Tempo Real (Flymake + chktex)</a></li>
-<li><a href="#org7fe8b17">8. 7. Gerenciando a Bibliografia (ebib)</a>
+<li><a href="#orgaec6a65">7. 6. Verificação de Sintaxe em Tempo Real (Flymake + chktex)</a></li>
+<li><a href="#org3208dc9">8. 7. Gerenciando a Bibliografia (ebib)</a>
 <ul>
-<li><a href="#org3607f18">8.1. Abrindo o ebib</a></li>
-<li><a href="#org1741376">8.2. Arquivos <code>.bib</code> pré-carregados</a></li>
-<li><a href="#orge6b5472">8.3. Navegação no ebib</a></li>
-<li><a href="#orgeb5690d">8.4. Adicionando uma entrada nova</a></li>
-<li><a href="#orgfffbf02">8.5. Editando uma entrada existente</a></li>
-<li><a href="#org659dc10">8.6. Inserindo uma citação no <code>.tex</code></a></li>
+<li><a href="#orgdd2e066">8.1. Abrindo o ebib</a></li>
+<li><a href="#org0ad2e82">8.2. Arquivos <code>.bib</code> pré-carregados</a></li>
+<li><a href="#org4af4420">8.3. Navegação no ebib</a></li>
+<li><a href="#org55de246">8.4. Adicionando uma entrada nova</a></li>
+<li><a href="#orge638ef2">8.5. Editando uma entrada existente</a></li>
+<li><a href="#orgcf4dcca">8.6. Inserindo uma citação no <code>.tex</code></a></li>
 </ul>
 </li>
-<li><a href="#orgdf87df2">9. 8. Inserindo Citações pelo RefTeX (alternativa rápida)</a>
+<li><a href="#org1044e7b">9. 8. Inserindo Citações pelo RefTeX (alternativa rápida)</a>
 <ul>
-<li><a href="#org7585ca9">9.1. Labels e referências cruzadas</a></li>
+<li><a href="#org10e3b85">9.1. Labels e referências cruzadas</a></li>
 </ul>
 </li>
-<li><a href="#org3851ac1">10. 9. Correção Ortográfica (Flyspell)</a></li>
-<li><a href="#orgdb6afea">11. 10. Editando Arquivos <code>.org</code> (README, PROJECT<sub>ANALYSIS</sub>)</a></li>
-<li><a href="#org60d85a0">12. 11. Adicionando um Novo Artigo</a></li>
-<li><a href="#orgdbb9380">13. 12. Referência Rápida de Atalhos</a>
+<li><a href="#orgbbe92b6">10. 9. Correção Ortográfica / "Language Tool" (Flyspell + Hunspell)</a>
 <ul>
-<li><a href="#org89b5db3">13.1. LaTeX-mode</a></li>
-<li><a href="#orga0e72d0">13.2. pdf-view-mode</a></li>
-<li><a href="#orgf16773e">13.3. Navegação geral</a></li>
+<li><a href="#orgd9cdf6d">10.1. Pré-requisito: instalar o Hunspell e o dicionário <code>pt_BR</code></a></li>
+<li><a href="#orgbfde5ed">10.2. Ativação automática</a></li>
+<li><a href="#org148ecdd">10.3. Ativação / desativação manual</a></li>
+<li><a href="#org7301eb6">10.4. Corrigindo uma palavra sublinhada</a></li>
+<li><a href="#org1d571c6">10.5. Navegando entre erros sem usar o mouse</a></li>
+<li><a href="#orgb18aac8">10.6. Trocando de idioma temporariamente</a></li>
+<li><a href="#org6327e6a">10.7. O Flyspell entende LaTeX</a></li>
+<li><a href="#org60219bb">10.8. Diferença entre Flyspell e o Flymake/chktex (Seção 6)</a></li>
+</ul>
+</li>
+<li><a href="#org6add47d">11. 10. Editando Arquivos <code>.org</code> (README, PROJECT<sub>ANALYSIS</sub>)</a></li>
+<li><a href="#org9793b55">12. 11. Adicionando um Novo Artigo</a></li>
+<li><a href="#org3ae961b">13. 12. Referência Rápida de Atalhos</a>
+<ul>
+<li><a href="#orgfe8e741">13.1. LaTeX-mode</a></li>
+<li><a href="#orgd8b2ae7">13.2. pdf-view-mode</a></li>
+<li><a href="#orgf14d3e7">13.3. Navegação geral</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgc36c31f" class="outline-2">
-<h2 id="orgc36c31f"><span class="section-number-2">1.</span> Visão Geral</h2>
+<div id="outline-container-org2d8593d" class="outline-2">
+<h2 id="org2d8593d"><span class="section-number-2">1.</span> Visão Geral</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Este tutorial explica como editar os artigos deste repositório usando o
@@ -277,26 +288,26 @@ sintaxe rodam dentro dos containers Docker já definidos no <code>Makefile</code
 é necessário instalar nenhum pacote TeX localmente.
 </p>
 
-<pre class="example" id="orgd944ac4">
+<pre class="example" id="orgf17c161">
 Dependências locais necessárias:
   - Emacs &gt;= 28
   - Docker (em execução)
   - git
-  - aspell + aspell-pt + aspell-en  (apenas para correção ortográfica)
+  - hunspell + hunspell-pt-BR + hunspell-en  (apenas para correção ortográfica)
 </pre>
 
 <p>
-pra installar o aspell utilize o ansible e execute este playbook
+pra instalar o hunspell utilize o ansible e execute este playbook
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell" id="org5effafb">ansible-playbook -i localhost, -K  ides/emacs/ansible/install-aspell.yml 
+<pre class="src src-shell" id="org7daf11b">ansible-playbook -i localhost, -K  ides/emacs/ansible/install-aspell.yml 
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org6c22b68" class="outline-2">
-<h2 id="org6c22b68"><span class="section-number-2">2.</span> 1. Iniciando o Emacs com a Configuração do Projeto</h2>
+<div id="outline-container-org86fc0c5" class="outline-2">
+<h2 id="org86fc0c5"><span class="section-number-2">2.</span> 1. Iniciando o Emacs com a Configuração do Projeto</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Use sempre a flag <code>-q</code> para ignorar o seu <code>~/.emacs.d</code> pessoal, e <code>-l</code>
@@ -314,12 +325,12 @@ Para não digitar isso toda vez, adicione um alias no seu <code>~/.bashrc</code>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #c678dd;">alias</span> emacs-revinfor=<span style="color: #98be65;">'emacs -q -l ~/Projects/artigo-revinfor/ides-configuration/emacs/init.el'</span>
+<pre class="src src-bash"><span style="font-weight: bold;">alias</span> emacs-revinfor=<span style="font-style: italic;">'emacs -q -l ~/Projects/artigo-revinfor/ides-configuration/emacs/init.el'</span>
 </pre>
 </div>
 </div>
-<div id="outline-container-org344589b" class="outline-3">
-<h3 id="org344589b"><span class="section-number-3">2.1.</span> Primeira execução</h3>
+<div id="outline-container-orgca6adb6" class="outline-3">
+<h3 id="orgca6adb6"><span class="section-number-3">2.1.</span> Primeira execução</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 Na primeira vez, o <code>straight.el</code> baixa e compila todos os pacotes
@@ -337,8 +348,8 @@ O <code>~/.emacs.d</code> pessoal <b>não é tocado</b>.
 </div>
 </div>
 </div>
-<div id="outline-container-org9266cac" class="outline-2">
-<h2 id="org9266cac"><span class="section-number-2">3.</span> 2. Estrutura de Arquivos no Emacs</h2>
+<div id="outline-container-org6d36dde" class="outline-2">
+<h2 id="org6d36dde"><span class="section-number-2">3.</span> 2. Estrutura de Arquivos no Emacs</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Ao abrir o Emacs, use <code>C-x p p</code> (project.el) para navegar entre os
@@ -390,14 +401,14 @@ Dentro do projeto, use:
 Os arquivos principais de cada artigo ficam em seus subdiretórios:
 </p>
 
-<pre class="example" id="org9bfc63a">
+<pre class="example" id="orgec3ae55">
 artigo_modelo_revista_infor/main.tex
 artigo_curso_defectologia_vigostky/main.tex
 </pre>
 </div>
 </div>
-<div id="outline-container-org87a6607" class="outline-2">
-<h2 id="org87a6607"><span class="section-number-2">4.</span> 3. Editando um Arquivo <code>.tex</code> (AUCTeX)</h2>
+<div id="outline-container-org9595c17" class="outline-2">
+<h2 id="org9595c17"><span class="section-number-2">4.</span> 3. Editando um Arquivo <code>.tex</code> (AUCTeX)</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Ao abrir qualquer arquivo <code>.tex</code>, o Emacs entra automaticamente em
@@ -405,14 +416,14 @@ Ao abrir qualquer arquivo <code>.tex</code>, o Emacs entra automaticamente em
 indentação automática e os menus <code>LaTeX</code> e <code>Command</code> na barra de menus.
 </p>
 </div>
-<div id="outline-container-org096d9ee" class="outline-3">
-<h3 id="org096d9ee"><span class="section-number-3">4.1.</span> Projeto multi-arquivo e arquivo mestre</h3>
+<div id="outline-container-orge481d74" class="outline-3">
+<h3 id="orge481d74"><span class="section-number-3">4.1.</span> Projeto multi-arquivo e arquivo mestre</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 Na primeira vez que abrir um <code>main.tex</code>, o AUCTeX pergunta:
 </p>
 
-<pre class="example" id="org5b4e892">
+<pre class="example" id="org36c2d0b">
 Please specify a master file: (default main.tex)
 </pre>
 
@@ -423,12 +434,12 @@ artigo e não será perguntada novamente.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb0abc80" class="outline-3">
-<h3 id="orgb0abc80"><span class="section-number-3">4.2.</span> Atalhos essenciais de edição</h3>
+<div id="outline-container-orgcabc5db" class="outline-3">
+<h3 id="orgcabc5db"><span class="section-number-3">4.2.</span> Atalhos essenciais de edição</h3>
 <div class="outline-text-3" id="text-4-2">
 </div>
-<div id="outline-container-org7075658" class="outline-4">
-<h4 id="org7075658"><span class="section-number-4">4.2.1.</span> Ambientes</h4>
+<div id="outline-container-orgb2dea7e" class="outline-4">
+<h4 id="orgb2dea7e"><span class="section-number-4">4.2.1.</span> Ambientes</h4>
 <div class="outline-text-4" id="text-4-2-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -458,8 +469,8 @@ Exemplos de ambientes úteis: <code>figure</code>, <code>table</code>, <code>ite
 </p>
 </div>
 </div>
-<div id="outline-container-orgb3d13a7" class="outline-4">
-<h4 id="orgb3d13a7"><span class="section-number-4">4.2.2.</span> Seções</h4>
+<div id="outline-container-org13d805a" class="outline-4">
+<h4 id="org13d805a"><span class="section-number-4">4.2.2.</span> Seções</h4>
 <div class="outline-text-4" id="text-4-2-2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -484,8 +495,8 @@ Exemplos de ambientes úteis: <code>figure</code>, <code>table</code>, <code>ite
 </table>
 </div>
 </div>
-<div id="outline-container-orgc7f73e7" class="outline-4">
-<h4 id="orgc7f73e7"><span class="section-number-4">4.2.3.</span> Fontes e formatação rápida</h4>
+<div id="outline-container-orge32014a" class="outline-4">
+<h4 id="orge32014a"><span class="section-number-4">4.2.3.</span> Fontes e formatação rápida</h4>
 <div class="outline-text-4" id="text-4-2-3">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -525,8 +536,8 @@ Exemplos de ambientes úteis: <code>figure</code>, <code>table</code>, <code>ite
 </table>
 </div>
 </div>
-<div id="outline-container-org6afa188" class="outline-4">
-<h4 id="org6afa188"><span class="section-number-4">4.2.4.</span> Matemática (LaTeX-math-mode)</h4>
+<div id="outline-container-orgb74ea52" class="outline-4">
+<h4 id="orgb74ea52"><span class="section-number-4">4.2.4.</span> Matemática (LaTeX-math-mode)</h4>
 <div class="outline-text-4" id="text-4-2-4">
 <p>
 O <code>LaTeX-math-mode</code> está ativo por padrão. Prefixo: <code>`</code> (acento grave).
@@ -576,14 +587,14 @@ Use <code>C-c ~</code> para alternar o <code>LaTeX-math-mode</code> manualmente.
 </div>
 </div>
 </div>
-<div id="outline-container-org546e428" class="outline-2">
-<h2 id="org546e428"><span class="section-number-2">5.</span> 4. Compilando com Docker (<code>C-c C-c</code>)</h2>
+<div id="outline-container-orgfcf18be" class="outline-2">
+<h2 id="orgfcf18be"><span class="section-number-2">5.</span> 4. Compilando com Docker (<code>C-c C-c</code>)</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Pressione <code>C-c C-c</code> dentro de qualquer buffer <code>.tex</code>. O AUCTeX exibirá:
 </p>
 
-<pre class="example" id="org93770fb">
+<pre class="example" id="orgea44ef1">
 Command: (default docker-latexmk)
 </pre>
 
@@ -608,8 +619,8 @@ artigo, garantindo que caminhos como <code>../common-shared/cls/</code> sejam
 resolvidos corretamente.</li>
 </ol>
 </div>
-<div id="outline-container-orgf7a9f6a" class="outline-3">
-<h3 id="orgf7a9f6a"><span class="section-number-3">5.1.</span> Resultado da compilação</h3>
+<div id="outline-container-orga149362" class="outline-3">
+<h3 id="orga149362"><span class="section-number-3">5.1.</span> Resultado da compilação</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 O AUCTeX abre o buffer <code>*TeX compilation*</code> com a saída do <code>latexmk</code>. Se
@@ -648,15 +659,15 @@ Erros são anotados diretamente na linha do arquivo <code>.tex</code> com setas 
 </p>
 </div>
 </div>
-<div id="outline-container-org56633cc" class="outline-3">
-<h3 id="org56633cc"><span class="section-number-3">5.2.</span> Equivalência com o Makefile</h3>
+<div id="outline-container-org9c3b2cd" class="outline-3">
+<h3 id="org9c3b2cd"><span class="section-number-3">5.2.</span> Equivalência com o Makefile</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 O comando executado pelo Emacs é equivalente a:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">make build <span style="color: #dcaeea;">ART</span>=artigo_curso_defectologia_vigostky
+<pre class="src src-bash">make build <span style="font-weight: bold; font-style: italic;">ART</span>=artigo_curso_defectologia_vigostky
 </pre>
 </div>
 
@@ -667,8 +678,8 @@ automaticamente.
 </div>
 </div>
 </div>
-<div id="outline-container-orgb7d5b64" class="outline-2">
-<h2 id="orgb7d5b64"><span class="section-number-2">6.</span> 5. Visualizando o PDF (pdf-tools + SyncTeX)</h2>
+<div id="outline-container-org1d06de7" class="outline-2">
+<h2 id="org1d06de7"><span class="section-number-2">6.</span> 5. Visualizando o PDF (pdf-tools + SyncTeX)</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 Após a compilação, pressione <code>C-c C-v</code> para abrir o PDF gerado no
@@ -680,8 +691,8 @@ O PDF é atualizado automaticamente sempre que uma compilação for
 concluída com sucesso.
 </p>
 </div>
-<div id="outline-container-org27b3d66" class="outline-3">
-<h3 id="org27b3d66"><span class="section-number-3">6.1.</span> Navegação no PDF</h3>
+<div id="outline-container-org0ba6d46" class="outline-3">
+<h3 id="org0ba6d46"><span class="section-number-3">6.1.</span> Navegação no PDF</h3>
 <div class="outline-text-3" id="text-6-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -746,8 +757,8 @@ concluída com sucesso.
 </table>
 </div>
 </div>
-<div id="outline-container-org300f387" class="outline-3">
-<h3 id="org300f387"><span class="section-number-3">6.2.</span> SyncTeX: do <code>.tex</code> para o PDF</h3>
+<div id="outline-container-orgd1534e0" class="outline-3">
+<h3 id="orgd1534e0"><span class="section-number-3">6.2.</span> SyncTeX: do <code>.tex</code> para o PDF</h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
 Com o cursor em qualquer linha do arquivo <code>.tex</code>, pressione <code>C-c C-v</code>:
@@ -755,8 +766,8 @@ o pdf-tools abre o PDF e destaca o trecho correspondente.
 </p>
 </div>
 </div>
-<div id="outline-container-org10a4e46" class="outline-3">
-<h3 id="org10a4e46"><span class="section-number-3">6.3.</span> SyncTeX: do PDF para o <code>.tex</code></h3>
+<div id="outline-container-org94d41a4" class="outline-3">
+<h3 id="org94d41a4"><span class="section-number-3">6.3.</span> SyncTeX: do PDF para o <code>.tex</code></h3>
 <div class="outline-text-3" id="text-6-3">
 <p>
 Dentro do <code>pdf-view-mode</code>, pressione <code>C-c C-g</code> sobre qualquer parte do
@@ -766,8 +777,8 @@ exata.
 </div>
 </div>
 </div>
-<div id="outline-container-orgf0912f3" class="outline-2">
-<h2 id="orgf0912f3"><span class="section-number-2">7.</span> 6. Verificação de Sintaxe em Tempo Real (Flymake + chktex)</h2>
+<div id="outline-container-orgaec6a65" class="outline-2">
+<h2 id="orgaec6a65"><span class="section-number-2">7.</span> 6. Verificação de Sintaxe em Tempo Real (Flymake + chktex)</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 O <code>flymake-mode</code> é ativado automaticamente ao abrir um <code>.tex</code>. Ele chama
@@ -823,18 +834,18 @@ do processo de compilação — sem instalação local necessária.
 </p>
 </div>
 </div>
-<div id="outline-container-org7fe8b17" class="outline-2">
-<h2 id="org7fe8b17"><span class="section-number-2">8.</span> 7. Gerenciando a Bibliografia (ebib)</h2>
+<div id="outline-container-org3208dc9" class="outline-2">
+<h2 id="org3208dc9"><span class="section-number-2">8.</span> 7. Gerenciando a Bibliografia (ebib)</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 O <code>ebib</code> é o gerenciador de bibliografias integrado, equivalente ao
 BibDesk no macOS. Ele lê diretamente os arquivos <code>.bib</code> do projeto.
 </p>
 </div>
-<div id="outline-container-org3607f18" class="outline-3">
-<h3 id="org3607f18"><span class="section-number-3">8.1.</span> Abrindo o ebib</h3>
+<div id="outline-container-orgdd2e066" class="outline-3">
+<h3 id="orgdd2e066"><span class="section-number-3">8.1.</span> Abrindo o ebib</h3>
 <div class="outline-text-3" id="text-8-1">
-<pre class="example" id="orgb3ab108">
+<pre class="example" id="org821701e">
 C-c e
 </pre>
 
@@ -844,8 +855,8 @@ campos da entrada selecionada abaixo.
 </p>
 </div>
 </div>
-<div id="outline-container-org1741376" class="outline-3">
-<h3 id="org1741376"><span class="section-number-3">8.2.</span> Arquivos <code>.bib</code> pré-carregados</h3>
+<div id="outline-container-org0ad2e82" class="outline-3">
+<h3 id="org0ad2e82"><span class="section-number-3">8.2.</span> Arquivos <code>.bib</code> pré-carregados</h3>
 <div class="outline-text-3" id="text-8-2">
 <p>
 A configuração carrega automaticamente:
@@ -858,8 +869,8 @@ A configuração carrega automaticamente:
 </ul>
 </div>
 </div>
-<div id="outline-container-orge6b5472" class="outline-3">
-<h3 id="orge6b5472"><span class="section-number-3">8.3.</span> Navegação no ebib</h3>
+<div id="outline-container-org4af4420" class="outline-3">
+<h3 id="org4af4420"><span class="section-number-3">8.3.</span> Navegação no ebib</h3>
 <div class="outline-text-3" id="text-8-3">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -899,8 +910,8 @@ A configuração carrega automaticamente:
 </table>
 </div>
 </div>
-<div id="outline-container-orgeb5690d" class="outline-3">
-<h3 id="orgeb5690d"><span class="section-number-3">8.4.</span> Adicionando uma entrada nova</h3>
+<div id="outline-container-org55de246" class="outline-3">
+<h3 id="org55de246"><span class="section-number-3">8.4.</span> Adicionando uma entrada nova</h3>
 <div class="outline-text-3" id="text-8-4">
 <ol class="org-ol">
 <li>Pressione <code>a</code> no índice do ebib.</li>
@@ -910,8 +921,8 @@ A configuração carrega automaticamente:
 </ol>
 </div>
 </div>
-<div id="outline-container-orgfffbf02" class="outline-3">
-<h3 id="orgfffbf02"><span class="section-number-3">8.5.</span> Editando uma entrada existente</h3>
+<div id="outline-container-orge638ef2" class="outline-3">
+<h3 id="orge638ef2"><span class="section-number-3">8.5.</span> Editando uma entrada existente</h3>
 <div class="outline-text-3" id="text-8-5">
 <ol class="org-ol">
 <li>Selecione a entrada com <code>n</code> / <code>p</code>.</li>
@@ -920,8 +931,8 @@ A configuração carrega automaticamente:
 </ol>
 </div>
 </div>
-<div id="outline-container-org659dc10" class="outline-3">
-<h3 id="org659dc10"><span class="section-number-3">8.6.</span> Inserindo uma citação no <code>.tex</code></h3>
+<div id="outline-container-orgcf4dcca" class="outline-3">
+<h3 id="orgcf4dcca"><span class="section-number-3">8.6.</span> Inserindo uma citação no <code>.tex</code></h3>
 <div class="outline-text-3" id="text-8-6">
 <p>
 Com o ebib aberto e uma entrada selecionada, pressione <code>i</code> (insert):
@@ -971,8 +982,8 @@ Feche o ebib com <code>q</code> para voltar ao <code>.tex</code>.
 </div>
 </div>
 </div>
-<div id="outline-container-orgdf87df2" class="outline-2">
-<h2 id="orgdf87df2"><span class="section-number-2">9.</span> 8. Inserindo Citações pelo RefTeX (alternativa rápida)</h2>
+<div id="outline-container-org1044e7b" class="outline-2">
+<h2 id="org1044e7b"><span class="section-number-2">9.</span> 8. Inserindo Citações pelo RefTeX (alternativa rápida)</h2>
 <div class="outline-text-2" id="text-9">
 <p>
 Sem sair do buffer <code>.tex</code>, pressione <code>C-c [</code>. O RefTeX abre um prompt de
@@ -1027,8 +1038,8 @@ busca nos arquivos <code>.bib</code> associados.
 </tbody>
 </table>
 </div>
-<div id="outline-container-org7585ca9" class="outline-3">
-<h3 id="org7585ca9"><span class="section-number-3">9.1.</span> Labels e referências cruzadas</h3>
+<div id="outline-container-org10e3b85" class="outline-3">
+<h3 id="org10e3b85"><span class="section-number-3">9.1.</span> Labels e referências cruzadas</h3>
 <div class="outline-text-3" id="text-9-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -1059,12 +1070,107 @@ busca nos arquivos <code>.bib</code> associados.
 </div>
 </div>
 </div>
-<div id="outline-container-org3851ac1" class="outline-2">
-<h2 id="org3851ac1"><span class="section-number-2">10.</span> 9. Correção Ortográfica (Flyspell)</h2>
+<div id="outline-container-orgbbe92b6" class="outline-2">
+<h2 id="orgbbe92b6"><span class="section-number-2">10.</span> 9. Correção Ortográfica / "Language Tool" (Flyspell + Hunspell)</h2>
 <div class="outline-text-2" id="text-10">
 <p>
-O <code>flyspell-mode</code> é ativado automaticamente em <code>LaTeX-mode</code> usando o
-dicionário <code>pt_BR</code> via <code>aspell</code>.
+O Emacs não usa um corretor à parte: a ferramenta de idioma configurada
+neste projeto é o <code>flyspell-mode</code> (nativo do Emacs), que por sua vez chama
+o motor externo <code>hunspell</code> com o dicionário <code>pt_BR</code>. É esse par
+(Flyspell + Hunspell) que sublinha palavras erradas e sugere correções
+enquanto você digita — o equivalente ao "corretor de idioma" de outros
+editores.
+</p>
+</div>
+<div id="outline-container-orgd9cdf6d" class="outline-3">
+<h3 id="orgd9cdf6d"><span class="section-number-3">10.1.</span> Pré-requisito: instalar o Hunspell e o dicionário <code>pt_BR</code></h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+Antes de usar, confirme que o pacote do sistema está instalado (ver
+<code>Visão Geral</code> no topo deste tutorial):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">ansible-playbook -i localhost, -K ides/emacs/ansible/install-aspell.yml
+</pre>
+</div>
+
+<p>
+Sem isso, o Flyspell ainda liga, mas fica mudo — nenhuma palavra é
+sublinhada, pois o backend <code>hunspell -d pt_BR</code> não existe no sistema.
+</p>
+</div>
+</div>
+<div id="outline-container-orgbfde5ed" class="outline-3">
+<h3 id="orgbfde5ed"><span class="section-number-3">10.2.</span> Ativação automática</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+Ao abrir qualquer arquivo <code>.tex</code>, o <code>LaTeX-mode</code> (AUCTeX) já dispara o
+<code>flyspell-mode</code> sozinho, através do hook definido em <code>init.el</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="font-weight: bold;">use-package</span> flyspell
+  <span style="font-weight: bold;">:hook</span> (LaTeX-mode . flyspell-mode)
+  <span style="font-weight: bold;">:custom</span>
+  (ispell-program-name <span style="font-style: italic;">"hunspell"</span>)
+  (ispell-dictionary <span style="font-style: italic;">"pt_BR"</span>))
+</pre>
+</div>
+
+<p>
+Você não precisa fazer nada: basta abrir o <code>.tex</code> e, após alguns
+segundos, as palavras que o <code>pt_BR</code> não reconhece aparecem sublinhadas
+em vermelho ondulado.
+</p>
+</div>
+</div>
+<div id="outline-container-org148ecdd" class="outline-3">
+<h3 id="org148ecdd"><span class="section-number-3">10.3.</span> Ativação / desativação manual</h3>
+<div class="outline-text-3" id="text-10-3">
+<p>
+Se precisar ligar ou desligar em algum buffer específico (por exemplo,
+dentro de um bloco <code>verbatim</code> cheio de código, onde o sublinhado atrapalha):
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Comando</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>M-x flyspell-mode</code></td>
+<td class="org-left">Liga/desliga o Flyspell no buffer atual</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>M-x flyspell-buffer</code></td>
+<td class="org-left">Força a verificação do buffer inteiro</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>M-x flyspell-region</code></td>
+<td class="org-left">Verifica apenas a região selecionada</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org7301eb6" class="outline-3">
+<h3 id="org7301eb6"><span class="section-number-3">10.4.</span> Corrigindo uma palavra sublinhada</h3>
+<div class="outline-text-3" id="text-10-4">
+<p>
+Posicione o cursor sobre (ou logo após) a palavra sublinhada e use:
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -1084,33 +1190,126 @@ dicionário <code>pt_BR</code> via <code>aspell</code>.
 <tbody>
 <tr>
 <td class="org-left"><code>C-c $</code></td>
-<td class="org-left">Corrigir palavra sob o cursor</td>
+<td class="org-left">Abrir menu de sugestões para a palavra antes do cursor</td>
 </tr>
 
 <tr>
 <td class="org-left"><code>M-$</code></td>
-<td class="org-left">Corrigir palavra sob o cursor (alternativo)</td>
+<td class="org-left"><code>ispell-word</code>: verifica/corrige a palavra sob o cursor (comando geral do ispell, funciona igual aqui)</td>
 </tr>
 
 <tr>
-<td class="org-left"><code>C-c C-b</code></td>
-<td class="org-left">Verificar o buffer inteiro</td>
+<td class="org-left"><code>mouse-2</code> (clique do meio do mouse) na palavra sublinhada</td>
+<td class="org-left">Abrir o menu de sugestões</td>
 </tr>
 </tbody>
 </table>
 
 <p>
-Para alternar para inglês temporariamente:
+No menu de sugestões (<code>*Choices*</code>), escolha:
+</p>
+
+<ul class="org-ul">
+<li>Um número para substituir pela sugestão correspondente;</li>
+<li><code>r</code> para digitar manualmente a correção;</li>
+<li><code>a</code> para aceitar a palavra apenas nesta sessão do Emacs (não grava);</li>
+<li><code>i</code> para inserir a palavra no dicionário pessoal (grava em
+<code>~/.hunspell_pt_BR</code> — assim ela nunca mais é marcada como erro, útil
+para termos técnicos, nomes próprios, siglas de área etc.);</li>
+<li><code>C</code> (maiúsculo) para aceitar e nunca mais avisar nesta sessão.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1d571c6" class="outline-3">
+<h3 id="org1d571c6"><span class="section-number-3">10.5.</span> Navegando entre erros sem usar o mouse</h3>
+<div class="outline-text-3" id="text-10-5">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Atalho</th>
+<th scope="col" class="org-left">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>C-,</code></td>
+<td class="org-left">Ir para o próximo erro de ortografia</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Não há atalho dedicado para "verificar o buffer inteiro" — use <code>M-x
+flyspell-buffer</code> (o AUCTeX já usa <code>C-c C-b</code> para compilar o buffer,
+então esse atalho não fica livre para o Flyspell aqui).
+</p>
+
+<p>
+Combine <code>C-,</code> (navegar) com <code>C-c $</code> (corrigir) em sequência: é o fluxo
+mais rápido para revisar um artigo inteiro antes de compilar.
+</p>
+</div>
+</div>
+<div id="outline-container-orgb18aac8" class="outline-3">
+<h3 id="orgb18aac8"><span class="section-number-3">10.6.</span> Trocando de idioma temporariamente</h3>
+<div class="outline-text-3" id="text-10-6">
+<p>
+Para revisar um trecho em inglês (ex.: abstract em inglês) sem editar o
+<code>init.el</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-nil">M-x ispell-change-dictionary RET en RET
+<pre class="src src-nil">M-x ispell-change-dictionary RET en_US RET
 </pre>
 </div>
+
+<p>
+E para voltar ao português do Brasil:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-nil">M-x ispell-change-dictionary RET pt_BR RET
+</pre>
+</div>
+
+<p>
+Rode <code>M-x flyspell-buffer</code> logo em seguida para re-verificar tudo com o
+novo dicionário.
+</p>
 </div>
 </div>
-<div id="outline-container-orgdb6afea" class="outline-2">
-<h2 id="orgdb6afea"><span class="section-number-2">11.</span> 10. Editando Arquivos <code>.org</code> (README, PROJECT<sub>ANALYSIS</sub>)</h2>
+<div id="outline-container-org6327e6a" class="outline-3">
+<h3 id="org6327e6a"><span class="section-number-3">10.7.</span> O Flyspell entende LaTeX</h3>
+<div class="outline-text-3" id="text-10-7">
+<p>
+O Flyspell em <code>LaTeX-mode</code> já ignora automaticamente comandos, chaves e
+argumentos como <code>\cite{...}</code>, <code>\label{...}</code> e nomes de ambientes — ele só
+verifica o texto corrido em português, não o "código" LaTeX ao redor.
+</p>
+</div>
+</div>
+<div id="outline-container-org60219bb" class="outline-3">
+<h3 id="org60219bb"><span class="section-number-3">10.8.</span> Diferença entre Flyspell e o Flymake/chktex (Seção 6)</h3>
+<div class="outline-text-3" id="text-10-8">
+<p>
+É comum confundir os dois: o Flyspell (esta seção) verifica <b>ortografia
+do idioma natural</b> (português/inglês); o Flymake + <code>docker-chktex</code>
+(Seção 6) verifica <b>problemas de estilo e sintaxe do LaTeX</b> (espaços
+antes de pontuação, comandos obsoletos etc.). Os dois rodam ao mesmo
+tempo, de forma independente, em qualquer buffer <code>.tex</code>.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org6add47d" class="outline-2">
+<h2 id="org6add47d"><span class="section-number-2">11.</span> 10. Editando Arquivos <code>.org</code> (README, PROJECT<sub>ANALYSIS</sub>)</h2>
 <div class="outline-text-2" id="text-11">
 <p>
 Arquivos <code>.org</code> abrem automaticamente em <code>org-mode</code>. Recursos úteis:
@@ -1174,8 +1373,8 @@ Arquivos <code>.org</code> abrem automaticamente em <code>org-mode</code>. Recur
 </table>
 </div>
 </div>
-<div id="outline-container-org60d85a0" class="outline-2">
-<h2 id="org60d85a0"><span class="section-number-2">12.</span> 11. Adicionando um Novo Artigo</h2>
+<div id="outline-container-org9793b55" class="outline-2">
+<h2 id="org9793b55"><span class="section-number-2">12.</span> 11. Adicionando um Novo Artigo</h2>
 <div class="outline-text-2" id="text-12">
 <ol class="org-ol">
 <li><p>
@@ -1199,10 +1398,10 @@ cp artigo_modelo_revista_infor/references.bib artigo_meu_novo_tema/references.bi
 Abra o <code>main.tex</code> no Emacs e ajuste os metadados:
 </p>
 <div class="org-src-container">
-<pre class="src src-latex"><span style="color: #51afef;">\titulo</span>{T&#237;tulo do Seu Artigo}
-<span style="color: #51afef;">\autor</span>{Seu Nome}
-<span style="color: #51afef;">\local</span>{Brasil}
-<span style="color: #51afef;">\data</span>{<span style="color: #51afef;">\today</span>}
+<pre class="src src-latex"><span style="font-weight: bold;">\titulo</span>{T&#237;tulo do Seu Artigo}
+<span style="font-weight: bold;">\autor</span>{Seu Nome}
+<span style="font-weight: bold;">\local</span>{Brasil}
+<span style="font-weight: bold;">\data</span>{<span style="font-weight: bold;">\today</span>}
 </pre>
 </div></li>
 
@@ -1215,12 +1414,12 @@ necessária.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgdbb9380" class="outline-2">
-<h2 id="orgdbb9380"><span class="section-number-2">13.</span> 12. Referência Rápida de Atalhos</h2>
+<div id="outline-container-org3ae961b" class="outline-2">
+<h2 id="org3ae961b"><span class="section-number-2">13.</span> 12. Referência Rápida de Atalhos</h2>
 <div class="outline-text-2" id="text-13">
 </div>
-<div id="outline-container-org89b5db3" class="outline-3">
-<h3 id="org89b5db3"><span class="section-number-3">13.1.</span> LaTeX-mode</h3>
+<div id="outline-container-orgfe8e741" class="outline-3">
+<h3 id="orgfe8e741"><span class="section-number-3">13.1.</span> LaTeX-mode</h3>
 <div class="outline-text-3" id="text-13-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -1305,8 +1504,8 @@ necessária.</li>
 </table>
 </div>
 </div>
-<div id="outline-container-orga0e72d0" class="outline-3">
-<h3 id="orga0e72d0"><span class="section-number-3">13.2.</span> pdf-view-mode</h3>
+<div id="outline-container-orgd8b2ae7" class="outline-3">
+<h3 id="orgd8b2ae7"><span class="section-number-3">13.2.</span> pdf-view-mode</h3>
 <div class="outline-text-3" id="text-13-2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -1346,8 +1545,8 @@ necessária.</li>
 </table>
 </div>
 </div>
-<div id="outline-container-orgf16773e" class="outline-3">
-<h3 id="orgf16773e"><span class="section-number-3">13.3.</span> Navegação geral</h3>
+<div id="outline-container-orgf14d3e7" class="outline-3">
+<h3 id="orgf14d3e7"><span class="section-number-3">13.3.</span> Navegação geral</h3>
 <div class="outline-text-3" id="text-13-3">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -1407,7 +1606,7 @@ necessária.</li>
 <div id="postamble" class="status">
 <p class="date">Date: 2026-07-11</p>
 <p class="author">Author: Wagner Marques &amp; Claude</p>
-<p class="date">Created: 2026-07-11 sáb 23:10</p>
+<p class="date">Created: 2026-08-06 qui 15:49</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

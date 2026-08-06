@@ -17,10 +17,10 @@ Dependências locais necessárias:
   - Emacs >= 28
   - Docker (em execução)
   - git
-  - aspell + aspell-pt + aspell-en  (apenas para correção ortográfica)
+  - hunspell + hunspell-pt-BR + hunspell-en  (apenas para correção ortográfica)
 #+end_example
 
-pra installar o aspell utilize o ansible e execute este playbook
+pra instalar o hunspell utilize o ansible e execute este playbook
 
 #+name: 
 #+begin_src shell
@@ -313,22 +313,119 @@ busca nos arquivos =.bib= associados.
 | =C-c (=   | Inserir =\label{}= com autocompletar       |
 | =C-c )=   | Inserir =\ref{}= ou =\eqref{}= com busca   |
 
-* 9. Correção Ortográfica (Flyspell)
+* 9. Correção Ortográfica / "Language Tool" (Flyspell + Hunspell)
 
-O =flyspell-mode= é ativado automaticamente em =LaTeX-mode= usando o
-dicionário =pt_BR= via =aspell=.
+O Emacs não usa um corretor à parte: a ferramenta de idioma configurada
+neste projeto é o =flyspell-mode= (nativo do Emacs), que por sua vez chama
+o motor externo =hunspell= com o dicionário =pt_BR=. É esse par
+(Flyspell + Hunspell) que sublinha palavras erradas e sugere correções
+enquanto você digita — o equivalente ao "corretor de idioma" de outros
+editores.
 
-| Atalho        | Ação                                          |
-|---------------+-----------------------------------------------|
-| =C-c $=       | Corrigir palavra sob o cursor                 |
-| =M-$=         | Corrigir palavra sob o cursor (alternativo)   |
-| =C-c C-b=     | Verificar o buffer inteiro                    |
+** Pré-requisito: instalar o Hunspell e o dicionário =pt_BR=
 
-Para alternar para inglês temporariamente:
+Antes de usar, confirme que o pacote do sistema está instalado (ver
+=Visão Geral= no topo deste tutorial):
+
+#+begin_src shell
+ansible-playbook -i localhost, -K ides/emacs/ansible/install-aspell.yml
+#+end_src
+
+Sem isso, o Flyspell ainda liga, mas fica mudo — nenhuma palavra é
+sublinhada, pois o backend =hunspell -d pt_BR= não existe no sistema.
+
+** Ativação automática
+
+Ao abrir qualquer arquivo =.tex=, o =LaTeX-mode= (AUCTeX) já dispara o
+=flyspell-mode= sozinho, através do hook definido em =init.el=:
+
+#+begin_src emacs-lisp
+(use-package flyspell
+  :hook (LaTeX-mode . flyspell-mode)
+  :custom
+  (ispell-program-name "hunspell")
+  (ispell-dictionary "pt_BR"))
+#+end_src
+
+Você não precisa fazer nada: basta abrir o =.tex= e, após alguns
+segundos, as palavras que o =pt_BR= não reconhece aparecem sublinhadas
+em vermelho ondulado.
+
+** Ativação / desativação manual
+
+Se precisar ligar ou desligar em algum buffer específico (por exemplo,
+dentro de um bloco =verbatim= cheio de código, onde o sublinhado atrapalha):
+
+| Comando                    | Ação                                    |
+|-----------------------------+------------------------------------------|
+| =M-x flyspell-mode=        | Liga/desliga o Flyspell no buffer atual |
+| =M-x flyspell-buffer=      | Força a verificação do buffer inteiro   |
+| =M-x flyspell-region=      | Verifica apenas a região selecionada    |
+
+** Corrigindo uma palavra sublinhada
+
+Posicione o cursor sobre (ou logo após) a palavra sublinhada e use:
+
+| Atalho    | Ação                                                   |
+|-----------+---------------------------------------------------------|
+| =C-c $=   | Abrir menu de sugestões para a palavra antes do cursor |
+| =M-$=     | =ispell-word=: verifica/corrige a palavra sob o cursor (comando geral do ispell, funciona igual aqui) |
+| =mouse-2= (clique do meio do mouse) na palavra sublinhada | Abrir o menu de sugestões |
+
+No menu de sugestões (=*Choices*=), escolha:
+
+- Um número para substituir pela sugestão correspondente;
+- =r= para digitar manualmente a correção;
+- =a= para aceitar a palavra apenas nesta sessão do Emacs (não grava);
+- =i= para inserir a palavra no dicionário pessoal (grava em
+  =~/.hunspell_pt_BR= — assim ela nunca mais é marcada como erro, útil
+  para termos técnicos, nomes próprios, siglas de área etc.);
+- =C= (maiúsculo) para aceitar e nunca mais avisar nesta sessão.
+
+** Navegando entre erros sem usar o mouse
+
+| Atalho              | Ação                                        |
+|---------------------+----------------------------------------------|
+| =C-,=               | Ir para o próximo erro de ortografia        |
+
+Não há atalho dedicado para "verificar o buffer inteiro" — use =M-x
+flyspell-buffer= (o AUCTeX já usa =C-c C-b= para compilar o buffer,
+então esse atalho não fica livre para o Flyspell aqui).
+
+Combine =C-,= (navegar) com =C-c $= (corrigir) em sequência: é o fluxo
+mais rápido para revisar um artigo inteiro antes de compilar.
+
+** Trocando de idioma temporariamente
+
+Para revisar um trecho em inglês (ex.: abstract em inglês) sem editar o
+=init.el=:
 
 #+begin_src
-M-x ispell-change-dictionary RET en RET
+M-x ispell-change-dictionary RET en_US RET
 #+end_src
+
+E para voltar ao português do Brasil:
+
+#+begin_src
+M-x ispell-change-dictionary RET pt_BR RET
+#+end_src
+
+Rode =M-x flyspell-buffer= logo em seguida para re-verificar tudo com o
+novo dicionário.
+
+** O Flyspell entende LaTeX
+
+O Flyspell em =LaTeX-mode= já ignora automaticamente comandos, chaves e
+argumentos como =\cite{...}=, =\label{...}= e nomes de ambientes — ele só
+verifica o texto corrido em português, não o "código" LaTeX ao redor.
+
+** Diferença entre Flyspell e o Flymake/chktex (Seção 6)
+
+É comum confundir os dois: o Flyspell (esta seção) verifica *ortografia
+do idioma natural* (português/inglês); o Flymake + =docker-chktex=
+(Seção 6) verifica *problemas de estilo e sintaxe do LaTeX* (espaços
+antes de pontuação, comandos obsoletos etc.). Os dois rodam ao mesmo
+tempo, de forma independente, em qualquer buffer =.tex=.
 
 * 10. Editando Arquivos =.org= (README, PROJECT_ANALYSIS)
 

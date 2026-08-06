@@ -1,7 +1,7 @@
 ---
 # install-aspell.yml
 #
-# Installs aspell and the Portuguese / English dictionaries required by
+# Installs hunspell and the Brazilian Portuguese dictionary required by
 # the Flyspell spell-checker configured in ides/emacs/init.el.
 #
 # Usage (run from any directory):
@@ -12,21 +12,24 @@
 # to treat the string as an inline inventory rather than a file path.
 # --ask-become-pass (or -K) prompts for your sudo password.
 
-- name: Install aspell spell-checking dictionaries for Emacs
+- name: Install hunspell spell-checking dictionaries for Emacs
   hosts: localhost
   connection: local
   become: true
 
   vars:
     packages_fedora:
-      - aspell
-      - aspell-en
-      - aspell-pt
+      - hunspell
+      - hunspell-en
+      - hunspell-pt-BR
 
     packages_debian:
-      - aspell
-      - aspell-en
-      - aspell-pt
+      - hunspell
+      - hunspell-en-us
+      - hunspell-pt-br
+
+    hunspell_dict_dir_fedora: /usr/share/hunspell
+    hunspell_dict_dir_debian: /usr/share/hunspell
 
   tasks:
 
@@ -37,35 +40,52 @@
           - "!min"
           - distribution
 
-    - name: Install aspell dictionaries on Fedora / RHEL
+    - name: Install hunspell dictionaries on Fedora / RHEL
       ansible.builtin.dnf:
         name: "{{ packages_fedora }}"
         state: present
       when: ansible_os_family == "RedHat"
 
-    - name: Install aspell dictionaries on Debian / Ubuntu
+    - name: Install hunspell dictionaries on Debian / Ubuntu
       ansible.builtin.apt:
         name: "{{ packages_debian }}"
         state: present
         update_cache: true
       when: ansible_os_family == "Debian"
 
-    - name: Verify aspell binary is available
+    - name: Verify hunspell binary is available
       ansible.builtin.command:
-        cmd: aspell --version
-      register: aspell_version
+        cmd: hunspell --version
+      register: hunspell_version
       changed_when: false
 
-    - name: Show installed aspell version
+    - name: Show installed hunspell version
       ansible.builtin.debug:
-        msg: "{{ aspell_version.stdout_lines[0] }}"
+        msg: "{{ hunspell_version.stdout_lines[0] }}"
 
-    - name: List installed aspell dictionaries
+    - name: Confirm the pt_BR dictionary files are present
+      ansible.builtin.stat:
+        path: "{{ (ansible_os_family == 'RedHat') | ternary(hunspell_dict_dir_fedora, hunspell_dict_dir_debian) }}/pt_BR.{{ item }}"
+      loop:
+        - dic
+        - aff
+      register: pt_br_files
+
+    - name: Fail if the pt_BR dictionary is missing
+      ansible.builtin.fail:
+        msg: >-
+          hunspell-pt-BR was installed but pt_BR.{{ item.item }} was not
+          found under {{ (ansible_os_family == 'RedHat') | ternary(hunspell_dict_dir_fedora, hunspell_dict_dir_debian) }}.
+      loop: "{{ pt_br_files.results }}"
+      when: not item.stat.exists
+
+    - name: List available hunspell dictionaries
       ansible.builtin.command:
-        cmd: aspell dicts
-      register: aspell_dicts
+        cmd: hunspell -D
+      register: hunspell_dicts
       changed_when: false
+      failed_when: false
 
     - name: Show available dictionaries
       ansible.builtin.debug:
-        msg: "{{ aspell_dicts.stdout_lines }}"
+        msg: "{{ hunspell_dicts.stderr_lines + hunspell_dicts.stdout_lines }}"
