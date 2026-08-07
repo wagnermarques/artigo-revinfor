@@ -3,14 +3,18 @@
 #
 # AUCTeX calls this from the article directory (e.g. artigo_modelo_revista_infor/).
 # We mount the repo root so the container can resolve ../common-shared/ paths.
+#
+# REVINFOR_LATEX_IMAGE selects which flavor image to use (see the Makefile's
+# FLAVOR=abnt|overleaf), defaulting to the ABNT image for plain `C-c C-c`.
 
 set -euo pipefail
 
+IMAGE="${REVINFOR_LATEX_IMAGE:-artigo-revinfor-latex:latest}"
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 CWD_REL="$(realpath --relative-to="$PROJECT_ROOT" "$(pwd)")"
 
 exec docker run --rm \
   -v "${PROJECT_ROOT}:/workdir" \
   -w "/workdir/${CWD_REL}" \
-  artigo-revinfor-latex:latest \
+  "${IMAGE}" \
   latexmk "$@"

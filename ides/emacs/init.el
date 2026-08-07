@@ -78,7 +78,7 @@
       initial-scratch-message nil
       ring-bell-function 'ignore)
 
-(menu-bar-mode   -1)
+(menu-bar-mode   1)    ; on, to host the "Revinfor" build menu (section 16)
 (tool-bar-mode   -1)
 (scroll-bar-mode -1)
 (column-number-mode 1)
@@ -96,6 +96,10 @@
       `(("." . ,(expand-file-name "backups/" revinfor/cache-dir)))
       auto-save-file-name-transforms
       `((".*" ,(expand-file-name "auto-save/" revinfor/cache-dir) t)))
+
+;; Unlike backup-directory-alist, Emacs does not auto-create the
+;; auto-save directory, so it must be created explicitly here.
+(make-directory (expand-file-name "auto-save/" revinfor/cache-dir) t)
 
 
 ;;; ---------------------------------------------------------------
@@ -172,13 +176,92 @@
   (TeX-engine 'default)             ; 'default = pdflatex in modern AUCTeX
   (TeX-chktex-program "docker-chktex")
   :config
+  ;; Two TeX-command-list entries mirror the Makefile's FLAVOR=abnt|overleaf
+  ;; choice (see section 1's docker-latexmk wrapper): both call the same
+  ;; script, but the overleaf one overrides REVINFOR_LATEX_IMAGE so it runs
+  ;; against the Overleaf-compatible container instead.
   (add-to-list 'TeX-command-list
-               '("docker-latexmk"
+               '("docker-latexmk-abnt"
                  "docker-latexmk -pdf -interaction=nonstopmode %t"
                  TeX-run-command nil t
-                 :help "Run latexmk inside the texlive Docker container"))
-  (setq TeX-command-default "docker-latexmk")
-  (setq-default TeX-master nil))   ; prompts once, then caches in .dir-locals
+                 :help "Run latexmk inside the ABNT texlive Docker container"))
+  (add-to-list 'TeX-command-list
+               '("docker-latexmk-overleaf"
+                 "REVINFOR_LATEX_IMAGE=artigo-revinfor-overleaf:latest docker-latexmk -pdf -interaction=nonstopmode %t"
+                 TeX-run-command nil t
+                 :help "Run latexmk inside the Overleaf-compatible texlive Docker container"))
+  (setq TeX-command-default "docker-latexmk-abnt")
+  (setq-default TeX-master nil)   ; prompts once, then caches in .dir-locals
+
+  ;; "Revinfor" menu — one-click Build Final PDF entries per flavor, so
+  ;; the docker-latexmk pipeline above doesn't require going through
+  ;; C-c C-c and selecting the command by name every time.
+  (defconst revinfor/flavor-image-alist
+    '(("abnt"     . "artigo-revinfor-latex:latest")
+      ("overleaf" . "artigo-revinfor-overleaf:latest"))
+    "Maps each Makefile FLAVOR to its Docker image name.")
+
+  (defconst revinfor/flavor-tex-command-alist
+    '(("abnt"     . "docker-latexmk-abnt")
+      ("overleaf" . "docker-latexmk-overleaf"))
+    "Maps each Makefile FLAVOR to its TeX-command-list entry name.")
+
+  (defun revinfor/run-docker-latexmk (flavor)
+    "Kick off the docker-latexmk TeX-command for FLAVOR with a heads-up message.
+Each run starts a fresh container and can do several latexmk passes
+(pdflatex/bibtex), so AUCTeX's single \"Running...\" echo can otherwise
+read as a hang. `sit-for' holds this message on screen briefly so it
+isn't instantly overwritten by that echo."
+    (message "Revinfor: compiling via docker-latexmk (%s) — a full build (container start + multiple latexmk passes) can take up to a minute; it is not stuck. Press C-c C-l to watch live output." flavor)
+    (sit-for 1.5)
+    (TeX-command (alist-get flavor revinfor/flavor-tex-command-alist nil nil #'string=)
+                 #'TeX-master-file (if TeX-save-query 0 1)))
+
+  (defun revinfor/build-pdf (flavor)
+    "Compile the current article's master file via docker-latexmk.
+FLAVOR is \"abnt\" or \"overleaf\" (see the Makefile). Builds that
+flavor's Docker image first if it isn't present locally yet."
+    (let ((image (alist-get flavor revinfor/flavor-image-alist nil nil #'string=)))
+      (if (zerop (call-process "docker" nil nil nil "image" "inspect" image))
+          (revinfor/run-docker-latexmk flavor)
+        (let* ((tex-buffer (current-buffer))
+               (default-directory (expand-file-name "../../" revinfor/config-dir))
+               (buf (get-buffer-create (format "*Revinfor Docker Build (%s)*" flavor))))
+          (message "Revinfor: %s image not found — building it now (first run, a few minutes)..." image)
+          (pop-to-buffer buf)
+          (make-process
+           :name (format "revinfor-docker-build-%s" flavor)
+           :buffer buf
+           :command (list "make" "docker-build" (format "FLAVOR=%s" flavor))
+           :sentinel
+           (lambda (proc _event)
+             (when (memq (process-status proc) '(exit signal))
+               (if (zerop (process-exit-status proc))
+                   (if (buffer-live-p tex-buffer)
+                       (with-current-buffer tex-buffer
+                         (message "Revinfor: Docker image built — starting PDF build.")
+                         (revinfor/run-docker-latexmk flavor))
+                     (message "Revinfor: Docker image built — re-run Build Final PDF."))
+                 (message "Revinfor: docker-build failed — see %s buffer" (buffer-name buf))))))))))
+
+  (defun revinfor/build-pdf-abnt ()
+    "Build the final PDF using the ABNT flavor Docker image."
+    (interactive)
+    (revinfor/build-pdf "abnt"))
+
+  (defun revinfor/build-pdf-overleaf ()
+    "Build the final PDF using the Overleaf-compatible flavor Docker image."
+    (interactive)
+    (revinfor/build-pdf "overleaf"))
+
+  ;; LaTeX-mode-map lives in latex.el, not tex.el, and AUCTeX only
+  ;; loads latex.el when a .tex file is actually opened — so defining
+  ;; the menu here directly would fail with a void-variable error.
+  (with-eval-after-load 'latex
+    (easy-menu-define revinfor/latex-menu LaTeX-mode-map "Revinfor build commands."
+      '("Revinfor"
+        ["Build Final PDF (ABNT)" revinfor/build-pdf-abnt t]
+        ["Build Final PDF (Overleaf)" revinfor/build-pdf-overleaf t]))))
 
 
 ;;; ---------------------------------------------------------------
@@ -195,7 +278,11 @@
   (setq TeX-view-program-list
         '(("PDF Tools" TeX-pdf-tools-sync-view)))
   (add-hook 'TeX-after-compilation-finished-functions
-            #'TeX-revert-document-buffer))
+            #'TeX-revert-document-buffer)
+  ;; Bookends the "not stuck" message from revinfor/run-docker-latexmk
+  ;; (section 6) with a clear end-of-build signal.
+  (add-hook 'TeX-after-compilation-finished-functions
+            (lambda (_file) (message "Revinfor: PDF build finished."))))
 
 
 ;;; ---------------------------------------------------------------
@@ -363,7 +450,8 @@
 ;; 15. Useful keybindings summary
 ;;
 ;;  LaTeX editing (LaTeX-mode):
-;;    C-c C-c       — compile via docker-latexmk (inside texlive container)
+;;    Revinfor menu — Build Final PDF (ABNT) / (Overleaf), no prompt
+;;    C-c C-c       — compile via docker-latexmk (pick abnt/overleaf; default: abnt)
 ;;    C-c C-v       — view PDF (pdf-tools, SyncTeX)
 ;;    C-c C-e       — insert environment
 ;;    C-c C-s       — insert section

@@ -30,6 +30,12 @@
 *.synctex(busy)
 *.pdfsync
 
+# --- AUCTeX editor cache (Emacs) ----------------------------------------------
+# auto/ = per-article style cache (TeX-auto-save/TeX-parse-self in
+# ides/emacs/init.el): custom macros, \bibliography{} paths, etc. Entirely
+# regenerated from the .tex source the next time the file is opened.
+auto/
+
 # --- Intermediate output formats ---------------------------------------------
 # .dvi/.xdv = pre-PDF output; *-converted-to.* = images auto-converted
 *.dvi
