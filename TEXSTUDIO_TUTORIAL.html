@@ -6,7 +6,7 @@
 <!-- 2026-08-08 sáb 12:12 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tutorial: Editando artigos com VS Code</title>
+<title>Tutorial: Editando artigos com TeXstudio</title>
 <meta name="author" content="Wagner Marques &amp; Claude" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -196,242 +196,200 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Tutorial: Editando artigos com VS Code</h1>
+<h1 class="title">Tutorial: Editando artigos com TeXstudio</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5028882">1. Visão Geral</a></li>
-<li><a href="#orgd58d33d">2. 1. Instalando a Extensão LaTeX Workshop</a></li>
-<li><a href="#org6209a5e">3. 2. Abrindo o Projeto</a>
+<li><a href="#org4a09a2a">1. Visão Geral</a></li>
+<li><a href="#org1b88e7e">2. 1. Instalando o TeXstudio</a></li>
+<li><a href="#org0831af4">3. 2. Abrindo um Artigo</a></li>
+<li><a href="#orgf124bd9">4. 3. Compilando o PDF</a>
 <ul>
-<li><a href="#org8fe243e">3.1. Configuração já incluída no repositório</a></li>
+<li><a href="#org062ec70">4.1. Opção A (recomendada): terminal + <code>make build</code></a></li>
+<li><a href="#orge3d82de">4.2. Opção B (avançada): compilar com <code>F5</code> dentro do TeXstudio</a></li>
 </ul>
 </li>
-<li><a href="#orgdc82b08">4. 3. Editando o Conteúdo</a></li>
-<li><a href="#org03f23a2">5. 4. Compilando e Visualizando o PDF</a></li>
-<li><a href="#orga18bc71">6. 5. Visualizando o PDF dentro do VS Code</a>
-<ul>
-<li><a href="#org77b3dde">6.1. Auto-atualização</a></li>
-<li><a href="#orgc9b6869">6.2. Sobre o SyncTeX (clique para navegar entre <code>.tex</code> e PDF)</a></li>
-</ul>
-</li>
-<li><a href="#orgc86219d">7. 6. Atalhos Úteis</a></li>
-<li><a href="#org126d8df">8. 7. Adicionando um Novo Artigo</a></li>
+<li><a href="#orgb4f3805">5. 4. Verificação de Sintaxe (chktex) — opcional</a></li>
+<li><a href="#org780e4d0">6. 5. Cuidado: nomes de PDF e o <code>.gitignore</code></a></li>
+<li><a href="#org4637b86">7. 6. Adicionando um Novo Artigo</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5028882" class="outline-2">
-<h2 id="org5028882"><span class="section-number-2">1.</span> Visão Geral</h2>
+<div id="outline-container-org4a09a2a" class="outline-2">
+<h2 id="org4a09a2a"><span class="section-number-2">1.</span> Visão Geral</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-Este tutorial explica como editar os artigos deste repositório usando o
-<b>Visual Studio Code</b> com a extensão <b>LaTeX Workshop</b>.
+O <a href="https://www.texstudio.org">TeXstudio</a> é um editor de LaTeX desktop dedicado (não é um IDE de
+propósito geral como VS Code/Emacs). É uma boa opção para quem quer um
+programa único, com autocompletar de comandos LaTeX e visualizador de PDF
+embutido, sem aprender atalhos de editor genérico.
 </p>
 
 <p>
-Assim como na configuração do Emacs (<code>ides/emacs/EMACS_TUTORIAL.org</code>), a
-compilação do PDF roda dentro dos containers Docker já definidos no
-<code>Makefile</code>. Não é necessário instalar TeX Live localmente.
+Assim como no Emacs e no VS Code, a compilação "oficial" deste projeto
+roda dentro do Docker (via <code>Makefile</code>), não pelo motor local do
+TeXstudio — então TeX Live <b>não</b> precisa estar instalado na sua máquina.
 </p>
 
-<pre class="example" id="orgaaa2010">
+<pre class="example" id="orgb04f96a">
 Dependências locais necessárias:
-  - VS Code
+  - TeXstudio
   - Docker (em execução)
   - git
 </pre>
-
-<p>
-Mais sobre o plugin: <a href="https://github.com/James-Yu/LaTeX-Workshop">https://github.com/James-Yu/LaTeX-Workshop</a>
-</p>
 </div>
 </div>
-<div id="outline-container-orgd58d33d" class="outline-2">
-<h2 id="orgd58d33d"><span class="section-number-2">2.</span> 1. Instalando a Extensão LaTeX Workshop</h2>
+<div id="outline-container-org1b88e7e" class="outline-2">
+<h2 id="org1b88e7e"><span class="section-number-2">2.</span> 1. Instalando o TeXstudio</h2>
 <div class="outline-text-2" id="text-2">
-<ol class="org-ol">
-<li>Abra o <b>VS Code</b>.</li>
-<li>Clique no ícone de <b>Extensões</b> na barra lateral esquerda (ou pressione
-<code>Ctrl+Shift+X</code>).</li>
-<li>Na barra de busca, digite: <code>LaTeX Workshop</code>.</li>
-<li>Clique em <b>Install</b> na extensão publicada por <i>James Yu</i>.</li>
-</ol>
+<p>
+Baixe em <a href="https://www.texstudio.org/#download">https://www.texstudio.org/#download</a> (Windows/macOS/Linux) e
+instale normalmente. Na primeira execução, o assistente de configuração
+pode pedir para localizar um TeX Live local — pode pular/cancelar essa
+etapa, pois não vamos usar o motor local do TeXstudio para compilar.
+</p>
 </div>
 </div>
-<div id="outline-container-org6209a5e" class="outline-2">
-<h2 id="org6209a5e"><span class="section-number-2">3.</span> 2. Abrindo o Projeto</h2>
+<div id="outline-container-org0831af4" class="outline-2">
+<h2 id="org0831af4"><span class="section-number-2">3.</span> 2. Abrindo um Artigo</h2>
 <div class="outline-text-2" id="text-3">
-<ol class="org-ol">
-<li>Vá em <code>File &gt; Open Folder...</code>.</li>
-<li>Selecione a <b>raiz do repositório</b>, a pasta <code>artigo-revinfor/</code> (não a pasta
-de um artigo individual). Isso importa: o build via Docker monta a raiz
-do repositório inteira, e cada artigo referencia os recursos
-compartilhados por caminho relativo (<code>../../common-shared/...</code>), então
-abrir só a subpasta do artigo quebra a navegação desses caminhos no
-editor.</li>
-<li><p>
-Na barra lateral você verá a estrutura de pastas:
+<p>
+O TeXstudio abre arquivos <code>.tex</code> individuais (não pastas de projeto como
+o VS Code). Use <code>File &gt; Open</code> e navegue até:
 </p>
 
-<pre class="example" id="org5fe2f6a">
+<pre class="example" id="orgf45c021">
 artigo-revinfor/
-├── Makefile
-├── common-shared/                          &lt;- classe, imagem e bib compartilhadas
 └── artigos/
-    ├── artigo_modelo_revista_infor/        &lt;- template / artigo de referência
-    │   ├── main.tex
-    │   └── references.bib
-    └── artigo_curso_defectologia_vigostky/ &lt;- artigo em andamento
-        ├── main.tex
-        └── references.bib
-</pre></li>
-</ol>
-</div>
-<div id="outline-container-org8fe243e" class="outline-3">
-<h3 id="org8fe243e"><span class="section-number-3">3.1.</span> Configuração já incluída no repositório</h3>
-<div class="outline-text-3" id="text-3-1">
+    ├── artigo_modelo_revista_infor/main.tex
+    └── artigo_curso_defectologia_vigostky/main.tex
+</pre>
+
 <p>
-O repositório já traz um <code>.vscode/settings.json</code> que desliga o build
-automático e o linter (<code>chktex</code>) embutidos na extensão. Isso evita erros
-confusos do tipo "pdflatex not found" toda vez que você salva — já que a
-compilação de verdade acontece dentro do Docker, não pela extensão. Você
-não precisa configurar nada disso; já vem pronto ao abrir a pasta.
+Cada artigo é um único arquivo autocontido (sem <code>\include</code> de capítulos),
+então não é preciso configurar "Master Document" — o próprio <code>main.tex</code>
+já é o documento mestre.
 </p>
 </div>
 </div>
-</div>
-<div id="outline-container-orgdc82b08" class="outline-2">
-<h2 id="orgdc82b08"><span class="section-number-2">4.</span> 3. Editando o Conteúdo</h2>
+<div id="outline-container-orgf124bd9" class="outline-2">
+<h2 id="orgf124bd9"><span class="section-number-2">4.</span> 3. Compilando o PDF</h2>
 <div class="outline-text-2" id="text-4">
-<ol class="org-ol">
-<li>Abra o <code>main.tex</code> de um dos artigos em <code>artigos/&lt;pasta_do_artigo&gt;/</code>.</li>
-<li>O VS Code reconhece automaticamente o arquivo como LaTeX e ativa realce
-de sintaxe, indentação e navegação de seções (ícone de estrutura na
-barra lateral).</li>
-<li>Autocompletar de citações (<code>\cite{}</code>) funciona automaticamente: a
-extensão lê o <code>references.bib</code> que está na mesma pasta do artigo.</li>
-</ol>
-</div>
-</div>
-<div id="outline-container-org03f23a2" class="outline-2">
-<h2 id="org03f23a2"><span class="section-number-2">5.</span> 4. Compilando e Visualizando o PDF</h2>
-<div class="outline-text-2" id="text-5">
 <p>
-Como o projeto usa Docker para manter o build portátil, a compilação é
-feita pelo terminal integrado do VS Code, chamando o mesmo <code>Makefile</code> usado
-pelo Emacs e pela linha de comando.
+Existem duas formas de compilar. Comece pela <b>Opção A</b>: é a que funciona
+sem nenhuma configuração extra e é a mesma usada nos tutoriais de VS Code
+e Emacs.
 </p>
-
+</div>
+<div id="outline-container-org062ec70" class="outline-3">
+<h3 id="org062ec70"><span class="section-number-3">4.1.</span> Opção A (recomendada): terminal + <code>make build</code></h3>
+<div class="outline-text-3" id="text-4-1">
 <ol class="org-ol">
-<li>Abra o terminal integrado (<code>Ctrl + `</code> ou <code>Terminal &gt; New Terminal</code>).</li>
+<li>Abra um terminal fora do TeXstudio, na raiz do repositório.</li>
 <li><p>
-Rode o build indicando a pasta do artigo com <code>ART</code>:
+Rode:
 </p>
-
 <div class="org-src-container">
 <pre class="src src-bash">make build ART=artigo_curso_defectologia_vigostky
 </pre>
+</div></li>
+<li>No TeXstudio, abra o PDF gerado com <code>File &gt; Open</code> (ex.:
+<code>artigos/artigo_curso_defectologia_vigostky/main-abnt-pdf.pdf</code>). O
+visualizador embutido do TeXstudio recarrega sozinho sempre que o
+arquivo muda no disco — então, depois de aberto uma vez, basta rodar
+<code>make build</code> de novo no terminal e a aba já atualiza.</li>
+</ol>
 </div>
-
+</div>
+<div id="outline-container-orge3d82de" class="outline-3">
+<h3 id="orge3d82de"><span class="section-number-3">4.2.</span> Opção B (avançada): compilar com <code>F5</code> dentro do TeXstudio</h3>
+<div class="outline-text-3" id="text-4-2">
 <p>
-Opcionalmente, escolha o motor e o "sabor" do container:
+Esta opção integra o build ao atalho <code>F5</code> do TeXstudio, reaproveitando o
+mesmo script wrapper que o Emacs usa
+(<code>ides/emacs/bin/docker-latexmk</code>) — apesar do nome da pasta, o script não
+tem nada específico de Emacs, é só um proxy genérico de <code>latexmk</code> para o
+container Docker.
 </p>
 
+<ol class="org-ol">
+<li><p>
+Garanta que o script está executável e acessível pelo <code>PATH</code>:
+</p>
 <div class="org-src-container">
-<pre class="src src-bash">make build ART=artigo_curso_defectologia_vigostky ENGINE=xe FLAVOR=overleaf
+<pre class="src src-bash">chmod +x ides/emacs/bin/docker-latexmk
+# adicione a pasta ao PATH do seu shell, ou crie um link simbólico:
+ln -s "$(pwd)/ides/emacs/bin/docker-latexmk" /usr/local/bin/docker-latexmk
 </pre>
 </div></li>
-
 <li><p>
-O PDF gerado aparece dentro da pasta do artigo, com um nome que
-codifica o sabor e o motor usados, por exemplo:
+Em <code>Options &gt; Configure TeXstudio &gt; Build</code>, na seção <b>Commands</b>,
+defina um comando definido pelo usuário (<code>User Command</code>), por exemplo:
 </p>
-
-<pre class="example" id="org327a8c8">
-artigos/artigo_curso_defectologia_vigostky/main-abnt-pdf.pdf
+<div class="org-src-container">
+<pre class="src src-text">docker-latexmk -pdf -jobname=main-abnt-pdf -interaction=nonstopmode %.tex
 </pre>
-
+</div>
 <p>
-(<code>FLAVOR=abnt ENGINE=pdf</code> por padrão — veja <code>make help</code> para as opções.)
+O <code>-jobname=main-abnt-pdf</code> é importante: ele faz o TeXstudio gerar o
+<b>mesmo nome de arquivo</b> que o <code>Makefile</code> produz por padrão
+(<code>FLAVOR=abnt ENGINE=pdf</code>), em vez do nome padrão <code>main.pdf</code> — veja o
+aviso na Seção 5 sobre por que isso importa.
 </p></li>
+<li>Configure esse comando como o "Default Compiler" (ou associe-o a <code>F5</code>)
+na mesma tela.</li>
+<li><b>Esta opção não foi testada ponta a ponta pela equipe</b> — se o
+visualizador de PDF do TeXstudio não localizar o arquivo automaticamente
+após o build (por causa do <code>jobname</code> diferente do <code>.tex</code>), abra o PDF
+manualmente uma vez com <code>File &gt; Open</code> como na Opção A; as atualizações
+seguintes devem recarregar sozinhas.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orga18bc71" class="outline-2">
-<h2 id="orga18bc71"><span class="section-number-2">6.</span> 5. Visualizando o PDF dentro do VS Code</h2>
+</div>
+<div id="outline-container-orgb4f3805" class="outline-2">
+<h2 id="orgb4f3805"><span class="section-number-2">5.</span> 4. Verificação de Sintaxe (chktex) — opcional</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+O mesmo wrapper genérico existe para o <code>chktex</code>:
+<code>ides/emacs/bin/docker-chktex</code>. Em <code>Options &gt; Configure TeXstudio &gt;
+Commands</code>, o campo <b>ChkTeX Command</b> aceita um comando externo com <code>%</code> no
+lugar do arquivo. Como o wrapper acima, não é específico do Emacs, mas
+essa integração também não foi validada ponta a ponta — trate como ponto
+de partida, não como passo garantido.
+</p>
+</div>
+</div>
+<div id="outline-container-org780e4d0" class="outline-2">
+<h2 id="org780e4d0"><span class="section-number-2">6.</span> 5. Cuidado: nomes de PDF e o <code>.gitignore</code></h2>
 <div class="outline-text-2" id="text-6">
-<ol class="org-ol">
-<li>Na barra lateral, dê duplo clique no arquivo <code>.pdf</code> gerado (ex.:
-<code>main-abnt-pdf.pdf</code>). O LaTeX Workshop abre seu próprio visualizador de
-PDF embutido no editor.</li>
-<li>Arraste a aba do PDF para o lado para deixá-la lado a lado com o <code>.tex</code>.</li>
-</ol>
-</div>
-<div id="outline-container-org77b3dde" class="outline-3">
-<h3 id="org77b3dde"><span class="section-number-3">6.1.</span> Auto-atualização</h3>
-<div class="outline-text-3" id="text-6-1">
 <p>
-O visualizador do LaTeX Workshop observa o arquivo PDF no disco: sempre
-que você rodar <code>make build</code> de novo no terminal, a aba já aberta é
-atualizada automaticamente — não é preciso fechar e reabrir.
+O <code>.gitignore</code> deste repositório ignora todo <code>*.pdf</code>, <b>exceto</b> qualquer
+arquivo que comece com <code>main</code> (<code>main*.pdf</code>) — é assim que os PDFs finais
+gerados pelo <code>Makefile</code> (<code>main-abnt-pdf.pdf</code> etc.) ficam versionados.
+</p>
+
+<p>
+Isso tem um efeito colateral: se você compilar com o <b>jobname padrão</b> do
+TeXstudio (sem <code>-jobname</code>, que gera só <code>main.pdf</code>), esse arquivo <b>também</b>
+casa com <code>main*.pdf</code> e aparece como novo arquivo rastreável pelo git —
+mesmo sendo só um artefato de build local, não a versão oficial. (Foi
+exatamente isso que gerou o <code>artigos/main.pdf</code> não rastreado que apareceu
+no <code>git status</code> deste repositório.)
+</p>
+
+<p>
+Para evitar isso: sempre use <code>-jobname=main-abnt-pdf</code> (ou o nome que
+corresponda ao <code>FLAVOR=/=ENGINE</code> que você está simulando) ao compilar
+fora do <code>Makefile</code>, e rode <code>git status</code> antes de commitar para checar se
+não sobrou nenhum <code>main.pdf</code> solto.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc9b6869" class="outline-3">
-<h3 id="orgc9b6869"><span class="section-number-3">6.2.</span> Sobre o SyncTeX (clique para navegar entre <code>.tex</code> e PDF)</h3>
-<div class="outline-text-3" id="text-6-2">
-<p>
-Como a compilação acontece <b>dentro do container Docker</b> (e não pelo motor
-interno da extensão), o clique de sincronização do LaTeX Workshop entre o
-<code>.tex</code> e o PDF pode não funcionar — os caminhos gravados no
-<code>.synctex.gz</code> são os do container, não os do seu disco. Essa é uma
-limitação conhecida de builds via Docker, não um erro de configuração. O
-fluxo padrão (editar → <code>make build</code> → visualizar) funciona normalmente
-sem isso.
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-orgc86219d" class="outline-2">
-<h2 id="orgc86219d"><span class="section-number-2">7.</span> 6. Atalhos Úteis</h2>
+<div id="outline-container-org4637b86" class="outline-2">
+<h2 id="org4637b86"><span class="section-number-2">7.</span> 6. Adicionando um Novo Artigo</h2>
 <div class="outline-text-2" id="text-7">
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-left" />
-</colgroup>
-<thead>
-<tr>
-<th scope="col" class="org-left">Atalho</th>
-<th scope="col" class="org-left">Ação</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="org-left"><code>Ctrl+Shift+P</code></td>
-<td class="org-left">Paleta de comandos (digite "LaTeX" para ver opções)</td>
-</tr>
-
-<tr>
-<td class="org-left"><code>Ctrl+`</code></td>
-<td class="org-left">Abrir/fechar o terminal integrado</td>
-</tr>
-
-<tr>
-<td class="org-left"><code>Ctrl+Shift+X</code></td>
-<td class="org-left">Painel de extensões</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-org126d8df" class="outline-2">
-<h2 id="org126d8df"><span class="section-number-2">8.</span> 7. Adicionando um Novo Artigo</h2>
-<div class="outline-text-2" id="text-8">
 <ol class="org-ol">
 <li><p>
 Crie o diretório do novo artigo dentro de <code>artigos/</code>:
@@ -448,11 +406,9 @@ Copie o template:
 cp artigos/artigo_modelo_revista_infor/references.bib artigos/artigo_meu_novo_tema/references.bib
 </pre>
 </div></li>
-<li>Ajuste os metadados no <code>main.tex</code> (<code>\titulo</code>, <code>\autor</code>, <code>\local</code>,
-<code>\data</code>). O caminho <code>\documentclass{../../common-shared/cls/...}</code> já
-está correto, pois o novo artigo fica no mesmo nível dos demais.</li>
-<li>Compile com <code>make build ART=artigo_meu_novo_tema</code>. Nenhuma alteração no
-<code>Makefile</code> é necessária — ele descobre o novo artigo automaticamente.</li>
+<li>Abra o novo <code>main.tex</code> no TeXstudio e ajuste os metadados (<code>\titulo</code>,
+<code>\autor</code>, <code>\local</code>, <code>\data</code>).</li>
+<li>Compile com <code>make build ART=artigo_meu_novo_tema</code> (Opção A da Seção 3).</li>
 </ol>
 </div>
 </div>

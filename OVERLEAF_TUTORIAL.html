@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2026-08-08 sáb 12:12 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tutorial: Editando artigos com Overleaf</title>
+<meta name="author" content="Wagner Marques &amp; Claude" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Tutorial: Editando artigos com Overleaf</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgd5e24bb">1. Visão Geral</a></li>
+<li><a href="#orgd500b67">2. 1. Preparando os arquivos do artigo</a></li>
+<li><a href="#org104bea6">3. 2. Criando o Projeto no Overleaf</a>
+<ul>
+<li><a href="#org960662f">3.1. Alternativa: colar os arquivos um a um</a></li>
+</ul>
+</li>
+<li><a href="#orge1d2590">4. 3. Compilando e Visualizando</a></li>
+<li><a href="#org1efcfd3">5. 4. Mantendo a compatibilidade com o build local (importante)</a></li>
+<li><a href="#orgedc8e9d">6. 5. Trazendo as edições de volta para o repositório</a></li>
+<li><a href="#org3663cee">7. 6. Quando usar Overleaf em vez de VS Code/Emacs</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgd5e24bb" class="outline-2">
+<h2 id="orgd5e24bb"><span class="section-number-2">1.</span> Visão Geral</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+O <a href="https://www.overleaf.com">Overleaf</a> é um editor de LaTeX <b>online</b>, sem instalação local. É a opção
+mais simples para colaboradores que não querem configurar Docker, VS Code
+ou Emacs — só precisam de uma conta e um navegador.
+</p>
+
+<p>
+A diferença importante em relação ao Emacs/VS Code deste repositório: lá a
+compilação roda dentro dos containers Docker definidos no <code>Makefile</code> (que
+sabem resolver os caminhos relativos entre <code>artigos/&lt;artigo&gt;/</code> e
+<code>common-shared/</code>). O Overleaf compila num único projeto autocontido, sem
+esse monorepo — então é preciso <b>levar os arquivos compartilhados junto</b>
+com o artigo. As seções abaixo mostram como.
+</p>
+
+<pre class="example" id="orgd5cc203">
+Dependências locais necessárias:
+  - Uma conta gratuita em overleaf.com
+  - Nenhum software local é necessário para editar/compilar
+  - Docker (opcional, só para conferir a compilação antes de subir — ver Seção 4)
+</pre>
+</div>
+</div>
+<div id="outline-container-orgd500b67" class="outline-2">
+<h2 id="orgd500b67"><span class="section-number-2">2.</span> 1. Preparando os arquivos do artigo</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Um artigo deste repositório depende de três coisas fora da própria pasta
+<code>artigos/&lt;artigo&gt;/</code>:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Arquivo no repositório</th>
+<th scope="col" class="org-left">Referenciado no <code>main.tex</code> como</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>common-shared/cls/Article_Class_RevInfor.cls</code></td>
+<td class="org-left"><code>\documentclass{../../common-shared/cls/...}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>common-shared/img/cabecalho-img-revistainfor.png</code></td>
+<td class="org-left"><code>\graphicspath{{../../common-shared/img/}}</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>artigos/&lt;artigo&gt;/references.bib</code></td>
+<td class="org-left">citações via <code>abntex2cite</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Como o projeto no Overleaf é uma pasta única (sem <code>../../</code>), monte a
+seguinte estrutura <b>antes de enviar</b>, achatando os caminhos:
+</p>
+
+<pre class="example" id="org0f37ab4">
+meu-projeto-overleaf/
+├── main.tex                          &lt;- copiado de artigos/&lt;artigo&gt;/main.tex
+├── references.bib                    &lt;- copiado de artigos/&lt;artigo&gt;/references.bib
+├── Article_Class_RevInfor.cls        &lt;- copiado de common-shared/cls/
+└── cabecalho-img-revistainfor.png    &lt;- copiado de common-shared/img/
+</pre>
+
+<p>
+E ajuste as duas linhas do topo do <code>main.tex</code> copiado para apontar para a
+pasta local (sem <code>../../common-shared/</code>):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex">\documentclass{Article_Class_RevInfor}
+\graphicspath{{./}}
+</pre>
+</div>
+
+<p>
+O resto do <code>main.tex</code> (título, autor, resumo, corpo, citações) não muda.
+</p>
+</div>
+</div>
+<div id="outline-container-org104bea6" class="outline-2">
+<h2 id="org104bea6"><span class="section-number-2">3.</span> 2. Criando o Projeto no Overleaf</h2>
+<div class="outline-text-2" id="text-3">
+<ol class="org-ol">
+<li>Faça login em <a href="https://www.overleaf.com">https://www.overleaf.com</a>.</li>
+<li>Clique em <b>New Project &gt; Upload Project</b>.</li>
+<li>Compacte a pasta montada na Seção 1 em um <code>.zip</code> e envie.</li>
+<li>O Overleaf detecta <code>main.tex</code> como arquivo principal automaticamente.
+Se não detectar, vá em <b>Menu &gt; Main document</b> e selecione <code>main.tex</code>.</li>
+</ol>
+</div>
+<div id="outline-container-org960662f" class="outline-3">
+<h3 id="org960662f"><span class="section-number-3">3.1.</span> Alternativa: colar os arquivos um a um</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Se preferir não usar <code>.zip</code>: crie um <b>Blank Project</b>, apague o <code>main.tex</code>
+padrão e use <b>New File / Upload</b> para adicionar cada um dos quatro
+arquivos da Seção 1 individualmente.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orge1d2590" class="outline-2">
+<h2 id="orge1d2590"><span class="section-number-2">4.</span> 3. Compilando e Visualizando</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+O Overleaf compila automaticamente a cada alteração e mostra o PDF ao
+lado do editor — não há comando manual equivalente ao <code>make build</code>. Se a
+compilação falhar, o log de erros aparece no painel inferior, com os
+mesmos tipos de erro que apareceriam no <code>latexmk</code> local.
+</p>
+</div>
+</div>
+<div id="outline-container-org1efcfd3" class="outline-2">
+<h2 id="org1efcfd3"><span class="section-number-2">5.</span> 4. Mantendo a compatibilidade com o build local (importante)</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+O Overleaf usa uma distribuição TeX Live própria, que muda de versão ao
+longo do tempo (visível em <b>Menu &gt; Settings &gt; TeX Live version</b>). Para
+evitar "funciona no Overleaf mas não no Docker" (ou vice-versa):
+</p>
+
+<ol class="org-ol">
+<li><p>
+Antes de enviar o artigo ao Overleaf, compile-o localmente com o sabor
+<code>overleaf</code> do container, que usa uma imagem TeX Live equivalente à do
+Overleaf (ver comentários em <code>Dockerfile.overleaf</code>):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">make build ART=&lt;pasta_do_artigo&gt; FLAVOR=overleaf
+</pre>
+</div></li>
+
+<li>Se compilar sem erros nesse sabor, a chance de divergência no Overleaf
+é baixa. Se o Overleaf usar um ano de TeX Live diferente do fixado em
+<code>Dockerfile.overleaf</code>, ajuste a tag da imagem local para bater com o
+valor mostrado em <b>Menu &gt; Settings &gt; TeX Live version</b> do seu projeto.</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orgedc8e9d" class="outline-2">
+<h2 id="orgedc8e9d"><span class="section-number-2">6.</span> 5. Trazendo as edições de volta para o repositório</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+O Overleaf não faz parte do fluxo git deste repositório. Depois de editar
+no Overleaf:
+</p>
+
+<ol class="org-ol">
+<li>Baixe o <code>main.tex</code> atualizado: <b>Menu &gt; Download &gt; Source</b>.</li>
+<li>Copie o conteúdo de volta para <code>artigos/&lt;artigo&gt;/main.tex</code> no seu
+clone local do repositório.</li>
+<li>Desfaça manualmente os dois ajustes de caminho da Seção 1
+(<code>\documentclass</code> e <code>\graphicspath</code> voltam a apontar para
+<code>../../common-shared/...</code>).</li>
+<li>Rode <code>make build ART=&lt;pasta_do_artigo&gt;</code> localmente para confirmar que
+ainda compila, e faça o commit normalmente.</li>
+</ol>
+
+<p>
+Times que colaboram <b>só</b> pelo Overleaf com frequência podem considerar a
+integração via Git do Overleaf (recurso pago, disponível em planos
+superiores) para automatizar esse vai-e-vem — não coberto aqui pois exige
+uma conta paga para validar o fluxo.
+</p>
+</div>
+</div>
+<div id="outline-container-org3663cee" class="outline-2">
+<h2 id="org3663cee"><span class="section-number-2">7.</span> 6. Quando usar Overleaf em vez de VS Code/Emacs</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li>Colaborador não-técnico que só precisa revisar/escrever texto, sem
+Docker nem terminal.</li>
+<li>Edição colaborativa em tempo real (vários autores no mesmo documento).</li>
+<li>Revisão rápida de um trecho, sem clonar o repositório.</li>
+</ul>
+
+<p>
+Para quem já tem Docker configurado e vai editar o artigo com frequência,
+prefira VS Code (<code>VS_CODE_TUTORIAL.org</code>) ou Emacs
+(<code>ides/emacs/EMACS_TUTORIAL.org</code>): evita o passo manual de sincronizar
+arquivos de volta para o git.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2026-08-08</p>
+<p class="author">Author: Wagner Marques &amp; Claude</p>
+<p class="date">Created: 2026-08-08 sáb 12:12</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

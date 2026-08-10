@@ -1,52 +1,147 @@
-* Tutorial: Configurando o VS Code para LaTeX
+#+TITLE: Tutorial: Editando artigos com VS Code
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-08-08
+#+OPTIONS: toc:t num:t
 
-Este guia explica como configurar o Visual Studio Code para editar o
-livro e visualizar o PDF renderizado em tempo real.
+* Visão Geral
 
-Para mais informacoes sobre o plugin, acessar: https://github.com/James-Yu/LaTeX-Workshop
+Este tutorial explica como editar os artigos deste repositório usando o
+*Visual Studio Code* com a extensão *LaTeX Workshop*.
 
-** 1. Instalando a Extensao LaTeX Workshop
+Assim como na configuração do Emacs (=ides/emacs/EMACS_TUTORIAL.org=), a
+compilação do PDF roda dentro dos containers Docker já definidos no
+=Makefile=. Não é necessário instalar TeX Live localmente.
 
-1. Abra o **VS Code**.
-2. Clique no icone de **Extensoes** na barra lateral esquerda (ou pressione `Ctrl+Shift+X`).
-3. Na barra de busca, digite: `LaTeX Workshop`.
-4. Clique no botao **Install** na extensao publicada por /James Yu/.
+#+begin_example
+Dependências locais necessárias:
+  - VS Code
+  - Docker (em execução)
+  - git
+#+end_example
 
-** 2. Abrindo o Projeto
+Mais sobre o plugin: https://github.com/James-Yu/LaTeX-Workshop
 
-1. Va em `File > Open Folder...`.
-2. Selecione a pasta do seu projeto `ruasdoipirangaehistdobrasilcomtoninho`.
-3. Voce vera a estrutura de pastas (`chapters/`, `main.tex`, etc.) na barra lateral.
+* 1. Instalando a Extensão LaTeX Workshop
 
-** 3. Editando o Conteudo
+1. Abra o *VS Code*.
+2. Clique no ícone de *Extensões* na barra lateral esquerda (ou pressione
+   =Ctrl+Shift+X=).
+3. Na barra de busca, digite: =LaTeX Workshop=.
+4. Clique em *Install* na extensão publicada por /James Yu/.
 
-1. Abra o arquivo `main.tex` ou qualquer arquivo dentro de `chapters/`.
-2. O VS Code reconhecera automaticamente que e um arquivo LaTeX e ativara as ferramentas da extensao.
+* 2. Abrindo o Projeto
 
-** 4. Compilando e Visualizando o PDF
+1. Vá em =File > Open Folder...=.
+2. Selecione a *raiz do repositório*, a pasta =artigo-revinfor/= (não a pasta
+   de um artigo individual). Isso importa: o build via Docker monta a raiz
+   do repositório inteira, e cada artigo referencia os recursos
+   compartilhados por caminho relativo (=../../common-shared/...=), então
+   abrir só a subpasta do artigo quebra a navegação desses caminhos no
+   editor.
+3. Na barra lateral você verá a estrutura de pastas:
 
-Como estamos usando Docker para manter o projeto portatil e limpo, utilizaremos o terminal integrado do VS Code para gerar o PDF.
+   #+begin_example
+   artigo-revinfor/
+   ├── Makefile
+   ├── common-shared/                          <- classe, imagem e bib compartilhadas
+   └── artigos/
+       ├── artigo_modelo_revista_infor/        <- template / artigo de referência
+       │   ├── main.tex
+       │   └── references.bib
+       └── artigo_curso_defectologia_vigostky/ <- artigo em andamento
+           ├── main.tex
+           └── references.bib
+   #+end_example
 
-1. Abra o terminal integrado (`Ctrl + '` ou `Terminal > New Terminal`).
-2. Digite o comando:
+** Configuração já incluída no repositório
+
+O repositório já traz um =.vscode/settings.json= que desliga o build
+automático e o linter (=chktex=) embutidos na extensão. Isso evita erros
+confusos do tipo "pdflatex not found" toda vez que você salva — já que a
+compilação de verdade acontece dentro do Docker, não pela extensão. Você
+não precisa configurar nada disso; já vem pronto ao abrir a pasta.
+
+* 3. Editando o Conteúdo
+
+1. Abra o =main.tex= de um dos artigos em =artigos/<pasta_do_artigo>/=.
+2. O VS Code reconhece automaticamente o arquivo como LaTeX e ativa realce
+   de sintaxe, indentação e navegação de seções (ícone de estrutura na
+   barra lateral).
+3. Autocompletar de citações (=\cite{}=) funciona automaticamente: a
+   extensão lê o =references.bib= que está na mesma pasta do artigo.
+
+* 4. Compilando e Visualizando o PDF
+
+Como o projeto usa Docker para manter o build portátil, a compilação é
+feita pelo terminal integrado do VS Code, chamando o mesmo =Makefile= usado
+pelo Emacs e pela linha de comando.
+
+1. Abra o terminal integrado (=Ctrl + `= ou =Terminal > New Terminal=).
+2. Rode o build indicando a pasta do artigo com =ART=:
+
    #+begin_src bash
-   make build
+   make build ART=artigo_curso_defectologia_vigostky
    #+end_src
-3. Apos a conclusao, o arquivo `main.pdf` sera criado/atualizado.
 
-** 5. Visualizando o PDF dentro do VS Code
+   Opcionalmente, escolha o motor e o "sabor" do container:
 
-Para ver o resultado sem sair do editor:
+   #+begin_src bash
+   make build ART=artigo_curso_defectologia_vigostky ENGINE=xe FLAVOR=overleaf
+   #+end_src
 
-1. Clique com o botao direito no arquivo `main.pdf` na barra lateral e escolha **Open to the Side**.
-2. *OU*: Clique no icone de "Lupa" (View LaTeX PDF) que aparece no canto superior direito quando um arquivo `.tex` esta aberto.
+3. O PDF gerado aparece dentro da pasta do artigo, com um nome que
+   codifica o sabor e o motor usados, por exemplo:
 
-** 6. Dica: Auto-Refresh
+   #+begin_example
+   artigos/artigo_curso_defectologia_vigostky/main-abnt-pdf.pdf
+   #+end_example
 
-- O visualizador do VS Code e inteligente: sempre que voce rodar `make build` no terminal, o PDF aberto ao lado sera atualizado automaticamente com as novas alteracoes.
-- Voce pode manter o PDF aberto em uma metade da tela e o codigo na outra para ver o progresso enquanto escreve.
+   (=FLAVOR=abnt ENGINE=pdf= por padrão — veja =make help= para as opções.)
 
-** 7. Atalhos Uteis
+* 5. Visualizando o PDF dentro do VS Code
 
-- `Ctrl+Alt+V`: Abre o visualizador de PDF.
-- `Ctrl+Shift+P`: Abre a paleta de comandos (digite "LaTeX" para ver todas as opcoes da extensao).
+1. Na barra lateral, dê duplo clique no arquivo =.pdf= gerado (ex.:
+   =main-abnt-pdf.pdf=). O LaTeX Workshop abre seu próprio visualizador de
+   PDF embutido no editor.
+2. Arraste a aba do PDF para o lado para deixá-la lado a lado com o =.tex=.
+
+** Auto-atualização
+
+O visualizador do LaTeX Workshop observa o arquivo PDF no disco: sempre
+que você rodar =make build= de novo no terminal, a aba já aberta é
+atualizada automaticamente — não é preciso fechar e reabrir.
+
+** Sobre o SyncTeX (clique para navegar entre =.tex= e PDF)
+
+Como a compilação acontece *dentro do container Docker* (e não pelo motor
+interno da extensão), o clique de sincronização do LaTeX Workshop entre o
+=.tex= e o PDF pode não funcionar — os caminhos gravados no
+=.synctex.gz= são os do container, não os do seu disco. Essa é uma
+limitação conhecida de builds via Docker, não um erro de configuração. O
+fluxo padrão (editar → =make build= → visualizar) funciona normalmente
+sem isso.
+
+* 6. Atalhos Úteis
+
+| Atalho         | Ação                                                 |
+|----------------+-------------------------------------------------------|
+| =Ctrl+Shift+P= | Paleta de comandos (digite "LaTeX" para ver opções)  |
+| =Ctrl+`=       | Abrir/fechar o terminal integrado                    |
+| =Ctrl+Shift+X= | Painel de extensões                                  |
+
+* 7. Adicionando um Novo Artigo
+
+1. Crie o diretório do novo artigo dentro de =artigos/=:
+   #+begin_src bash
+   mkdir artigos/artigo_meu_novo_tema
+   #+end_src
+2. Copie o template:
+   #+begin_src bash
+   cp artigos/artigo_modelo_revista_infor/main.tex artigos/artigo_meu_novo_tema/main.tex
+   cp artigos/artigo_modelo_revista_infor/references.bib artigos/artigo_meu_novo_tema/references.bib
+   #+end_src
+3. Ajuste os metadados no =main.tex= (=\titulo=, =\autor=, =\local=,
+   =\data=). O caminho =\documentclass{../../common-shared/cls/...}= já
+   está correto, pois o novo artigo fica no mesmo nível dos demais.
+4. Compile com =make build ART=artigo_meu_novo_tema=. Nenhuma alteração no
+   =Makefile= é necessária — ele descobre o novo artigo automaticamente.

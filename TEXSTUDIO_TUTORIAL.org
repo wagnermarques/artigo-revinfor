@@ -1,0 +1,137 @@
+#+TITLE: Tutorial: Editando artigos com TeXstudio
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-08-08
+#+OPTIONS: toc:t num:t
+
+* Visão Geral
+
+O [[https://www.texstudio.org][TeXstudio]] é um editor de LaTeX desktop dedicado (não é um IDE de
+propósito geral como VS Code/Emacs). É uma boa opção para quem quer um
+programa único, com autocompletar de comandos LaTeX e visualizador de PDF
+embutido, sem aprender atalhos de editor genérico.
+
+Assim como no Emacs e no VS Code, a compilação "oficial" deste projeto
+roda dentro do Docker (via =Makefile=), não pelo motor local do
+TeXstudio — então TeX Live *não* precisa estar instalado na sua máquina.
+
+#+begin_example
+Dependências locais necessárias:
+  - TeXstudio
+  - Docker (em execução)
+  - git
+#+end_example
+
+* 1. Instalando o TeXstudio
+
+Baixe em https://www.texstudio.org/#download (Windows/macOS/Linux) e
+instale normalmente. Na primeira execução, o assistente de configuração
+pode pedir para localizar um TeX Live local — pode pular/cancelar essa
+etapa, pois não vamos usar o motor local do TeXstudio para compilar.
+
+* 2. Abrindo um Artigo
+
+O TeXstudio abre arquivos =.tex= individuais (não pastas de projeto como
+o VS Code). Use =File > Open= e navegue até:
+
+#+begin_example
+artigo-revinfor/
+└── artigos/
+    ├── artigo_modelo_revista_infor/main.tex
+    └── artigo_curso_defectologia_vigostky/main.tex
+#+end_example
+
+Cada artigo é um único arquivo autocontido (sem =\include= de capítulos),
+então não é preciso configurar "Master Document" — o próprio =main.tex=
+já é o documento mestre.
+
+* 3. Compilando o PDF
+
+Existem duas formas de compilar. Comece pela *Opção A*: é a que funciona
+sem nenhuma configuração extra e é a mesma usada nos tutoriais de VS Code
+e Emacs.
+
+** Opção A (recomendada): terminal + =make build=
+
+1. Abra um terminal fora do TeXstudio, na raiz do repositório.
+2. Rode:
+   #+begin_src bash
+   make build ART=artigo_curso_defectologia_vigostky
+   #+end_src
+3. No TeXstudio, abra o PDF gerado com =File > Open= (ex.:
+   =artigos/artigo_curso_defectologia_vigostky/main-abnt-pdf.pdf=). O
+   visualizador embutido do TeXstudio recarrega sozinho sempre que o
+   arquivo muda no disco — então, depois de aberto uma vez, basta rodar
+   =make build= de novo no terminal e a aba já atualiza.
+
+** Opção B (avançada): compilar com =F5= dentro do TeXstudio
+
+Esta opção integra o build ao atalho =F5= do TeXstudio, reaproveitando o
+mesmo script wrapper que o Emacs usa
+(=ides/emacs/bin/docker-latexmk=) — apesar do nome da pasta, o script não
+tem nada específico de Emacs, é só um proxy genérico de =latexmk= para o
+container Docker.
+
+1. Garanta que o script está executável e acessível pelo =PATH=:
+   #+begin_src bash
+   chmod +x ides/emacs/bin/docker-latexmk
+   # adicione a pasta ao PATH do seu shell, ou crie um link simbólico:
+   ln -s "$(pwd)/ides/emacs/bin/docker-latexmk" /usr/local/bin/docker-latexmk
+   #+end_src
+2. Em =Options > Configure TeXstudio > Build=, na seção *Commands*,
+   defina um comando definido pelo usuário (=User Command=), por exemplo:
+   #+begin_src text
+   docker-latexmk -pdf -jobname=main-abnt-pdf -interaction=nonstopmode %.tex
+   #+end_src
+   O =-jobname=main-abnt-pdf= é importante: ele faz o TeXstudio gerar o
+   *mesmo nome de arquivo* que o =Makefile= produz por padrão
+   (=FLAVOR=abnt ENGINE=pdf=), em vez do nome padrão =main.pdf= — veja o
+   aviso na Seção 5 sobre por que isso importa.
+3. Configure esse comando como o "Default Compiler" (ou associe-o a =F5=)
+   na mesma tela.
+4. *Esta opção não foi testada ponta a ponta pela equipe* — se o
+   visualizador de PDF do TeXstudio não localizar o arquivo automaticamente
+   após o build (por causa do =jobname= diferente do =.tex=), abra o PDF
+   manualmente uma vez com =File > Open= como na Opção A; as atualizações
+   seguintes devem recarregar sozinhas.
+
+* 4. Verificação de Sintaxe (chktex) — opcional
+
+O mesmo wrapper genérico existe para o =chktex=:
+=ides/emacs/bin/docker-chktex=. Em =Options > Configure TeXstudio >
+Commands=, o campo *ChkTeX Command* aceita um comando externo com =%= no
+lugar do arquivo. Como o wrapper acima, não é específico do Emacs, mas
+essa integração também não foi validada ponta a ponta — trate como ponto
+de partida, não como passo garantido.
+
+* 5. Cuidado: nomes de PDF e o =.gitignore=
+
+O =.gitignore= deste repositório ignora todo =*.pdf=, *exceto* qualquer
+arquivo que comece com =main= (=main*.pdf=) — é assim que os PDFs finais
+gerados pelo =Makefile= (=main-abnt-pdf.pdf= etc.) ficam versionados.
+
+Isso tem um efeito colateral: se você compilar com o *jobname padrão* do
+TeXstudio (sem =-jobname=, que gera só =main.pdf=), esse arquivo *também*
+casa com =main*.pdf= e aparece como novo arquivo rastreável pelo git —
+mesmo sendo só um artefato de build local, não a versão oficial. (Foi
+exatamente isso que gerou o =artigos/main.pdf= não rastreado que apareceu
+no =git status= deste repositório.)
+
+Para evitar isso: sempre use =-jobname=main-abnt-pdf= (ou o nome que
+corresponda ao =FLAVOR=/=ENGINE= que você está simulando) ao compilar
+fora do =Makefile=, e rode =git status= antes de commitar para checar se
+não sobrou nenhum =main.pdf= solto.
+
+* 6. Adicionando um Novo Artigo
+
+1. Crie o diretório do novo artigo dentro de =artigos/=:
+   #+begin_src bash
+   mkdir artigos/artigo_meu_novo_tema
+   #+end_src
+2. Copie o template:
+   #+begin_src bash
+   cp artigos/artigo_modelo_revista_infor/main.tex artigos/artigo_meu_novo_tema/main.tex
+   cp artigos/artigo_modelo_revista_infor/references.bib artigos/artigo_meu_novo_tema/references.bib
+   #+end_src
+3. Abra o novo =main.tex= no TeXstudio e ajuste os metadados (=\titulo=,
+   =\autor=, =\local=, =\data=).
+4. Compile com =make build ART=artigo_meu_novo_tema= (Opção A da Seção 3).

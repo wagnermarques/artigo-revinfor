@@ -1,0 +1,127 @@
+#+TITLE: Tutorial: Editando artigos com Overleaf
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-08-08
+#+OPTIONS: toc:t num:t
+
+* Visão Geral
+
+O [[https://www.overleaf.com][Overleaf]] é um editor de LaTeX *online*, sem instalação local. É a opção
+mais simples para colaboradores que não querem configurar Docker, VS Code
+ou Emacs — só precisam de uma conta e um navegador.
+
+A diferença importante em relação ao Emacs/VS Code deste repositório: lá a
+compilação roda dentro dos containers Docker definidos no =Makefile= (que
+sabem resolver os caminhos relativos entre =artigos/<artigo>/= e
+=common-shared/=). O Overleaf compila num único projeto autocontido, sem
+esse monorepo — então é preciso *levar os arquivos compartilhados junto*
+com o artigo. As seções abaixo mostram como.
+
+#+begin_example
+Dependências locais necessárias:
+  - Uma conta gratuita em overleaf.com
+  - Nenhum software local é necessário para editar/compilar
+  - Docker (opcional, só para conferir a compilação antes de subir — ver Seção 4)
+#+end_example
+
+* 1. Preparando os arquivos do artigo
+
+Um artigo deste repositório depende de três coisas fora da própria pasta
+=artigos/<artigo>/=:
+
+| Arquivo no repositório                                  | Referenciado no =main.tex= como               |
+|-----------------------------------------------------------+--------------------------------------------------|
+| =common-shared/cls/Article_Class_RevInfor.cls=            | =\documentclass{../../common-shared/cls/...}=    |
+| =common-shared/img/cabecalho-img-revistainfor.png=        | =\graphicspath{{../../common-shared/img/}}=      |
+| =artigos/<artigo>/references.bib=                          | citações via =abntex2cite=                       |
+
+Como o projeto no Overleaf é uma pasta única (sem =../../=), monte a
+seguinte estrutura *antes de enviar*, achatando os caminhos:
+
+#+begin_example
+meu-projeto-overleaf/
+├── main.tex                          <- copiado de artigos/<artigo>/main.tex
+├── references.bib                    <- copiado de artigos/<artigo>/references.bib
+├── Article_Class_RevInfor.cls        <- copiado de common-shared/cls/
+└── cabecalho-img-revistainfor.png    <- copiado de common-shared/img/
+#+end_example
+
+E ajuste as duas linhas do topo do =main.tex= copiado para apontar para a
+pasta local (sem =../../common-shared/=):
+
+#+begin_src latex
+\documentclass{Article_Class_RevInfor}
+\graphicspath{{./}}
+#+end_src
+
+O resto do =main.tex= (título, autor, resumo, corpo, citações) não muda.
+
+* 2. Criando o Projeto no Overleaf
+
+1. Faça login em https://www.overleaf.com.
+2. Clique em *New Project > Upload Project*.
+3. Compacte a pasta montada na Seção 1 em um =.zip= e envie.
+4. O Overleaf detecta =main.tex= como arquivo principal automaticamente.
+   Se não detectar, vá em *Menu > Main document* e selecione =main.tex=.
+
+** Alternativa: colar os arquivos um a um
+
+Se preferir não usar =.zip=: crie um *Blank Project*, apague o =main.tex=
+padrão e use *New File / Upload* para adicionar cada um dos quatro
+arquivos da Seção 1 individualmente.
+
+* 3. Compilando e Visualizando
+
+O Overleaf compila automaticamente a cada alteração e mostra o PDF ao
+lado do editor — não há comando manual equivalente ao =make build=. Se a
+compilação falhar, o log de erros aparece no painel inferior, com os
+mesmos tipos de erro que apareceriam no =latexmk= local.
+
+* 4. Mantendo a compatibilidade com o build local (importante)
+
+O Overleaf usa uma distribuição TeX Live própria, que muda de versão ao
+longo do tempo (visível em *Menu > Settings > TeX Live version*). Para
+evitar "funciona no Overleaf mas não no Docker" (ou vice-versa):
+
+1. Antes de enviar o artigo ao Overleaf, compile-o localmente com o sabor
+   =overleaf= do container, que usa uma imagem TeX Live equivalente à do
+   Overleaf (ver comentários em =Dockerfile.overleaf=):
+
+   #+begin_src bash
+   make build ART=<pasta_do_artigo> FLAVOR=overleaf
+   #+end_src
+
+2. Se compilar sem erros nesse sabor, a chance de divergência no Overleaf
+   é baixa. Se o Overleaf usar um ano de TeX Live diferente do fixado em
+   =Dockerfile.overleaf=, ajuste a tag da imagem local para bater com o
+   valor mostrado em *Menu > Settings > TeX Live version* do seu projeto.
+
+* 5. Trazendo as edições de volta para o repositório
+
+O Overleaf não faz parte do fluxo git deste repositório. Depois de editar
+no Overleaf:
+
+1. Baixe o =main.tex= atualizado: *Menu > Download > Source*.
+2. Copie o conteúdo de volta para =artigos/<artigo>/main.tex= no seu
+   clone local do repositório.
+3. Desfaça manualmente os dois ajustes de caminho da Seção 1
+   (=\documentclass= e =\graphicspath= voltam a apontar para
+   =../../common-shared/...=).
+4. Rode =make build ART=<pasta_do_artigo>= localmente para confirmar que
+   ainda compila, e faça o commit normalmente.
+
+Times que colaboram *só* pelo Overleaf com frequência podem considerar a
+integração via Git do Overleaf (recurso pago, disponível em planos
+superiores) para automatizar esse vai-e-vem — não coberto aqui pois exige
+uma conta paga para validar o fluxo.
+
+* 6. Quando usar Overleaf em vez de VS Code/Emacs
+
+- Colaborador não-técnico que só precisa revisar/escrever texto, sem
+  Docker nem terminal.
+- Edição colaborativa em tempo real (vários autores no mesmo documento).
+- Revisão rápida de um trecho, sem clonar o repositório.
+
+Para quem já tem Docker configurado e vai editar o artigo com frequência,
+prefira VS Code (=VS_CODE_TUTORIAL.org=) ou Emacs
+(=ides/emacs/EMACS_TUTORIAL.org=): evita o passo manual de sincronizar
+arquivos de volta para o git.

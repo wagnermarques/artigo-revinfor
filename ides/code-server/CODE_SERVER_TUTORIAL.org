@@ -1,0 +1,358 @@
+#+TITLE: Tutorial: Editando os .tex no VS Code do navegador (code-server)
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-08-10
+#+OPTIONS: toc:t num:t
+
+* Visão Geral
+
+Este tutorial ensina, do começo ao fim, como *editar os arquivos =.tex= deste
+repositório usando o VS Code* — sem instalar VS Code, sem instalar extensões e
+sem instalar TeX Live na sua máquina.
+
+O que roda é o [[https://github.com/coder/code-server][code-server]]: o próprio VS Code servido dentro de um container
+Docker e acessado pelo navegador. A imagem já vem com a extensão *LaTeX
+Workshop* pré-instalada, e o repositório inteiro é montado dentro do editor —
+você edita os arquivos *reais* do seu disco, não uma cópia.
+
+#+begin_example
+Dependências locais necessárias:
+  - Docker (em execução)
+  - Um navegador
+  - make
+#+end_example
+
+O container do editor *não tem TeX Live dentro dele*. Ele só edita. A
+compilação continua acontecendo nos containers =abnt= e =overleaf= já
+definidos no =Makefile= — os mesmos usados pelo Emacs e pela linha de comando.
+Isso é proposital: dá para compilar com =FLAVOR=abnt= e com =FLAVOR=overleaf=
+a partir do *mesmo* editor aberto, sem trocar de container nem reconfigurar
+nada. Veja =ides/code-server/Dockerfile= e a Seção 8 para os detalhes.
+
+* 1. Primeira vez: construindo a imagem do editor
+
+Na *raiz do repositório* (a pasta =artigo-revinfor/=), rode:
+
+#+begin_src bash
+make docker-build-editor
+#+end_src
+
+Isso baixa a imagem oficial do code-server e instala dentro dela o
+=docker-cli=, o =git=, o =make= e a extensão LaTeX Workshop. Precisa ser feito
+*uma única vez* — ou de novo apenas se o =ides/code-server/Dockerfile= mudar.
+
+Se você ainda não construiu nenhuma imagem de LaTeX, construa também a de
+build (também só uma vez por sabor):
+
+#+begin_src bash
+make docker-build FLAVOR=abnt
+make docker-build FLAVOR=overleaf   # opcional, só se for usar este sabor
+#+end_src
+
+* 2. Abrindo o editor
+
+Ainda na raiz do repositório:
+
+#+begin_src bash
+make editor
+#+end_src
+
+O container sobe em primeiro plano, publicando a porta *8080* apenas em
+=127.0.0.1= (ou seja, não fica exposto para a rede). Abra no navegador:
+
+#+begin_example
+http://localhost:8080
+#+end_example
+
+O repositório já vem aberto automaticamente no editor — não é preciso fazer
+=File > Open Folder=.
+
+** Senha de acesso
+
+O code-server pede uma senha gerada automaticamente. Na *primeira execução*
+ela é impressa na saída do terminal onde você rodou =make editor=. Depois
+disso, para consultá-la a qualquer momento (com o editor rodando):
+
+#+begin_src bash
+docker exec artigo-revinfor-editor cat /home/coder/.config/code-server/config.yaml
+#+end_src
+
+A senha fica guardada num volume Docker nomeado
+(=artigo-revinfor-editor-config=), então ela *persiste* entre execuções: não
+muda a cada =make editor=.
+
+** Encerrando
+
+=Ctrl+C= no terminal onde o =make editor= está rodando encerra e remove o
+container (ele roda com =--rm=). Seus arquivos não somem: o repositório está
+*montado* do disco real, não copiado para dentro do container. Tudo que você
+salvou já está no seu disco, inclusive para o =git=.
+
+* 3. A estrutura do repositório dentro do editor
+
+Na barra lateral esquerda (=Ctrl+Shift+E=) você verá:
+
+#+begin_example
+/workdir/                                       <- a raiz do repo, montada aqui
+├── Makefile
+├── .vscode/settings.json                       <- configuração já pronta
+├── common-shared/                              <- classe, imagem e .bib compartilhados
+├── ides/
+│   ├── code-server/                            <- este tutorial e o Dockerfile do editor
+│   └── emacs/
+└── artigos/
+    ├── artigo_modelo_revista_infor/            <- template / artigo de referência
+    │   ├── main.tex
+    │   └── references.bib
+    └── artigo_curso_defectologia_vigostky/     <- artigo em andamento
+        ├── main.tex
+        └── references.bib
+#+end_example
+
+Dentro do container, a raiz do repositório aparece como =/workdir=. É o mesmo
+lugar que a pasta =artigo-revinfor/= no seu computador — só que visto de
+dentro.
+
+*Importante:* trabalhe sempre com a raiz aberta, não com a subpasta de um
+artigo isolada. Cada artigo referencia os recursos compartilhados por caminho
+relativo (=../../common-shared/...=), e abrir só a subpasta quebra a navegação
+desses caminhos no editor.
+
+** Configuração que já vem pronta
+
+O repositório traz um =.vscode/settings.json= que desliga duas coisas da
+extensão LaTeX Workshop:
+
+#+begin_src json
+{
+  "latex-workshop.latex.autoBuild.run": "never",
+  "latex-workshop.linting.chktex.enabled": false
+}
+#+end_src
+
+Isso evita erros confusos do tipo "pdflatex not found" toda vez que você salva
+— afinal, não há TeX Live dentro do container do editor: a compilação de
+verdade acontece nos containers de build. Você não precisa configurar nada
+disso; já vem pronto ao abrir o repositório.
+
+* 4. Editando o conteúdo =.tex=
+
+1. Na barra lateral, abra o =main.tex= de um dos artigos, por exemplo
+   =artigos/artigo_curso_defectologia_vigostky/main.tex=.
+2. O editor reconhece o arquivo como LaTeX automaticamente e ativa realce de
+   sintaxe, indentação e dobra de seções.
+3. Para navegar entre =\section=, =\subsection= etc., use o painel *Outline*
+   (parte de baixo da barra lateral do Explorer) ou =Ctrl+Shift+O=.
+4. O autocompletar de citações funciona sozinho: digite =\cite{= e a extensão
+   lista as entradas lidas do =references.bib= que está na mesma pasta do
+   artigo.
+5. Autocompletar de comandos, ambientes (=\begin{...}=) e referências
+   (=\ref{=) também vem da extensão, sem configuração adicional.
+
+Salvar é o =Ctrl+S= de sempre — e como a pasta é montada, o arquivo é gravado
+direto no seu disco.
+
+* 5. Compilando o PDF
+
+A compilação é feita pelo *terminal integrado* do editor, chamando o mesmo
+=Makefile= usado pelo Emacs e pela linha de comando.
+
+1. Abra o terminal integrado com =Ctrl+`= (crase) ou pelo menu
+   =Terminal > New Terminal=. Ele já abre em =/workdir=.
+2. Rode o build indicando a pasta do artigo com =ART=:
+
+   #+begin_src bash
+   make build ART=artigos/artigo_curso_defectologia_vigostky
+   #+end_src
+
+3. Para escolher o sabor do container e o motor LaTeX:
+
+   #+begin_src bash
+   make build ART=artigos/artigo_curso_defectologia_vigostky FLAVOR=overleaf ENGINE=xe
+   #+end_src
+
+   Os padrões são =FLAVOR=abnt= e =ENGINE=pdf=. Rode =make help= no mesmo
+   terminal para ver todos os artigos detectados e todas as opções.
+
+4. O PDF gerado aparece dentro da pasta do artigo, com um nome que codifica o
+   sabor e o motor usados:
+
+   #+begin_example
+   artigos/artigo_curso_defectologia_vigostky/main-abnt-pdf.pdf
+   artigos/artigo_curso_defectologia_vigostky/main-overleaf-xe.pdf
+   #+end_example
+
+** Alternando entre os dois containers de build
+
+Como o editor não fica preso a um container específico, você pode rodar um
+build depois do outro *no mesmo terminal integrado*:
+
+#+begin_src bash
+make build ART=artigos/artigo_curso_defectologia_vigostky FLAVOR=abnt
+make build ART=artigos/artigo_curso_defectologia_vigostky FLAVOR=overleaf
+#+end_src
+
+Os dois PDFs ficam lado a lado na pasta do artigo, sem reiniciar nem
+reconfigurar nada no editor.
+
+** Limpando arquivos intermediários
+
+#+begin_src bash
+make clean ART=artigos/artigo_curso_defectologia_vigostky
+#+end_src
+
+Isso remove =.aux=, =.log=, =.bbl= e companhia, deixando os PDFs finais no
+lugar.
+
+* 6. Visualizando o PDF dentro do editor
+
+1. Na barra lateral, dê *duplo clique* no =.pdf= gerado (ex.:
+   =main-abnt-pdf.pdf=). O LaTeX Workshop abre o visualizador de PDF embutido,
+   dentro do próprio navegador.
+2. Arraste a aba do PDF para a direita para deixá-la lado a lado com o =.tex=.
+
+** Auto-atualização
+
+O visualizador observa o arquivo PDF no disco: toda vez que você rodar
+=make build= de novo no terminal, a aba já aberta se atualiza sozinha — não
+precisa fechar e reabrir.
+
+** Sobre o SyncTeX (clicar para pular entre =.tex= e PDF)
+
+Como a compilação acontece *dentro do container de build* (e não pelo motor
+interno da extensão), o clique de sincronização entre =.tex= e PDF pode não
+funcionar: os caminhos gravados no =.synctex.gz= são os do container, não os
+do seu disco. É uma limitação conhecida de builds via Docker, não um erro de
+configuração. O fluxo padrão (editar → =make build= → visualizar) funciona
+normalmente sem isso.
+
+* 7. Atalhos úteis
+
+| Atalho         | Ação                                                   |
+|----------------+--------------------------------------------------------|
+| =Ctrl+Shift+P= | Paleta de comandos (digite "LaTeX" para ver as opções) |
+| =Ctrl+`=       | Abrir/fechar o terminal integrado                      |
+| =Ctrl+Shift+E= | Explorador de arquivos                                 |
+| =Ctrl+Shift+O= | Ir para uma seção do =.tex= (Outline)                  |
+| =Ctrl+P=       | Abrir arquivo pelo nome                                |
+| =Ctrl+B=       | Mostrar/esconder a barra lateral                       |
+| =Ctrl+S=       | Salvar                                                 |
+
+*Atenção aos atalhos do navegador:* alguns combinados (=Ctrl+W=, =Ctrl+T=,
+=Ctrl+N=, =Ctrl+Shift+W=) são capturados pelo navegador antes de chegarem ao
+editor. Se isso incomodar, instale a página como app (no Chrome/Chromium:
+menu → /Instalar/ ou /Criar atalho… → Abrir como janela/), que roda o
+code-server numa janela sem as abas do navegador.
+
+* 8. Como funciona por baixo (Docker-outside-of-Docker)
+
+O container do editor não tem seu próprio daemon Docker. O =make editor= monta
+o *socket do Docker do seu computador* (=/var/run/docker.sock=) dentro do
+container do editor. Assim, quando você roda =make build= no terminal
+integrado, o =docker run= executado lá dentro é, na prática, atendido pelo
+Docker do seu computador — os containers =abnt=/=overleaf= sobem como "irmãos"
+do container do editor, não "dentro" dele.
+
+É por isso que existe a variável =HOST_PROJECT_ROOT= no =Makefile=: um caminho
+como =/workdir= faz sentido *dentro* do editor, mas não existe no seu
+computador de verdade — e é o seu computador quem efetivamente monta os
+volumes. O =make editor= já injeta o caminho real do repositório
+automaticamente; não é preciso configurar nada na mão.
+
+* 9. Usando git de dentro do editor
+
+O =git= está instalado na imagem, e o painel *Source Control* (=Ctrl+Shift+G=)
+funciona normalmente sobre o repositório montado. Duas ressalvas:
+
+- As credenciais e a configuração global do git da sua máquina *não* são
+  visíveis dentro do container. Para =push= em repositório remoto, o caminho
+  mais simples é usar o terminal do seu computador (fora do editor).
+- Se o git reclamar de "dubious ownership", rode dentro do terminal integrado:
+
+  #+begin_src bash
+  git config --global --add safe.directory /workdir
+  #+end_src
+
+* 10. Problemas comuns
+
+** "Editor image 'artigo-revinfor-editor:latest' not found locally."
+
+Você pulou a Seção 1. Rode =make docker-build-editor=.
+
+** "LaTeX image ... not found locally." ao rodar make build
+
+Falta construir a imagem daquele sabor. Rode, no seu computador ou no terminal
+integrado:
+
+#+begin_src bash
+make docker-build FLAVOR=abnt      # ou FLAVOR=overleaf
+#+end_src
+
+** "permission denied" ao falar com /var/run/docker.sock
+
+O usuário =coder= dentro do container precisa pertencer ao grupo dono do
+socket. O =make editor= já faz isso automaticamente (=--group-add=), mas se o
+socket não existir no caminho padrão do seu sistema, a detecção falha.
+Confirme que o Docker está rodando e que =/var/run/docker.sock= existe.
+
+** A porta 8080 já está em uso
+
+Encerre o que estiver ocupando a porta, ou suba o editor manualmente trocando
+a porta publicada (ex.: =-p 127.0.0.1:8090:8080=), copiando o comando
+=docker run= do alvo =editor= no =Makefile=.
+
+** O container não sobe porque o nome já existe
+
+Restou um container antigo. Remova com:
+
+#+begin_src bash
+docker rm -f artigo-revinfor-editor
+#+end_src
+
+** Esqueci a senha
+
+Veja a Seção 2. Para *zerar* a senha (uma nova será gerada na próxima
+execução), apague o volume de configuração — com o editor parado:
+
+#+begin_src bash
+docker volume rm artigo-revinfor-editor-config
+#+end_src
+
+* 11. Adicionando um novo artigo
+
+1. No terminal integrado, crie a pasta dentro de =artigos/=:
+
+   #+begin_src bash
+   mkdir artigos/artigo_meu_novo_tema
+   #+end_src
+
+2. Copie o template:
+
+   #+begin_src bash
+   cp artigos/artigo_modelo_revista_infor/main.tex artigos/artigo_meu_novo_tema/main.tex
+   cp artigos/artigo_modelo_revista_infor/references.bib artigos/artigo_meu_novo_tema/references.bib
+   #+end_src
+
+3. Ajuste os metadados no =main.tex= (=\titulo=, =\autor=, =\local=, =\data=).
+   O caminho =\documentclass{../../common-shared/cls/...}= já está correto,
+   pois o novo artigo fica no mesmo nível dos demais.
+
+4. Compile:
+
+   #+begin_src bash
+   make build ART=artigos/artigo_meu_novo_tema
+   #+end_src
+
+Nenhuma alteração no =Makefile= é necessária — ele descobre o novo artigo
+automaticamente.
+
+* 12. Quando usar o code-server em vez do VS Code local
+
+- Você quer testar rapidamente sem instalar nada além de Docker.
+- Vai disponibilizar o editor para alguém remotamente (numa VM ou servidor),
+  acessando só pelo navegador.
+- Prefere não gerenciar extensões e configuração do VS Code na sua máquina.
+
+Para uso diário e frequente numa máquina só sua, o VS Code local
+(=VS_CODE_TUTORIAL.org=, na raiz do repositório) tende a ser um pouco mais
+responsivo, por não ter a camada do navegador — mas os dois usam a mesma
+extensão e exatamente o mesmo fluxo de build.

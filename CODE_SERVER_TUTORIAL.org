@@ -1,0 +1,121 @@
+#+TITLE: Tutorial: Editando artigos com code-server (VS Code no navegador)
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-08-08
+#+OPTIONS: toc:t num:t
+
+* Visão Geral
+
+Esta é a opção de *zero instalação de editor*: um container Docker roda o
+[[https://github.com/coder/code-server][code-server]] (o próprio VS Code, servido num navegador) já com a extensão
+*LaTeX Workshop* pré-instalada. Você só precisa de Docker e um navegador —
+nada de instalar VS Code, extensões ou TeX Live na máquina.
+
+Diferente de um "Dev Container" comum (que anexa o VS Code a UM único
+container), este editor é *deliberadamente flavor-agnostic*: o container do
+editor não tem TeX Live instalado. Ele só edita e, pelo terminal integrado,
+chama os containers =abnt= e =overleaf= já existentes no =Makefile= — os
+mesmos usados pelo Emacs e pela linha de comando. Isso significa que dá
+para compilar com =FLAVOR=abnt= e =FLAVOR=overleaf= a partir do *mesmo*
+editor aberto, sem trocar de container. Veja =ides/code-server/Dockerfile=
+para os detalhes.
+
+#+begin_example
+Dependências locais necessárias:
+  - Docker (em execução)
+  - Um navegador
+#+end_example
+
+* 1. Primeira vez: construindo a imagem do editor
+
+Na raiz do repositório:
+
+#+begin_src bash
+make docker-build-editor
+#+end_src
+
+Isso baixa a imagem oficial do code-server e instala a extensão LaTeX
+Workshop dentro dela. Só precisa ser feito uma vez (ou de novo se
+=ides/code-server/Dockerfile= mudar).
+
+* 2. Abrindo o Editor
+
+#+begin_src bash
+make editor
+#+end_src
+
+Isso inicia o container em primeiro plano, publicando a porta *8080*
+apenas em =127.0.0.1= (não fica exposto na rede). Abra no navegador:
+
+#+begin_example
+http://localhost:8080
+#+end_example
+
+** Senha de acesso
+
+O code-server pede uma senha gerada automaticamente. Na *primeira vez*,
+ela aparece na saída do próprio terminal onde você rodou =make editor=;
+depois disso, veja com:
+
+#+begin_src bash
+docker exec artigo-revinfor-editor cat /home/coder/.config/code-server/config.yaml
+#+end_src
+
+A senha fica salva num volume Docker nomeado (=artigo-revinfor-editor-config=),
+então ela persiste entre execuções — não muda a cada =make editor=.
+
+** Encerrando
+
+=Ctrl+C= no terminal onde o =make editor= está rodando encerra e remove o
+container (ele roda com =--rm=). Seus arquivos não somem: o repositório
+inteiro está montado do disco real, não copiado para dentro do container.
+
+* 3. Editando e Compilando
+
+A partir daqui, a experiência dentro do navegador é *idêntica* ao VS Code
+local — mesma interface, mesma extensão. Siga =VS_CODE_TUTORIAL.org= a
+partir da Seção 3 ("Editando o Conteúdo") em diante: abrir =main.tex=,
+rodar =make build ART=<pasta_do_artigo>= no terminal integrado, abrir o
+PDF gerado por duplo clique. A única diferença é que o repositório já
+vem aberto automaticamente (não é preciso =File > Open Folder=).
+
+** Alternando entre os dois containers de build
+
+Como o editor não fica preso a um container específico, você pode rodar,
+no mesmo terminal integrado, um build depois do outro:
+
+#+begin_src bash
+make build ART=artigos/artigo_curso_defectologia_vigostky FLAVOR=abnt
+make build ART=artigos/artigo_curso_defectologia_vigostky FLAVOR=overleaf
+#+end_src
+
+Ambos os PDFs (=main-abnt-pdf.pdf= e =main-overleaf-pdf.pdf=) ficam
+disponíveis lado a lado na pasta do artigo, sem reiniciar ou reconfigurar
+nada no editor.
+
+* 4. Como Funciona por Baixo (Docker-outside-of-Docker)
+
+O container do editor não tem seu próprio daemon Docker. Em vez disso, o
+=make editor= monta o *socket do Docker do seu computador*
+(=/var/run/docker.sock=) dentro do container do editor. Assim, quando você
+roda =make build= no terminal integrado, o comando =docker run= executado
+lá dentro é, na prática, atendido pelo Docker do seu computador — os
+containers =abnt=/=overleaf= sobem como "irmãos" do container do editor,
+não "dentro" dele.
+
+Essa é a razão de existir a variável =HOST_PROJECT_ROOT= no =Makefile=: um
+caminho como =/workdir= faz sentido *dentro* do container do editor, mas
+não existe no seu computador de verdade — e é o seu computador quem
+efetivamente monta os volumes. O =make editor= já injeta o caminho real do
+repositório automaticamente; não é preciso configurar nada na mão.
+
+* 5. Quando usar code-server em vez de VS Code local ou TeXstudio
+
+- Você quer testar rapidamente sem instalar nada além de Docker.
+- Vai disponibilizar o editor para alguém remotamente (ex.: numa VM ou
+  servidor), acessando só pelo navegador.
+- Prefere não gerenciar extensões/configuração do VS Code na sua máquina.
+
+Para uso diário e frequente numa máquina só sua, VS Code local
+(=VS_CODE_TUTORIAL.org=) tende a ser um pouco mais responsivo (sem a
+camada de navegador) — mas ambos usam a mesma extensão e o mesmo fluxo de
+build.
