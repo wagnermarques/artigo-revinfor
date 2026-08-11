@@ -151,7 +151,118 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 5b. Revinfor build-flavor tables — shared between the AUCTeX
+;; 5b. In-buffer completion popup (Corfu + Cape)
+;;
+;;     Section 5 above only covers the *minibuffer*.  This section is
+;;     what makes completion behave like an IDE: a popup that appears
+;;     at point while you type, with no keystroke to trigger it.
+;;
+;;     Corfu is only the front-end.  It renders whatever Emacs'
+;;     standard `completion-at-point-functions' offers, and AUCTeX 14
+;;     already fills that hook in every LaTeX buffer — macros and
+;;     environment names via `TeX--completion-at-point', macro
+;;     arguments (package names, class names, ...) via
+;;     `LaTeX--arguments-completion-at-point'.  So Corfu alone is
+;;     enough to surface everything C-M-i used to hide behind a
+;;     keystroke.  Cape then adds the source AUCTeX has no reason to
+;;     provide: completion of ordinary words, which is what actually
+;;     helps while writing the prose of an article.
+;;; ---------------------------------------------------------------
+
+(use-package corfu
+  :init
+  (global-corfu-mode 1)
+  :custom
+  (corfu-cycle t)
+  (corfu-quit-no-match t)      ; get out of the way as soon as nothing matches
+  (corfu-on-exact-match nil)   ; typing a complete word must not self-expand
+  ;; The first candidate is highlighted straight away, so accepting it
+  ;; is a single TAB — the behaviour every IDE has.  This is only safe
+  ;; because RET is unbound below: in a prose-heavy LaTeX buffer the
+  ;; popup is on screen most of the time, and were RET still bound to
+  ;; `corfu-insert', every Enter would silently complete a word.
+  (corfu-preselect 'first)
+  ;; Upstream's default ('insert) writes the highlighted candidate into
+  ;; the buffer as a preview.  Turned off here: the buffer must not
+  ;; change until TAB is pressed, otherwise the text flickers under the
+  ;; cursor while typing and flyspell keeps re-checking half-words.
+  (corfu-preview-current nil)
+  :bind
+  (:map corfu-map
+        ("RET"    . nil)       ; Enter stays Enter, popup or no popup
+        ([return] . nil)
+        ("TAB"    . corfu-insert)
+        ([tab]    . corfu-insert)
+        ("C-n"    . corfu-next)
+        ("C-p"    . corfu-previous)
+        ("C-g"    . corfu-quit))
+  :config
+  ;; Since Corfu 2.8 the auto-completion engine is a separate file, and
+  ;; `corfu-mode' only pulls it in when `corfu-auto' is already non-nil
+  ;; (see the (when corfu-auto (require 'corfu-auto)) in corfu-mode).
+  ;; Requiring it here is what brings the three variables below into
+  ;; existence — setting them beforehand would just be setting symbols
+  ;; nothing reads yet.
+  (require 'corfu-auto)
+  (setq corfu-auto t                ; the entire point: no C-M-i needed
+        ;; Upstream warns that a short delay or a prefix below 2 puts
+        ;; real load on Emacs, since every keystroke re-runs the Capf.
+        ;; These stay at sane values because the trigger characters
+        ;; below already give instant feedback where it matters.
+        corfu-auto-delay 0.2
+        corfu-auto-prefix 3
+        ;; A trigger character bypasses `corfu-auto-prefix' completely:
+        ;; the popup opens on the very next keystroke.  "\" and "{" are
+        ;; precisely the two spots where a LaTeX author wants the list
+        ;; immediately — starting a macro, and opening a macro argument
+        ;; such as the package name in \usepackage{}.  Prose keeps the
+        ;; calmer 3-character behaviour.
+        corfu-auto-trigger "\\{")
+
+  ;; Side panel showing the docstring of the highlighted candidate —
+  ;; for LaTeX that is AUCTeX's own help text for the macro.  Lives in
+  ;; corfu's extensions/ subdirectory, which straight.el installs too.
+  (require 'corfu-popupinfo)
+  (corfu-popupinfo-mode 1)
+  (setq corfu-popupinfo-delay '(0.5 . 0.3)))
+
+;; NOTE: Corfu draws its popup in a child frame.  On this Emacs (30.2)
+;; child frames are graphical-only, so under `emacs -nw' the popup
+;; silently never appears — the fix there is the corfu-terminal
+;; package, left out on purpose since this config is launched
+;; graphically.  Emacs 31 gains TTY child frames and drops the need.
+
+(use-package cape
+  ;; Loaded eagerly on purpose.  The options below are plain defcustoms
+  ;; that spring into existence only when cape.el itself is loaded, so
+  ;; deferring the package (`:after', `:defer') would leave them unset
+  ;; and silently fall back to the defaults.
+  :demand t
+  :init
+  (defun revinfor/latex-capf-setup ()
+    "Add prose and file-path completion sources to the current LaTeX buffer.
+Appended with a high depth so they sit *after* AUCTeX's own entries:
+a \"\\\" prefix must always complete as a macro, never as some word
+picked up from the running text."
+    (add-hook 'completion-at-point-functions #'cape-file    90 t)
+    (add-hook 'completion-at-point-functions #'cape-dabbrev 95 t))
+  (add-hook 'LaTeX-mode-hook #'revinfor/latex-capf-setup)
+  :custom
+  ;; Long Portuguese terms and author surnames get retyped constantly
+  ;; across an article's .tex files, so candidates are gathered from
+  ;; every open LaTeX buffer, not just the current one.  How *early*
+  ;; those candidates are offered is not set here — that is Corfu's
+  ;; `corfu-auto-prefix' above.
+  (cape-dabbrev-buffer-function #'cape-same-mode-buffers)
+  ;; Kept on so `cape-file' stays quiet in prose: with no "file:"
+  ;; prefix typed, it only offers itself once the text at point holds a
+  ;; "/" whose parent directory actually exists.  That is exactly the
+  ;; \includegraphics{imagens/...} case, and never an ordinary word.
+  (cape-file-directory-must-exist t))
+
+
+;;; ---------------------------------------------------------------
+;; 5c. Revinfor build-flavor tables — shared between the AUCTeX
 ;;     commands (section 6) and the pdf-tools completion hook
 ;;     (section 7). Each flavor's docker-latexmk run gets its own
 ;;     -jobname so the two builds don't overwrite the same main.pdf.
@@ -212,7 +323,7 @@ hook argument doesn't account for the custom jobname.")
   ;; choice (see section 1's docker-latexmk wrapper): both call the same
   ;; script, but the overleaf one overrides REVINFOR_LATEX_IMAGE so it runs
   ;; against the Overleaf-compatible container instead. Each also sets its
-  ;; own -jobname (see revinfor/flavor-pdf-alist, section 5b) so an ABNT
+  ;; own -jobname (see revinfor/flavor-pdf-alist, section 5c) so an ABNT
   ;; build and an Overleaf build never overwrite each other's PDF.
   (add-to-list 'TeX-command-list
                '("docker-latexmk-abnt"
@@ -525,6 +636,17 @@ plain master name and would never find a jobname'd main-<flavor>.pdf."
 ;;    C-c )         — insert \ref   via RefTeX
 ;;    C-c e         — open ebib bibliography manager
 ;;    (flymake)     — docker-chktex runs automatically; errors shown inline
+;;
+;;  Autocomplete popup (Corfu — appears by itself while typing):
+;;    TAB           — accept the highlighted candidate
+;;    C-n / C-p     — next / previous candidate (arrow keys work too)
+;;    RET           — deliberately NOT completion; inserts a newline
+;;    C-g           — dismiss the popup
+;;    C-M-i         — force the popup open before the auto-delay elapses
+;;    M-t           — toggle the documentation panel for the candidate
+;;    M-PgDn/M-PgUp — scroll that documentation panel
+;;    Completes: \macros, \begin{env}, macro arguments (AUCTeX), plus
+;;    words from open buffers and file paths (Cape).
 ;;
 ;;  PDF viewer (pdf-view-mode):
 ;;    C-c C-g       — SyncTeX backward search (jump to .tex source)
