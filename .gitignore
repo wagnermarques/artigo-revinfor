@@ -94,6 +94,27 @@ auto/
 # Local Emacs project config kept out of version control
 ides/emacs/.emacs-revinfor/
 
+# --- Emacs scratch files (Emacs) ---------------------------------------------
+# These are written next to the file being edited, so they land straight in the
+# article folders. ides/emacs/init.el redirects them into .emacs-revinfor/, but
+# that only applies to the project Emacs: opening a .tex with a plain `emacs`
+# (system config) still drops them here, which is how main.tex~ showed up.
+#
+# *~     = backup of the previous saved version
+# \#*\#  = auto-save file, written periodically between saves (#main.tex#)
+# .\#*   = lock file, a symlink marking a buffer as open (.#main.tex)
+#
+# The backslashes are required: a leading '#' would otherwise start a comment.
+*~
+\#*\#
+.\#*
+
+# --- Byte-compiled / cached Emacs Lisp ---------------------------------------
+# .elc = byte-compiled elisp (e.g. ides/emacs/init.elc), regenerated from the
+# .el source. auto-save-list/ = Emacs' index of open auto-save files.
+*.elc
+auto-save-list/
+
 # =============================================================================
 # FINAL PDF: by default every .pdf is ignored (regenerable artifact). The
 # exception below re-includes the generated article PDFs (main-<flavor>-<engine>.pdf,
