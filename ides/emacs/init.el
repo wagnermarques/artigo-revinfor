@@ -103,19 +103,34 @@
 
 
 ;;; ---------------------------------------------------------------
-;; 3. Fonts — Nerd Fonts installed on Fedora
-;;    Tries a list of fonts commonly installed via ~/.local/share/fonts
-;;    (manually unpacked Nerd Fonts) or `dnf install jetbrains-mono-fonts`
-;;    etc., falling back to DejaVu Sans Mono, which ships with Fedora.
+;; 3. Fonts — buffer and UI text only
+;;    Tries a list of fonts commonly unpacked by hand into
+;;    ~/.local/share/fonts, falling back to DejaVu Sans Mono, which
+;;    ships with Fedora.
+;;
+;;    None of these are packaged in Fedora's repositories (only
+;;    cascadia-*-nf-fonts are), so each has to be unpacked by hand from
+;;    its nerd-fonts release zip; on a machine where that was never
+;;    done the list simply falls through to DejaVu.
+;;
+;;    Whichever one wins is purely cosmetic and has no bearing on
+;;    treemacs' icons: those are drawn in a separate symbols-only font,
+;;    installed independently — see section 14.
 ;;; ---------------------------------------------------------------
 
 (defun revinfor/set-font ()
   "Set the default and fixed-pitch face to the first available font."
   (let ((font (seq-find (lambda (f) (member f (font-family-list)))
-                         '("JetBrainsMono Nerd Font Mono"
-                           "FiraCode Nerd Font Mono"
+                         '("FiraCode Nerd Font Mono"
+                           "JetBrainsMono Nerd Font Mono"
                            "Hack Nerd Font Mono"
                            "CaskaydiaCove Nerd Font Mono"
+                           ;; Fedora's cascadia-mono-nf-fonts ships
+                           ;; Microsoft's own CascadiaMonoNF-*.otf, a
+                           ;; different build from the nerd-fonts
+                           ;; project's "Caskaydia*" patch above, and it
+                           ;; registers under its own family name.
+                           "Cascadia Mono NF"
                            "DejaVu Sans Mono"))))
     (when font
       (set-face-attribute 'default nil :family font :height 110)
@@ -604,7 +619,29 @@ plain master name and would never find a jobname'd main-<flavor>.pdf."
 (use-package treemacs-nerd-icons
   :after treemacs
   :config
-  (treemacs-load-theme "nerd-icons"))
+  ;; Treemacs' icons are NOT drawn in the editing font from section 3.
+  ;; nerd-icons renders every glyph in `nerd-icons-font-family', which
+  ;; defaults to "Symbols Nerd Font Mono" — a symbols-only font shipped
+  ;; separately from any patched programming font, and absent from
+  ;; Fedora's repositories.  Without it the whole sidebar degrades to
+  ;; empty boxes, no matter which Nerd Font the buffer text uses; and
+  ;; conversely it is enough on its own, even with plain DejaVu text.
+  ;;
+  ;; Install it once with M-x nerd-icons-install-fonts, which downloads
+  ;; NFM.ttf into ~/.local/share/fonts and refreshes the font cache.
+  ;; Until that exists, stay on treemacs' built-in theme rather than
+  ;; filling the sidebar with tofu.
+  (cond
+   ;; Without a graphical display `find-font' has nothing to query, and
+   ;; whether the glyphs show up is down to the terminal's own font
+   ;; rather than to Emacs.  Load the theme and let the terminal decide.
+   ((not (display-graphic-p))
+    (treemacs-load-theme "nerd-icons"))
+   ((find-font (font-spec :family nerd-icons-font-family))
+    (treemacs-load-theme "nerd-icons"))
+   (t
+    (message "Treemacs: font %S not installed — run M-x nerd-icons-install-fonts to get icons"
+             nerd-icons-font-family))))
 
 ;; Open treemacs automatically at startup, pointed at the repo root.
 ;; `treemacs-add-and-display-current-project-exclusively' resolves the
