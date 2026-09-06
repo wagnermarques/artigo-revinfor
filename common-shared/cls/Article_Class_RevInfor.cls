@@ -287,6 +287,23 @@
     \end{abstract}\PRIVATEclearpageifneeded%
 }
 
+% Palavras-chave / Keywords (padrão Revista InFor)
+% ---------------------------------------------------------------------------
+% No PDF oficial, as palavras-chave ocupam um PARÁGRAFO PRÓPRIO dentro do
+% Resumo/Abstract, com o rótulo em negrito. Se o autor do artigo só digitar
+% \textbf{Palavras-chave}: ... colado ao fim do último parágrafo do resumo
+% (sem lembrar de deixar uma linha em branco antes), o texto acaba grudado no
+% parágrafo anterior. O \par abaixo fecha o parágrafo em curso e garante a
+% linha própria SEMPRE, independente do que o autor escreveu antes.
+%
+% Uso dentro do resumo em português:
+%     \palavraschaveRevInfor{Termo um. Termo dois. Termo três.}
+% Uso dentro do resumo em inglês (rótulo "Keywords" via argumento opcional):
+%     \palavraschaveRevInfor[Keywords]{Term one. Term two. Term three.}
+\newcommand{\palavraschaveRevInfor}[2][Palavras-chave]{%
+    \par\noindent{\bfseries #1}: #2%
+}
+
 % Título em língua estrangeira (inglês), impresso ANTES do \begin{resumo}[Abstract].
 % No oficial ele aparece entre as palavras-chave e o cabeçalho "ABSTRACT", no mesmo
 % padrão do título principal: negrito, CAIXA ALTA, centralizado, entrelinha 1,5.
@@ -365,9 +382,12 @@
 %  Rodapé de licença Creative Commons — 1ª página (padrão Revista InFor)
 % ---------------------------------------------------------------------------
 % No PDF oficial, o rodapé da PRIMEIRA página traz, junto à borda inferior da
-% mancha e alinhado à esquerda, o selo Creative Commons (CC BY-NC-SA) seguido
-% da frase "Artigo publicado em acesso aberto sob licença Creative Commons".
-% O selo aparece SÓ na 1ª página.
+% mancha e alinhado à esquerda: uma linha horizontal, a referência bibliográfica
+% completa do artigo (\@rodapeRefRevInforText) e, abaixo dela, o selo Creative
+% Commons (CC BY-NC-SA) seguido da frase "Artigo publicado em acesso aberto sob
+% licença Creative Commons". Esse bloco aparece SÓ na 1ª página; nas demais
+% páginas não há logomarca nem referência (só a numeração de página, cuidada
+% à parte).
 %
 % O selo é desenhado com o pacote ccicons (\ccbyncsa = glifos CC/BY/NC/SA), sem
 % depender de imagem externa. O texto vem em corpo 9 (\footnotesize), entrelinha
@@ -379,10 +399,26 @@
 \newcommand{\@rodapeCCRevInforText}{Artigo publicado em acesso aberto sob licença Creative Commons}
 \newcommand{\rodapeCCRevInfor}[1]{\renewcommand{\@rodapeCCRevInforText}{#1}}
 
+% Referência bibliográfica completa do artigo (linha acima do selo CC), no
+% padrão "SOBRENOME, Nome. Título: subtítulo. InFor, Inov. Form., Rev.
+% NEaD-Unesp, São Paulo, v. X, n. X, p. XX-XX, ano. ISSN 2525-3476.". Volume,
+% número, páginas e ano só são conhecidos no fechamento da edição, por isso o
+% padrão traz "X"/"ano" como placeholder — os editores preenchem na diagramação
+% final. Para informar a referência definitiva de um artigo específico, use
+% \referenciaRevInfor{...} no preâmbulo do main.tex.
+\newcommand{\@rodapeRefRevInforText}{SOBRENOME, Nome. Título: subtítulo. \textit{InFor, Inov. Form., Rev. NEaD-Unesp}, São Paulo, v.~X, n.~X, p.~XX-XX, ano. ISSN 2525-3476. [Para preenchimento dos editores].}
+\newcommand{\referenciaRevInfor}[1]{\renewcommand{\@rodapeRefRevInforText}{#1}}
+
 % Altura da linha de base do rodapé a partir da borda INFERIOR do papel.
 % Aumente para subir o selo; diminua para descê-lo.
+% \raisebox conta a partir da borda INFERIOR do papel: quanto MAIOR o valor,
+% mais alto (mais perto do texto) o bloco fica. 1,5cm bastava quando só havia
+% a linha do selo CC; agora o bloco também tem, ACIMA dela, a linha divisória
+% e a referência bibliográfica (2 linhas) -- ou seja, o bloco ficou mais
+% ALTO, então a base precisa descer (valor MENOR) para caber sem invadir a
+% área de texto.
 \newlength{\@rodapeCCRevInforRaise}
-\setlength{\@rodapeCCRevInforRaise}{1.5cm}
+\setlength{\@rodapeCCRevInforRaise}{0.3cm}
 
 % Desenha o rodapé como camada de FRENTE, só na página corrente (o '*' do
 % \AddToShipoutPictureFG* restringe à 1ª página, onde o \maketitle roda).
@@ -394,8 +430,20 @@
             \AtPageLowerLeft{%
                 \raisebox{\@rodapeCCRevInforRaise}{%
                     \hspace*{\dimexpr1in+\oddsidemargin\relax}%
-                    {\normalfont\footnotesize
-                     {\large\ccbyncsa}\hspace{1ex}\@rodapeCCRevInforText}%
+                    \parbox[b]{\textwidth}{%
+                        \normalfont\footnotesize\SingleSpacing
+                        % \parskip/\parindent do corpo do texto (0,2cm / 1,3cm) não devem
+                        % vazar para dentro deste bloco pequeno -- senão o rodapé fica alto
+                        % demais e invade a área de texto da página. Zeramos localmente.
+                        \setlength{\parskip}{0pt}\setlength{\parindent}{0pt}
+                        \ifx\@rodapeRefRevInforText\empty\else
+                            \rule{\textwidth}{0.4pt}\par
+                            \vspace{2pt}
+                            \@rodapeRefRevInforText\par
+                            \vspace{2pt}
+                        \fi
+                        {\large\ccbyncsa}\hspace{1ex}\@rodapeCCRevInforText
+                    }%
                 }%
             }%
         }%
@@ -482,42 +530,65 @@
 
 
 % ---------------------------------------------------------------------------
-%  Cabeçalhos e rodapés
+%  Cabeçalhos e rodapés (padrão Revista InFor)
 % ---------------------------------------------------------------------------
-% Aqui DEFINIMOS um estilo de página chamado "meuestilo". Atenção: definir não
-% é ativar! Para usá-lo, escreva \pagestyle{meuestilo} no main.tex (após
-% \begin{document}). Os textos abaixo são exemplos/placeholders — troque-os
-% pelo conteúdo real do cabeçalho/rodapé do seu artigo.
+% No PDF oficial, A PARTIR DA 2ª PÁGINA (a 1ª é a página de rosto/resumo, sem
+% cabeçalho corrido), o topo de cada página alterna entre:
+%   - página ÍMPAR: "SOBRENOME, Ano" (autor-data, como uma citação);
+%   - página PAR:   o título do artigo, em itálico.
+% Ambos alinhados à esquerda, com uma linha horizontal separando do texto.
+%
+% O texto autor-data não pode ser derivado automaticamente de \autor{} (que
+% mistura afiliação/e-mail/ORCID no mesmo campo) nem do ano de publicação
+% (só definido pelos editores no fechamento da edição). Por isso é um campo
+% próprio, configurável no preâmbulo do main.tex:
+%     \cabecalhoCorridoRevInfor{SOBRENOME, Ano}
+% O título da página par já é conhecido (\titulo{...}) e não precisa configuração.
+\newcommand{\@cabecalhoCorridoRevInforText}{SOBRENOME, Ano}
+\newcommand{\cabecalhoCorridoRevInfor}[1]{\renewcommand{\@cabecalhoCorridoRevInforText}{#1}}
 
-%% Cria o novo estilo de cabeçalhos e rodapés
+% Define aqui um estilo de página chamado "meuestilo". Definir não é ativar:
+% quem liga o cabeçalho corrido, a partir da 2ª página, é o próprio comando
+% \textual (redefinido logo abaixo) — nenhum \pagestyle{} é necessário no
+% main.tex de cada artigo.
 \makepagestyle{meuestilo}
 
-%% Cabeçalho das páginas PARES (só aparece no modo twoside)
-\makeevenhead{meuestilo}
-    {Texto no topo, à esquerda (página par)} % à esquerda
-    {Centro - \thepage} % ao centro (\thepage = número da página)
-    {Texto à direita (página par)} % à direita
-
-%% Cabeçalho das páginas ÍMPARES (ou de todas, no modo 'oneside' usado aqui)
-\makeoddhead{meuestilo}
-    {Texto no topo, à esquerda (página ímpar/oneside)} % à esquerda
-    {Centro - \thepage} % ao centro (número da página)
-    {Texto à direita (página ímpar/oneside)} % à direita
+% Texto do cabeçalho, compartilhado entre par/ímpar: no modo 'oneside' (usado
+% nesta classe) só o "odd" é de fato aplicado pelo LaTeX, então alternamos o
+% conteúdo NÓS MESMOS verificando a paridade de \value{page} — funciona tanto
+% em 'oneside' quanto em 'twoside', por isso definimos os dois.
+\newcommand{\@meuestiloCabecalhoTexto}{%
+    \ifodd\value{page}%
+        \@cabecalhoCorridoRevInforText%
+    \else
+        \itshape\@title%
+    \fi
+}
+\makeoddhead{meuestilo}{\@meuestiloCabecalhoTexto}{}{}
+\makeevenhead{meuestilo}{\@meuestiloCabecalhoTexto}{}{}
 
 %% Linha horizontal separando o cabeçalho do texto
 \makeheadrule{meuestilo}{\textwidth}{\normalrulethickness}
 
-%% Rodapé das páginas PARES
-\makeevenfoot{meuestilo}
-    {Texto no rodapé, à esquerda (página par)} % à esquerda
-    {Centro - \thepage} % ao centro (número da página)
-    {Texto à direita (página par)} % à direita
+% O cabeçalho corrido nas páginas PARES imprime o título do artigo por
+% extenso; títulos longos quebram em 2 linhas. O \headheight padrão (14,5pt)
+% só cabe 1 linha, e o memoir avisa com "Overfull \vbox" nas páginas em que
+% isso acontece. Aumentamos para caber 2 linhas com folga.
+\setlength{\headheight}{30pt}
+\checkandfixthelayout
 
-%% Rodapé das páginas ÍMPARES (ou de todas, no modo 'oneside')
-\makeoddfoot{meuestilo}
-    {Texto no rodapé, à esquerda (página ímpar/oneside)} % à esquerda
-    {Centro - \thepage} % ao centro (número da página)
-    {Texto à direita (página ímpar/oneside)} % à direita
+%% Rodapé: número de página alinhado à direita, igual ao restante do artigo
+%% (mesmo critério usado no estilo 'plain', logo abaixo).
+\makeoddfoot{meuestilo}{}{}{\thepage}
+\makeevenfoot{meuestilo}{}{}{\thepage}
+
+% Ativação automática: o abnTeX2 (\textual, em modo 'article') liga
+% \pagestyle{plain} ao entrar nos elementos textuais. Encadeamos "meuestilo"
+% logo depois, sem precisar tocar o main.tex de cada artigo — o cabeçalho
+% corrido passa a valer a partir da 1ª página textual (a 2ª página do PDF,
+% já que a 1ª é a página de rosto/resumo).
+\let\ABNTEXoldtextualRevInfor\textual
+\renewcommand{\textual}{\ABNTEXoldtextualRevInfor\pagestyle{meuestilo}}
 
 
 
@@ -653,20 +724,12 @@
 % (No modo 'twocolumn', o abntex2 já reduz o recuo de 4 cm para 1.8 cm.)
 
 % --- Cabeçalhos e rodapés customizados ---
-% O estilo "meuestilo" definido na seção 4 só é aplicado quando você escreve
-% \pagestyle{meuestilo} logo após um comando de divisão do documento. Exemplo:
-%   \begin{document}
-%     \pretextual
-%     \pagestyle{meuestilo}   % estilo na primeira página
-%     \maketitle
-%     ...
-%     \textual
-%     \pagestyle{meuestilo}   % estilo nas páginas de texto
-%     \section{Nova seção}
-%     ...
-%   \end{document}
-% A diferença entre páginas pares e ímpares só vale no modo 'twoside'. No modo
-% 'oneside' (usado aqui), apenas o cabeçalho/rodapé "odd" é aplicado.
+% O estilo "meuestilo" (seção 4) já é ativado automaticamente pela classe a
+% partir da 1ª página textual — nenhum \pagestyle{} é necessário no main.tex.
+% Ele imprime, em cada página a partir da 2ª do PDF, "SOBRENOME, Ano" (ímpares)
+% ou o título do artigo em itálico (pares). Configure o texto autor-data com:
+%     \cabecalhoCorridoRevInfor{SOBRENOME, Ano}
+% no preâmbulo do main.tex (o título já vem de \titulo{...}).
 % Mais detalhes: seção 7.3 do manual do memoir.
 
 % --- Mais exemplos ---
