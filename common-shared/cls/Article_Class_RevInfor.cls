@@ -91,8 +91,9 @@
 % precisa de imagem externa). Usado no bloco de autoria (padrão Revista InFor).
 \RequirePackage{orcidlink}
 
-% Selos Creative Commons como glifos de fonte (\ccbyncsa, \ccLogo, ...), sem
-% precisar de imagem externa. Usado no rodapé de licença da 1ª página.
+% Selos Creative Commons como glifos de fonte (\ccbyncsa, \ccLogo, ...). O
+% rodapé da 1ª página usa a LOGOMARCA OFICIAL em imagem (ver seção do rodapé);
+% estes glifos ficam disponíveis para uso no texto do artigo.
 \RequirePackage{ccicons}
 
 % Aparência dos links: texto colorido em vez de caixas. URLs (e-mail/ORCID) em
@@ -231,9 +232,51 @@
 \preauthor{\begin{flushright}\normalfont\normalsize\SingleSpacing}
 \postauthor{\par\end{flushright}}
 
+% ---------------------------------------------------------------------------
+%  Dados do autor em partes: NOME, SOBRENOME e ANO
+% ---------------------------------------------------------------------------
+% O nome do autor aparece em DOIS formatos diferentes no artigo:
+%   - no bloco de autoria, por extenso e na ordem direta:  "Jayson Magno da Silva";
+%   - no cabeçalho corrido, no formato autor-data da ABNT: "SILVA, 2025".
+% Para não digitar o mesmo dado duas vezes (e não deixar os dois formatos
+% saírem do ar um do outro), guardamos as PARTES em três campos:
+%
+%     \nomeAutorRevInfor{Jayson Magno da}   % prenome(s) + partículas (de, da, dos)
+%     \sobrenomeAutorRevInfor{Silva}        % sobrenome de chamada (vai em CAIXA ALTA)
+%     \anoRevInfor{2025}                    % ano da publicação
+%
+% A partir deles a classe monta sozinha:
+%   \nomeCompletoAutorRevInfor  -> "Jayson Magno da Silva" (para o bloco de autoria)
+%   \autorDataRevInfor          -> "SILVA, 2025"           (para o cabeçalho corrido)
+%
+% Os três campos são OPCIONAIS: se não forem preenchidos, nada quebra — o
+% cabeçalho corrido cai no texto configurado por \cabecalhoCorridoRevInfor{}
+% (ou no placeholder "SOBRENOME, Ano"), como antes.
+\newcommand{\@nomeAutorRevInfor}{}
+\newcommand{\@sobrenomeAutorRevInfor}{}
+\newcommand{\@anoRevInfor}{}
+\newcommand{\nomeAutorRevInfor}[1]{\renewcommand{\@nomeAutorRevInfor}{#1}}
+\newcommand{\sobrenomeAutorRevInfor}[1]{\renewcommand{\@sobrenomeAutorRevInfor}{#1}}
+\newcommand{\anoRevInfor}[1]{\renewcommand{\@anoRevInfor}{#1}}
+
+% "Nome Sobrenome" — ordem direta, como no bloco de autoria. O \space só entra
+% se houver prenome, para não sobrar um espaço solto quando só o sobrenome for
+% preenchido.
+\newcommand{\nomeCompletoAutorRevInfor}{%
+    \ifx\@nomeAutorRevInfor\@empty\else\@nomeAutorRevInfor\space\fi
+    \@sobrenomeAutorRevInfor%
+}
+
+% "SOBRENOME, Ano" — formato autor-data da ABNT, usado no cabeçalho corrido.
+\newcommand{\autorDataRevInfor}{%
+    \MakeUppercase{\@sobrenomeAutorRevInfor}, \@anoRevInfor%
+}
+
 % \autorRevInfor{nome}{afiliação}{e-mail}{ORCID iD}
 % Monta o bloco já formatado e o registra como autor (o \maketitle o imprime).
 % O ORCID é só o identificador (ex.: 0000-0001-5858-2507); montamos a URL.
+% Dica: passe \nomeCompletoAutorRevInfor no 1º argumento para reaproveitar o
+% nome já informado em \nomeAutorRevInfor{} / \sobrenomeAutorRevInfor{}.
 \newcommand{\autorRevInfor}[4]{%
     \autor{%
         {\bfseries #1}\\%
@@ -383,15 +426,22 @@
 % ---------------------------------------------------------------------------
 % No PDF oficial, o rodapé da PRIMEIRA página traz, junto à borda inferior da
 % mancha e alinhado à esquerda: uma linha horizontal, a referência bibliográfica
-% completa do artigo (\@rodapeRefRevInforText) e, abaixo dela, o selo Creative
-% Commons (CC BY-NC-SA) seguido da frase "Artigo publicado em acesso aberto sob
-% licença Creative Commons". Esse bloco aparece SÓ na 1ª página; nas demais
-% páginas não há logomarca nem referência (só a numeração de página, cuidada
-% à parte).
+% completa do artigo (\@rodapeRefRevInforText) e, abaixo dela, a logomarca
+% Creative Commons (CC BY-NC-SA) seguida da frase "Artigo publicado em acesso
+% aberto sob licença Creative Commons". Esse bloco aparece SÓ na 1ª página; nas
+% demais páginas não há logomarca nem referência (só a numeração de página,
+% cuidada à parte).
 %
-% O selo é desenhado com o pacote ccicons (\ccbyncsa = glifos CC/BY/NC/SA), sem
-% depender de imagem externa. O texto vem em corpo 9 (\footnotesize), entrelinha
-% simples.
+% A logomarca é a IMAGEM OFICIAL da Creative Commons (botão 80x15 "BY-NC-SA"),
+% baixada do press kit da CC e guardada em
+% common-shared/img/cc-by-nc-sa-80x15.png:
+%   https://mirrors.creativecommons.org/presskit/buttons/80x15/png/by-nc-sa.png
+% Ela substitui os glifos do pacote ccicons usados antes. O texto vem em corpo 9
+% (\footnotesize), entrelinha simples.
+%
+% Para trocar a logomarca (outra licença, outro arquivo), use
+% \logoCCRevInfor{nome-do-arquivo.png} no preâmbulo; passando vazio
+% (\logoCCRevInfor{}) o rodapé sai só com a frase, sem imagem.
 %
 % Vem LIGADO por padrão (é elemento padrão da revista). Para trocar a frase, use
 % \rodapeCCRevInfor{...} no preâmbulo; para DESATIVAR, passe vazio:
@@ -399,14 +449,55 @@
 \newcommand{\@rodapeCCRevInforText}{Artigo publicado em acesso aberto sob licença Creative Commons}
 \newcommand{\rodapeCCRevInfor}[1]{\renewcommand{\@rodapeCCRevInforText}{#1}}
 
+% Arquivo da logomarca (procurado no \graphicspath do artigo, que aponta para
+% common-shared/img/) e sua altura impressa.
+\newcommand{\@rodapeCCRevInforLogo}{cc-by-nc-sa-80x15.png}
+\newcommand{\logoCCRevInfor}[1]{\renewcommand{\@rodapeCCRevInforLogo}{#1}}
+\newlength{\@rodapeCCRevInforLogoH}
+% 0,3cm de altura no botão 80x15 dá ~1,6cm de largura -- proporção do original.
+\setlength{\@rodapeCCRevInforLogoH}{0.3cm}
+
 % Referência bibliográfica completa do artigo (linha acima do selo CC), no
 % padrão "SOBRENOME, Nome. Título: subtítulo. InFor, Inov. Form., Rev.
-% NEaD-Unesp, São Paulo, v. X, n. X, p. XX-XX, ano. ISSN 2525-3476.". Volume,
-% número, páginas e ano só são conhecidos no fechamento da edição, por isso o
-% padrão traz "X"/"ano" como placeholder — os editores preenchem na diagramação
-% final. Para informar a referência definitiva de um artigo específico, use
-% \referenciaRevInfor{...} no preâmbulo do main.tex.
-\newcommand{\@rodapeRefRevInforText}{SOBRENOME, Nome. Título: subtítulo. \textit{InFor, Inov. Form., Rev. NEaD-Unesp}, São Paulo, v.~X, n.~X, p.~XX-XX, ano. ISSN 2525-3476. [Para preenchimento dos editores].}
+% NEaD-Unesp, São Paulo, v. X, n. X, p. XX-XX, ano. ISSN 2525-3476.".
+%
+% A AUTORIA, o TÍTULO e o ANO são montados a partir do que o artigo já informou
+% no preâmbulo:
+%     \sobrenomeAutorRevInfor{} + \nomeAutorRevInfor{} -> "SILVA, Jayson Magno da"
+%     \titulo{}                                         -> o título do artigo
+%     \anoRevInfor{}                                    -> o ano
+% Volume, número e páginas só são conhecidos no fechamento da edição, então
+% continuam como "X"/"XX-XX" — os editores preenchem na diagramação final.
+% Cada pedaço não preenchido cai sozinho no placeholder antigo ("SOBRENOME,
+% Nome", "Título: subtítulo", "ano"), sem quebrar nada.
+%
+% Para informar a referência definitiva de um artigo (ou para casos fora do
+% padrão: dois autores, "et al."...), use \referenciaRevInfor{...} no preâmbulo
+% do main.tex — ele sobrescreve tudo isto.
+
+% "SILVA, Jayson Magno da" — formato autor da ABNT: sobrenome em caixa alta,
+% prenomes e partículas depois da vírgula.
+\newcommand{\autorReferenciaRevInfor}{%
+    \ifx\@sobrenomeAutorRevInfor\@empty
+        SOBRENOME, Nome%
+    \else
+        \MakeUppercase{\@sobrenomeAutorRevInfor}%
+        \ifx\@nomeAutorRevInfor\@empty\else, \@nomeAutorRevInfor\fi
+    \fi
+}
+
+% Título como digitado em \titulo{} (caixa mista, sem o \MakeUppercase que a
+% abertura do artigo aplica).
+\newcommand{\@tituloReferenciaRevInfor}{%
+    \ifx\@title\@empty Título: subtítulo\else\@title\fi
+}
+
+% Ano da publicação; placeholder "ano" enquanto não houver \anoRevInfor{}.
+\newcommand{\@anoReferenciaRevInfor}{%
+    \ifx\@anoRevInfor\@empty ano\else\@anoRevInfor\fi
+}
+
+\newcommand{\@rodapeRefRevInforText}{\autorReferenciaRevInfor. \@tituloReferenciaRevInfor. \textit{InFor, Inov. Form., Rev. NEaD-Unesp}, São Paulo, v.~X, n.~X, p.~XX-XX, \@anoReferenciaRevInfor. ISSN 2525-3476. [Para preenchimento dos editores].}
 \newcommand{\referenciaRevInfor}[1]{\renewcommand{\@rodapeRefRevInforText}{#1}}
 
 % Altura da linha de base do rodapé a partir da borda INFERIOR do papel.
@@ -442,7 +533,12 @@
                             \@rodapeRefRevInforText\par
                             \vspace{2pt}
                         \fi
-                        {\large\ccbyncsa}\hspace{1ex}\@rodapeCCRevInforText
+                        \ifx\@rodapeCCRevInforLogo\empty\else
+                            \raisebox{-0.15\height}{%
+                                \includegraphics[height=\@rodapeCCRevInforLogoH]{\@rodapeCCRevInforLogo}}%
+                            \hspace{1ex}%
+                        \fi
+                        \@rodapeCCRevInforText
                     }%
                 }%
             }%
@@ -538,13 +634,28 @@
 %   - página PAR:   o título do artigo, em itálico.
 % Ambos alinhados à esquerda, com uma linha horizontal separando do texto.
 %
-% O texto autor-data não pode ser derivado automaticamente de \autor{} (que
-% mistura afiliação/e-mail/ORCID no mesmo campo) nem do ano de publicação
-% (só definido pelos editores no fechamento da edição). Por isso é um campo
-% próprio, configurável no preâmbulo do main.tex:
-%     \cabecalhoCorridoRevInfor{SOBRENOME, Ano}
+% O texto autor-data NÃO sai de \autor{} (que mistura afiliação/e-mail/ORCID
+% no mesmo campo). Ele é montado a partir dos campos separados da seção de
+% autoria — \sobrenomeAutorRevInfor{} e \anoRevInfor{} —, que produzem
+% "SOBRENOME, Ano" via \autorDataRevInfor.
+%
+% Ordem de precedência do que é impresso nas páginas ímpares:
+%   1. o texto passado a \cabecalhoCorridoRevInfor{...}, se usado (escape para
+%      casos fora do padrão: dois autores, "et al.", ano ainda indefinido...);
+%   2. \autorDataRevInfor, se sobrenome e ano estiverem preenchidos;
+%   3. o placeholder "SOBRENOME, Ano", para lembrar que falta preencher.
 % O título da página par já é conhecido (\titulo{...}) e não precisa configuração.
-\newcommand{\@cabecalhoCorridoRevInforText}{SOBRENOME, Ano}
+\newcommand{\@cabecalhoCorridoRevInforText}{%
+    \ifx\@sobrenomeAutorRevInfor\@empty
+        SOBRENOME, Ano%
+    \else
+        \ifx\@anoRevInfor\@empty
+            SOBRENOME, Ano%
+        \else
+            \autorDataRevInfor%
+        \fi
+    \fi
+}
 \newcommand{\cabecalhoCorridoRevInfor}[1]{\renewcommand{\@cabecalhoCorridoRevInforText}{#1}}
 
 % Define aqui um estilo de página chamado "meuestilo". Definir não é ativar:
@@ -727,9 +838,12 @@
 % O estilo "meuestilo" (seção 4) já é ativado automaticamente pela classe a
 % partir da 1ª página textual — nenhum \pagestyle{} é necessário no main.tex.
 % Ele imprime, em cada página a partir da 2ª do PDF, "SOBRENOME, Ano" (ímpares)
-% ou o título do artigo em itálico (pares). Configure o texto autor-data com:
-%     \cabecalhoCorridoRevInfor{SOBRENOME, Ano}
-% no preâmbulo do main.tex (o título já vem de \titulo{...}).
+% ou o título do artigo em itálico (pares). O autor-data sai dos campos:
+%     \nomeAutorRevInfor{Jayson Magno da}
+%     \sobrenomeAutorRevInfor{Silva}
+%     \anoRevInfor{2025}
+% no preâmbulo do main.tex (o título já vem de \titulo{...}). Para um texto
+% fora desse padrão, sobrescreva com \cabecalhoCorridoRevInfor{...}.
 % Mais detalhes: seção 7.3 do manual do memoir.
 
 % --- Mais exemplos ---
