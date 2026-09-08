@@ -115,6 +115,15 @@ ides/emacs/.emacs-revinfor/
 *.elc
 auto-save-list/
 
+# --- Python (common-commands/) -----------------------------------------------
+# __pycache__/*.pyc = bytecode cache, regenerated on every run. venv/.venv = a
+# local virtualenv, if one is ever added there -- not needed today (the
+# scripts only use the standard library), but ignored up front just in case.
+__pycache__/
+*.pyc
+venv/
+.venv/
+
 # =============================================================================
 # FINAL PDF: by default every .pdf is ignored (regenerable artifact). The
 # exception below re-includes the generated article PDFs (main-<flavor>-<engine>.pdf,

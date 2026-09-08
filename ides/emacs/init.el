@@ -277,35 +277,129 @@ picked up from the running text."
 
 
 ;;; ---------------------------------------------------------------
-;; 5c. Revinfor build-flavor tables — shared between the AUCTeX
-;;     commands (section 6) and the pdf-tools completion hook
-;;     (section 7). Each flavor's docker-latexmk run gets its own
-;;     -jobname so the two builds don't overwrite the same main.pdf.
+;; 5c. Revinfor build/view — portable Python scripts + build-flavor
+;;     tables shared with the pdf-tools completion hook (section 7).
+;;     The actual Docker/latexmk plumbing lives in
+;;     common-commands/build_article.py (see that file's own
+;;     docstring) — this section only calls it and manages the
+;;     Emacs-side book-keeping (which buffer to run it in, which
+;;     already-open pdf-view buffer to revert afterwards). Keeping
+;;     that plumbing in one portable (Linux/Windows) Python module,
+;;     rather than hand-rolled here, also means a future non-Emacs
+;;     screen/GUI can reuse the exact same build_article.py/
+;;     view_article.py without reimplementing Docker invocations.
 ;;; ---------------------------------------------------------------
 
-(defconst revinfor/flavor-image-alist
-  '(("abnt"     . "artigo-revinfor-latex:latest")
-    ("overleaf" . "artigo-revinfor-overleaf:latest"))
-  "Maps each Makefile FLAVOR to its Docker image name.")
+(defconst revinfor/repo-root
+  (expand-file-name "../../" revinfor/config-dir)
+  "Repo root, two levels above ides/emacs/ (this init.el's directory).")
 
-(defconst revinfor/flavor-tex-command-alist
-  '(("abnt"     . "docker-latexmk-abnt")
-    ("overleaf" . "docker-latexmk-overleaf"))
-  "Maps each Makefile FLAVOR to its TeX-command-list entry name.")
+(defconst revinfor/common-commands-dir
+  (expand-file-name "common-commands/" revinfor/repo-root)
+  "Directory holding build_article.py / view_article.py / revinfor_common.py.")
+
+(defun revinfor/python-executable ()
+  "Locate a Python 3 interpreter, preferring \"python3\" (Linux/macOS)
+and falling back to \"python\" (common on Windows)."
+  (or (executable-find "python3")
+      (executable-find "python")
+      (user-error "Revinfor: no Python interpreter found on PATH (tried python3, python)")))
 
 (defconst revinfor/flavor-pdf-alist
-  '(("abnt"     . "main-abnt.pdf")
-    ("overleaf" . "main-overleaf.pdf"))
-  "Maps each Makefile FLAVOR to the PDF filename its -jobname flag
-produces (see the docker-latexmk-* entries in section 6). AUCTeX's
-own `TeX-active-master' has no notion of a custom jobname — it always
+  '(("abnt"     . "main-abnt-pdf.pdf")
+    ("overleaf" . "main-overleaf-pdf.pdf"))
+  "Maps each Makefile FLAVOR to the PDF filename build_article.py's
+-jobname flag produces for the default pdf engine (see
+common-commands/revinfor_common.py's `pdf_name'). AUCTeX's own
+`TeX-active-master' has no notion of this custom jobname — it always
 resolves to the plain master name — so this table is what the
-Revinfor build/view commands and the completion hook use instead.")
+Revinfor build/view commands below use instead.")
 
-(defvar revinfor/current-build-flavor nil
-  "Flavor of the most recently started Revinfor docker-latexmk build.
-Read by the completion-message hook in section 7, since AUCTeX's own
-hook argument doesn't account for the custom jobname.")
+(defun revinfor/revert-pdf-buffer (flavor)
+  "Revert an already-open pdf-view buffer on FLAVOR's just-built PDF
+for the current article, if any, so it doesn't keep showing stale
+content."
+  (let* ((pdf-name (alist-get flavor revinfor/flavor-pdf-alist nil nil #'string=))
+         (pdf-file (expand-file-name pdf-name (TeX-master-directory)))
+         (buf (get-file-buffer pdf-file)))
+    (when buf (with-current-buffer buf (revert-buffer t t t)))))
+
+(defun revinfor/build-sentinel (proc _event)
+  "Process sentinel for `revinfor/build-pdf'.
+This file does not set lexical-binding, so a lambda given directly to
+:sentinel cannot close over `revinfor/build-pdf's local variables —
+they would read as void by the time Emacs calls it asynchronously.
+Reading FLAVOR and the originating tex buffer back off PROC's plist
+(set in `revinfor/build-pdf' via `process-put') sidesteps that."
+  (when (memq (process-status proc) '(exit signal))
+    (let ((flavor (process-get proc 'revinfor-flavor))
+          (tex-buffer (process-get proc 'revinfor-tex-buffer))
+          (buf (process-buffer proc)))
+      (if (zerop (process-exit-status proc))
+          (progn
+            (when (buffer-live-p tex-buffer)
+              (with-current-buffer tex-buffer
+                (revinfor/revert-pdf-buffer flavor)))
+            (message "Revinfor: PDF build finished (%s)." flavor))
+        (message "Revinfor: build failed (%s) — see %s buffer" flavor (buffer-name buf))))))
+
+(defun revinfor/build-pdf (flavor)
+  "Compile the current article's PDF for FLAVOR (\"abnt\" or
+\"overleaf\") by running common-commands/build_article.py in a
+dedicated buffer. That script builds FLAVOR's Docker image first if
+it isn't present locally yet, then runs latexmk inside it — a single
+process handles both steps, with no Elisp-side chaining needed."
+  (let* ((tex-buffer (current-buffer))
+         (art (file-relative-name (TeX-master-directory) revinfor/repo-root))
+         (script (expand-file-name "build_article.py" revinfor/common-commands-dir))
+         (buf (get-buffer-create (format "*Revinfor Build (%s)*" flavor)))
+         (default-directory revinfor/repo-root)
+         proc)
+    (with-current-buffer buf (erase-buffer))
+    (message "Revinfor: building %s (%s) — a full build (container start + latexmk passes) can take up to a minute; it is not stuck. See the %s buffer for live output."
+             art flavor (buffer-name buf))
+    (setq proc (make-process
+                :name (format "revinfor-build-%s" flavor)
+                :buffer buf
+                ;; --no-open: this menu opens the PDF itself, in-editor via
+                ;; pdf-tools (see `revinfor/revert-pdf-buffer' and
+                ;; `revinfor/view-pdf'); without this flag the script would
+                ;; ALSO pop the OS's separate default PDF viewer every time.
+                :command (list (revinfor/python-executable) script art
+                                "--flavor" flavor "--no-open")
+                :sentinel #'revinfor/build-sentinel))
+    (process-put proc 'revinfor-flavor flavor)
+    (process-put proc 'revinfor-tex-buffer tex-buffer)))
+
+(defun revinfor/build-pdf-abnt ()
+  "Build the final PDF using the ABNT flavor Docker image."
+  (interactive)
+  (revinfor/build-pdf "abnt"))
+
+(defun revinfor/build-pdf-overleaf ()
+  "Build the final PDF using the Overleaf-compatible flavor Docker image."
+  (interactive)
+  (revinfor/build-pdf "overleaf"))
+
+(defun revinfor/view-pdf (flavor)
+  "Open FLAVOR's built PDF for the current article in pdf-view-mode.
+Bypasses AUCTeX's own C-c C-v / TeX-view, which always looks for the
+plain master name and would never find a jobname'd main-<flavor>-pdf.pdf."
+  (let* ((pdf-name (alist-get flavor revinfor/flavor-pdf-alist nil nil #'string=))
+         (pdf-file (expand-file-name pdf-name (TeX-master-directory))))
+    (if (file-exists-p pdf-file)
+        (find-file-other-window pdf-file)
+      (user-error "Revinfor: %s not found yet — build it first" pdf-name))))
+
+(defun revinfor/view-pdf-abnt ()
+  "View the current article's ABNT flavor PDF."
+  (interactive)
+  (revinfor/view-pdf "abnt"))
+
+(defun revinfor/view-pdf-overleaf ()
+  "View the current article's Overleaf flavor PDF."
+  (interactive)
+  (revinfor/view-pdf "overleaf"))
 
 
 ;;; ---------------------------------------------------------------
@@ -338,8 +432,10 @@ hook argument doesn't account for the custom jobname.")
   ;; choice (see section 1's docker-latexmk wrapper): both call the same
   ;; script, but the overleaf one overrides REVINFOR_LATEX_IMAGE so it runs
   ;; against the Overleaf-compatible container instead. Each also sets its
-  ;; own -jobname (see revinfor/flavor-pdf-alist, section 5c) so an ABNT
-  ;; build and an Overleaf build never overwrite each other's PDF.
+  ;; own -jobname so an ABNT build and an Overleaf build never overwrite
+  ;; each other's PDF. These back the plain C-c C-c quick-compile only —
+  ;; the Revinfor menu's "Build Final PDF" (section 5c) goes through
+  ;; build_article.py instead, not through this TeX-command machinery.
   (add-to-list 'TeX-command-list
                '("docker-latexmk-abnt"
                  "docker-latexmk -pdf -interaction=nonstopmode -jobname=main-abnt %t"
@@ -353,79 +449,9 @@ hook argument doesn't account for the custom jobname.")
   (setq TeX-command-default "docker-latexmk-abnt")
   (setq-default TeX-master nil)   ; prompts once, then caches in .dir-locals
 
-  ;; "Revinfor" menu — one-click Build/View Final PDF entries per flavor,
-  ;; so the docker-latexmk pipeline above doesn't require going through
-  ;; C-c C-c and selecting the command by name every time.
-  (defun revinfor/run-docker-latexmk (flavor)
-    "Kick off the docker-latexmk TeX-command for FLAVOR with a heads-up message.
-Each run starts a fresh container and can do several latexmk passes
-(pdflatex/bibtex), so AUCTeX's single \"Running...\" echo can otherwise
-read as a hang. `sit-for' holds this message on screen briefly so it
-isn't instantly overwritten by that echo."
-    (setq revinfor/current-build-flavor flavor)
-    (message "Revinfor: compiling via docker-latexmk (%s) → %s — a full build (container start + multiple latexmk passes) can take up to a minute; it is not stuck. Press C-c C-l to watch live output."
-             flavor (alist-get flavor revinfor/flavor-pdf-alist nil nil #'string=))
-    (sit-for 1.5)
-    (TeX-command (alist-get flavor revinfor/flavor-tex-command-alist nil nil #'string=)
-                 #'TeX-master-file (if TeX-save-query 0 1)))
-
-  (defun revinfor/build-pdf (flavor)
-    "Compile the current article's master file via docker-latexmk.
-FLAVOR is \"abnt\" or \"overleaf\" (see the Makefile). Builds that
-flavor's Docker image first if it isn't present locally yet."
-    (let ((image (alist-get flavor revinfor/flavor-image-alist nil nil #'string=)))
-      (if (zerop (call-process "docker" nil nil nil "image" "inspect" image))
-          (revinfor/run-docker-latexmk flavor)
-        (let* ((tex-buffer (current-buffer))
-               (default-directory (expand-file-name "../../" revinfor/config-dir))
-               (buf (get-buffer-create (format "*Revinfor Docker Build (%s)*" flavor))))
-          (message "Revinfor: %s image not found — building it now (first run, a few minutes)..." image)
-          (pop-to-buffer buf)
-          (make-process
-           :name (format "revinfor-docker-build-%s" flavor)
-           :buffer buf
-           :command (list "make" "docker-build" (format "FLAVOR=%s" flavor))
-           :sentinel
-           (lambda (proc _event)
-             (when (memq (process-status proc) '(exit signal))
-               (if (zerop (process-exit-status proc))
-                   (if (buffer-live-p tex-buffer)
-                       (with-current-buffer tex-buffer
-                         (message "Revinfor: Docker image built — starting PDF build.")
-                         (revinfor/run-docker-latexmk flavor))
-                     (message "Revinfor: Docker image built — re-run Build Final PDF."))
-                 (message "Revinfor: docker-build failed — see %s buffer" (buffer-name buf))))))))))
-
-  (defun revinfor/build-pdf-abnt ()
-    "Build the final PDF using the ABNT flavor Docker image."
-    (interactive)
-    (revinfor/build-pdf "abnt"))
-
-  (defun revinfor/build-pdf-overleaf ()
-    "Build the final PDF using the Overleaf-compatible flavor Docker image."
-    (interactive)
-    (revinfor/build-pdf "overleaf"))
-
-  (defun revinfor/view-pdf (flavor)
-    "Open FLAVOR's built PDF for the current article in pdf-view-mode.
-Bypasses AUCTeX's own C-c C-v / TeX-view, which always looks for the
-plain master name and would never find a jobname'd main-<flavor>.pdf."
-    (let* ((pdf-name (alist-get flavor revinfor/flavor-pdf-alist nil nil #'string=))
-           (pdf-file (expand-file-name pdf-name (TeX-master-directory))))
-      (if (file-exists-p pdf-file)
-          (find-file-other-window pdf-file)
-        (user-error "Revinfor: %s not found yet — build it first" pdf-name))))
-
-  (defun revinfor/view-pdf-abnt ()
-    "View the current article's ABNT flavor PDF."
-    (interactive)
-    (revinfor/view-pdf "abnt"))
-
-  (defun revinfor/view-pdf-overleaf ()
-    "View the current article's Overleaf flavor PDF."
-    (interactive)
-    (revinfor/view-pdf "overleaf"))
-
+  ;; "Revinfor" menu — one-click Build/View Final PDF entries per flavor
+  ;; (functions defined in section 5c), so the build_article.py pipeline
+  ;; doesn't require going through C-c C-c and selecting a command by name.
   ;; LaTeX-mode-map lives in latex.el, not tex.el, and AUCTeX only
   ;; loads latex.el when a .tex file is actually opened — so defining
   ;; the menu here directly would fail with a void-variable error.
@@ -452,25 +478,14 @@ plain master name and would never find a jobname'd main-<flavor>.pdf."
   (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
   (setq TeX-view-program-list
         '(("PDF Tools" TeX-pdf-tools-sync-view)))
-  ;; Bookends the "not stuck" message from revinfor/run-docker-latexmk
-  ;; (section 6) with a clear end-of-build signal, and reverts an
-  ;; already-open pdf-view buffer on the just-built flavor's PDF.
-  ;; AUCTeX's stock TeX-revert-document-buffer isn't used here: its
-  ;; hook argument is `TeX-active-master', which stays the plain
-  ;; master name and never resolves to a -jobname'd main-<flavor>.pdf
-  ;; (see revinfor/flavor-pdf-alist, section 5b), so it would always
-  ;; look for a main.pdf buffer that these builds never produce.
+  ;; Plain end-of-build signal for the C-c C-c / docker-latexmk-* quick
+  ;; compile (section 6): unlike the Revinfor menu's own build (section
+  ;; 5c, which reverts the right pdf-view buffer itself in its process
+  ;; sentinel), this generic hook has no reliable way to know which
+  ;; flavor/jobname was used, so it just reports the compiled file.
   (add-hook 'TeX-after-compilation-finished-functions
-            (lambda (_file)
-              (let* ((flavor revinfor/current-build-flavor)
-                     (pdf-name (and flavor (alist-get flavor revinfor/flavor-pdf-alist
-                                                       nil nil #'string=))))
-                (when pdf-name
-                  (let* ((pdf-file (expand-file-name pdf-name (TeX-master-directory)))
-                         (buf (get-file-buffer pdf-file)))
-                    (when buf (with-current-buffer buf (revert-buffer t t t)))))
-                (message "Revinfor: PDF build finished (%s)."
-                         (or pdf-name (file-name-nondirectory _file)))))))
+            (lambda (file)
+              (message "Revinfor: PDF build finished (%s)." (file-name-nondirectory file)))))
 
 
 ;;; ---------------------------------------------------------------
@@ -661,7 +676,8 @@ plain master name and would never find a jobname'd main-<flavor>.pdf."
 ;;
 ;;  LaTeX editing (LaTeX-mode):
 ;;    Revinfor menu — Build/View Final PDF (ABNT) / (Overleaf), no prompt
-;;                    outputs: main-abnt.pdf / main-overleaf.pdf
+;;                    (runs common-commands/build_article.py); outputs:
+;;                    main-abnt-pdf.pdf / main-overleaf-pdf.pdf
 ;;    C-c C-c       — compile via docker-latexmk (pick abnt/overleaf; default: abnt)
 ;;    C-c C-v       — NOT wired for these: AUCTeX's view always looks for the
 ;;                    plain master name, not a -jobname'd file. Use the
