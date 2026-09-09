@@ -1,0 +1,539 @@
+#+TITLE: Tutorial: Mapeamento de dados LaTeX -> XML JATS
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-09-09
+#+OPTIONS: toc:t num:t
+
+* Visão Geral
+
+Este documento detalha, comando por comando, como o conteúdo de
+=main.tex= (escrito com a classe =Article_Class_RevInfor.cls=) e de
+=references.bib= deve ser traduzido para *JATS XML* — o formato exigido
+por praticamente todo indexador que trabalha com texto completo (SciELO,
+PMC, e a maioria dos agregadores acadêmicos).
+
+Este é o mapa de dados a ser seguido pelo script conversor da Fase 2 do
+plano geral (ainda não escrito). Ele não exige nenhuma ferramenta para
+ser lido — é a referência a consultar durante a implementação do script.
+Para o contexto de quando usar isto (e o que fazer antes), ver
+=OJS_INDEXACAO_TUTORIAL.org=.
+
+#+begin_example
+Por que NÃO usar o Pandoc para converter main.tex direto?
+  A classe Article_Class_RevInfor.cls é uma customização pesada de
+  abnTeX2/memoir (banners, rodapés, cabeçalhos correntes) que o leitor
+  de LaTeX do Pandoc não interpreta — ele não executa macros de um
+  arquivo .cls. A boa notícia: todo o conteúdo SEMÂNTICO do artigo
+  (título, autoria, resumo, seções, citações) passa por um punhado de
+  comandos bem definidos, listados nas tabelas abaixo. Por isso o
+  caminho mais confiável é um extrator dedicado (regex/parser simples
+  em Python) que conhece só esses comandos, e não o Pandoc genérico.
+#+end_example
+
+* 1. Qual "sabor" de JATS usar
+
+Existem três variantes (tag sets) do JATS 1.3, cada uma com um propósito:
+
+| Tag set               | Uso típico                                    |
+|-------------------------+------------------------------------------------|
+| Archiving and Interchange | Arquivamento de longo prazo (mais permissivo) |
+| *Journal Publishing*   | O formato usado por revistas publicando artigos — *este é o que usaremos* |
+| Article Authoring      | Para autores submeterem, antes da editoração  |
+
+XSD oficial para validação (usar com =xmllint=, já instalado no ambiente):
+https://jats.nlm.nih.gov/publishing/1.3/xsd/JATS-journalpublishing1.xsd
+
+Estrutura raiz do documento:
+
+#+begin_src xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.3 20210610//EN"
+  "JATS-journalpublishing1.dtd">
+<article xmlns:xlink="http://www.w3.org/1999/xlink"
+         article-type="research-article" xml:lang="pt">
+  <front> ... </front>   <!-- metadados: Seção 2 -->
+  <body>  ... </body>    <!-- corpo do artigo: Seção 3 -->
+  <back>  ... </back>    <!-- referências: Seção 4 -->
+</article>
+#+end_src
+
+* 2. Mapeamento de metadados (=<front>=)
+
+Fonte: preâmbulo de =main.tex= (comandos ANTES de =\begin{document}=) e o
+bloco pré-textual (entre =\begin{document}= e =\textual=).
+
+** 2.1 Metadados da revista (=journal-meta=) — fixos, não vêm do artigo
+
+Estes valores são os mesmos para todo artigo publicado nesta revista;
+podem ficar hard-coded no script conversor ou num arquivo de config
+separado (não fazem parte de nenhum =main.tex=):
+
+#+begin_src xml
+<journal-meta>
+  <journal-id journal-id-type="publisher-id">cdep3</journal-id>
+  <journal-title-group>
+    <journal-title>InFor, Inov. Form., Rev. NEaD-Unesp</journal-title>
+  </journal-title-group>
+  <issn pub-type="epub">2525-3476</issn>
+  <publisher>
+    <publisher-name>Universidade Estadual Paulista (UNESP) - NEaD</publisher-name>
+  </publisher>
+</journal-meta>
+#+end_src
+
+O ISSN =2525-3476= já está hard-coded hoje dentro de
+=Article_Class_RevInfor.cls= (linha do =\@rodapeRefRevInforText=, ver
+=common-shared/cls/Article_Class_RevInfor.cls=) — o script pode
+reaproveitar essa mesma constante para não duplicar a fonte da verdade,
+ou extraí-la de lá via regex em vez de copiar manualmente.
+
+** 2.2 Título do artigo
+
+| Comando LaTeX                              | Elemento JATS                                                    |
+|-----------------------------------------------+---------------------------------------------------------------------|
+| =\titulo{...}=                              | =<article-title>= dentro de =<title-group>=                       |
+| =\tituloestrangeiroRevInfor{...}=           | =<trans-title-group xml:lang="en"><trans-title>=                  |
+
+#+begin_src latex
+\titulo{Contornos do currículo e a integração de tecnologias no
+  contexto da política pública \textit{Plan Ceibal} desenvolvida no
+  Uruguai}
+...
+\tituloestrangeiroRevInfor{Curriculum outlines on the context of the
+  public policy Plan Ceibal developed in Uruguay}
+#+end_src
+
+#+begin_src xml
+<title-group>
+  <article-title>Contornos do currículo e a integração de tecnologias
+    no contexto da política pública <italic>Plan Ceibal</italic>
+    desenvolvida no Uruguai</article-title>
+  <trans-title-group xml:lang="en">
+    <trans-title>Curriculum outlines on the context of the public
+      policy Plan Ceibal developed in Uruguay</trans-title>
+  </trans-title-group>
+</title-group>
+#+end_src
+
+*Atenção*: =\textit{Plan Ceibal}= dentro de =\titulo{}= precisa virar
+=<italic>Plan Ceibal</italic>= no XML — o extrator precisa lidar com
+comandos de formatação ANINHADOS dentro dos argumentos de =\titulo=, não
+só extrair o texto puro.
+
+** 2.3 Autoria
+
+Fonte: =\nomeAutorRevInfor=, =\sobrenomeAutorRevInfor=, =\anoRevInfor= e
+o comando composto =\autorRevInfor{nome}{afiliação}{email}{orcid}=
+(definido em =Article_Class_RevInfor.cls=, linha ~280).
+
+| Argumento de =\autorRevInfor{#1}{#2}{#3}{#4}=  | Elemento JATS                                    |
+|---------------------------------------------------+------------------------------------------------------|
+| =#1= nome completo (via =\nomeCompletoAutorRevInfor=) | =<name><surname>=/=<given-names>= (usar os campos separados =\nomeAutorRevInfor=/=\sobrenomeAutorRevInfor=, não o #1 já concatenado) |
+| =#2= afiliação                                   | =<aff>=                                              |
+| =#3= e-mail                                      | =<email>=                                            |
+| =#4= ORCID iD                                    | =<contrib-id contrib-id-type="orcid">=               |
+
+#+begin_src latex
+\nomeAutorRevInfor{Jayson Magno da}
+\sobrenomeAutorRevInfor{Silva}
+\anoRevInfor{2025}
+\autorRevInfor
+    {\nomeCompletoAutorRevInfor}
+    {Doutor em Educação. Professor Formador I, Pesquisador Colaborador
+     na Universidade Federal do ABC (UFABC), São Paulo, Brasil.}
+    {jayson.magno@ufabc.edu.br}
+    {0000-0001-5858-2507}
+#+end_src
+
+#+begin_src xml
+<contrib-group>
+  <contrib contrib-type="author">
+    <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0001-5858-2507</contrib-id>
+    <name>
+      <surname>Silva</surname>
+      <given-names>Jayson Magno da</given-names>
+    </name>
+    <email>jayson.magno@ufabc.edu.br</email>
+    <aff>Doutor em Educação. Professor Formador I, Pesquisador
+      Colaborador na Universidade Federal do ABC (UFABC), São Paulo,
+      Brasil.</aff>
+  </contrib>
+</contrib-group>
+#+end_src
+
+*Nota sobre múltiplos autores*: o modelo atual (=main.tex= de
+=artigo_modelo_revista_infor/=) só demonstra UM autor. Se um artigo real
+tiver coautoria, o extrator precisa reconhecer múltiplas chamadas de
+=\autorRevInfor{...}= no preâmbulo — cada uma vira um novo bloco
+=<contrib>= dentro do mesmo =<contrib-group>=.
+
+*Ano de publicação* (=\anoRevInfor{2025}=) não entra no =<front>= como
+parte da autoria — ele alimenta =<pub-date>= (Seção 2.6).
+
+** 2.4 Resumo / Abstract
+
+Fonte: os dois ambientes =resumo= (um sem argumento = português, um com
+=[Abstract]= = inglês) e =\palavraschaveRevInfor=/=\palavraschaveRevInfor[Keywords]=
+dentro deles.
+
+| Trecho LaTeX                                     | Elemento JATS                                |
+|-----------------------------------------------------+--------------------------------------------------|
+| =\begin{resumo}...\end{resumo}= (sem argumento)   | =<abstract>= (idioma default do artigo, pt)     |
+| =\begin{resumo}[Abstract]...\end{resumo}=         | =<trans-abstract xml:lang="en">=                |
+| =\palavraschaveRevInfor{...}=                     | =<kwd-group xml:lang="pt"><kwd>= (um por termo, separado por ".") |
+| =\palavraschaveRevInfor[Keywords]{...}=           | =<kwd-group xml:lang="en"><kwd>=                |
+
+#+begin_src latex
+\begin{resumo}
+O presente artigo tem por objetivo refletir sobre a integração
+currículo e tecnologias digitais [...]
+
+\palavraschaveRevInfor{Currículo e Tecnologias. Plan Ceibal.
+  Computadores Portáteis. Tecnologias Digitais de Informação e
+  Comunicação. Políticas Públicas.}
+\end{resumo}
+#+end_src
+
+#+begin_src xml
+<abstract xml:lang="pt">
+  <p>O presente artigo tem por objetivo refletir sobre a integração
+    currículo e tecnologias digitais [...]</p>
+</abstract>
+<kwd-group xml:lang="pt">
+  <kwd>Currículo e Tecnologias</kwd>
+  <kwd>Plan Ceibal</kwd>
+  <kwd>Computadores Portáteis</kwd>
+  <kwd>Tecnologias Digitais de Informação e Comunicação</kwd>
+  <kwd>Políticas Públicas</kwd>
+</kwd-group>
+#+end_src
+
+*Regra de quebra das palavras-chave*: o texto vem separado por ". "
+(ponto e espaço) dentro do argumento de =\palavraschaveRevInfor=; o
+extrator deve fazer =split(". ")= e remover o ponto final do último
+termo, gerando um =<kwd>= por termo.
+
+O resumo em inglês segue exatamente o mesmo padrão, mas dentro de
+=<trans-abstract xml:lang="en">= em vez de =<abstract>=, e o
+=<kwd-group xml:lang="en">= correspondente.
+
+** 2.5 ISSN e identificadores do artigo
+
+=article-id= (DOI, se houver) não tem um comando correspondente em
+=main.tex= hoje — esse dado vem do próprio OJS (Seção 2.4 do outro
+tutorial), não do LaTeX. O script deve receber o DOI como parâmetro
+externo (linha de comando ou arquivo de config por artigo), não tentar
+extraí-lo do =.tex=:
+
+#+begin_src xml
+<article-id pub-id-type="doi">10.NNNNN/xxxxx</article-id>
+#+end_src
+
+** 2.6 Data de publicação
+
+| Comando LaTeX          | Elemento JATS                                          |
+|---------------------------+------------------------------------------------------------|
+| =\anoRevInfor{2025}=    | =<pub-date publication-format="electronic"><year>=      |
+
+#+begin_src xml
+<pub-date publication-format="electronic">
+  <year>2025</year>
+</pub-date>
+#+end_src
+
+Volume, número e páginas (os "X"/"XX-XX" que aparecem como placeholder
+no rodapé do PDF, ver =\@rodapeRefRevInforText= na classe) só são
+conhecidos no fechamento da edição — o extrator não tem como preenchê-los
+a partir do =.tex=; devem ser passados como parâmetros externos também,
+assim como o DOI.
+
+* 3. Mapeamento do corpo (=<body>=)
+
+Fonte: tudo entre =\textual= e =\postextual= em =main.tex=.
+
+** 3.1 Seções
+
+| Comando LaTeX     | Elemento JATS                          |
+|----------------------+---------------------------------------------|
+| =\section{...}=    | novo =<sec>= com =<title>=              |
+| =\subsection{...}= | =<sec>= aninhado dentro do =<sec>= pai  |
+| parágrafo (texto separado por linha em branco) | =<p>= |
+
+#+begin_src latex
+\section{Introdução}
+Este é o modelo refatorado para a Revista InFor. [...]
+
+Este é o modelo refatorado [...] (segundo parágrafo)
+#+end_src
+
+#+begin_src xml
+<sec>
+  <title>Introdução</title>
+  <p>Este é o modelo refatorado para a Revista InFor. [...]</p>
+  <p>Este é o modelo refatorado [...] (segundo parágrafo)</p>
+</sec>
+#+end_src
+
+*Regra prática*: o extrator deve tratar cada =\section{}= como um limite
+de bloco, e dentro dele quebrar o texto em =<p>= a cada linha em branco
+dupla (=\n\n=) do =.tex= — o mesmo critério que o próprio LaTeX usa para
+separar parágrafos.
+
+** 3.2 Formatação inline
+
+| Comando LaTeX     | Elemento JATS         |
+|----------------------+-----------------------------|
+| =\textit{...}=     | =<italic>...</italic>=     |
+| =\textbf{...}=     | =<bold>...</bold>=         |
+| =\underline{...}=  | =<underline>...</underline>= |
+
+Esses três já cobrem o que a classe usa no corpo do texto (o restante da
+formatação visual — banner, rodapé CC, cabeçalho corrido — é só
+aparência de PDF e não tem equivalente semântico em JATS; deve ser
+ignorado pelo extrator).
+
+** 3.3 Citações no texto
+
+O artigo usa =abntex2cite= (sistema autor-data). Comandos mais comuns e
+seu equivalente:
+
+| Comando LaTeX                | Elemento JATS                                         |
+|----------------------------------+------------------------------------------------------------|
+| =\cite{chaveBib}=              | =<xref ref-type="bibr" rid="ref-chaveBib">(Autor, Ano)</xref>= |
+| =\citeonline{chaveBib}=        | =<xref ref-type="bibr" rid="ref-chaveBib">Autor (Ano)</xref>= |
+
+O =rid= referenciado precisa bater com o =id= atribuído à entrada
+correspondente em =<ref-list>= (Seção 4) — o extrator deve usar a MESMA
+chave BibTeX como sufixo do =id= dos dois lados (=ref-chaveBib=), para
+garantir que os links internos funcionem.
+
+*Limitação conhecida*: o texto visível dentro do =<xref>= (o "(Autor,
+Ano)") normalmente é *gerado pelo BibTeX/abntex2cite na hora da
+compilação do PDF*, não escrito literalmente no =.tex=. O extrator não
+tem como reproduzir esse texto sem também processar o =.bib= — a
+solução prática é: para cada =\cite{chave}= encontrado, buscar a entrada
+=chave= já convertida (Seção 4) e montar "(Sobrenome, Ano)" a partir dos
+campos =author=/=year= do BibTeX.
+
+** 3.4 Tabelas
+
+A classe carrega =booktabs= e =tabularx= (ver =Article_Class_RevInfor.cls=,
+linhas ~121-131). Nenhum artigo de exemplo no repositório usa tabela
+ainda, mas o mapeamento esperado é:
+
+#+begin_src latex
+\begin{table}
+\caption{Legenda da tabela}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Coluna A & Coluna B \\
+\midrule
+valor 1 & valor 2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+#+end_src
+
+#+begin_src xml
+<table-wrap>
+  <caption><p>Legenda da tabela</p></caption>
+  <table>
+    <thead>
+      <tr><th>Coluna A</th><th>Coluna B</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>valor 1</td><td>valor 2</td></tr>
+    </tbody>
+  </table>
+</table-wrap>
+#+end_src
+
+Tabelas em LaTeX têm sintaxe muito mais variada que o resto do
+documento (multicolunas, =\multirow=, alinhamentos customizados) — na
+prática, é o ponto do extrator com maior chance de precisar de ajuste
+manual por artigo, ao contrário do restante do mapeamento, que é
+mecânico.
+
+** 3.5 Figuras
+
+#+begin_src latex
+\includegraphics[width=0.8\textwidth]{nome-da-imagem.png}
+#+end_src
+
+#+begin_src xml
+<fig>
+  <graphic xlink:href="nome-da-imagem.png"/>
+</fig>
+#+end_src
+
+O arquivo de imagem referenciado precisa ser copiado/anexado junto com o
+XML na hora do upload como galé no OJS (o =<graphic>= só guarda o nome
+do arquivo, não os bytes da imagem).
+
+* 4. Mapeamento das referências (=<back><ref-list>=)
+
+Fonte: =references.bib= do artigo + =common-shared/bib/references.bib=
+(compartilhado entre artigos, ver a linha =\bibliography{...}= no fim de
+=main.tex=). Usar a biblioteca Python =bibtexparser= (=pip install
+bibtexparser=) para ler os dois arquivos, ao invés de regex — BibTeX tem
+sintaxe própria (chaves aninhadas, abreviações =@string=) que não vale a
+pena reimplementar.
+
+| Campo BibTeX                    | Elemento JATS                                               |
+|------------------------------------+------------------------------------------------------------------|
+| tipo da entrada (=@article=, =@book=, =@inproceedings=...) | atributo =publication-type= de =<element-citation>=          |
+| =author= (=Sobrenome, Nome and Sobrenome2, Nome2=) | um =<person-group person-group-type="author">= com um =<name>= por autor |
+| =title=                          | =<article-title>= (se =@article=) ou =<source>= (se =@book=)   |
+| =journal=                        | =<source>=                                                     |
+| =year=                           | =<year>=                                                       |
+| =volume=                         | =<volume>=                                                     |
+| =number=                         | =<issue>=                                                      |
+| =pages=                          | =<fpage>=/=<lpage>= (=split("-")= no valor)                    |
+| =doi=                            | =<pub-id pub-id-type="doi">=                                   |
+| =publisher=                      | =<publisher-name>=                                              |
+
+#+begin_src bibtex
+@article{silva2020curriculo,
+  author  = {Silva, Jayson Magno da and Souza, Maria},
+  title   = {Currículo e tecnologias digitais},
+  journal = {Revista de Educação},
+  year    = {2020},
+  volume  = {15},
+  number  = {2},
+  pages   = {45--67},
+  doi     = {10.1234/redu.2020.15.2.45}
+}
+#+end_src
+
+#+begin_src xml
+<ref id="ref-silva2020curriculo">
+  <element-citation publication-type="journal">
+    <person-group person-group-type="author">
+      <name><surname>Silva</surname><given-names>Jayson Magno da</given-names></name>
+      <name><surname>Souza</surname><given-names>Maria</given-names></name>
+    </person-group>
+    <article-title>Currículo e tecnologias digitais</article-title>
+    <source>Revista de Educação</source>
+    <year>2020</year>
+    <volume>15</volume>
+    <issue>2</issue>
+    <fpage>45</fpage>
+    <lpage>67</lpage>
+    <pub-id pub-id-type="doi">10.1234/redu.2020.15.2.45</pub-id>
+  </element-citation>
+</ref>
+#+end_src
+
+Note que o =id="ref-silva2020curriculo"= usa a MESMA chave BibTeX que
+aparece dentro de =\cite{silva2020curriculo}= no corpo do texto (Seção
+3.3) — é esse casamento de chaves que faz os links internos do XML
+funcionarem.
+
+* 5. Exemplo completo, lado a lado
+
+Um trecho mínimo de =main.tex= (título + um autor + resumo + uma seção +
+uma citação) e o XML JATS correspondente, juntando tudo o que foi
+mapeado acima:
+
+#+begin_src latex
+\titulo{Título de Exemplo}
+\nomeAutorRevInfor{João}
+\sobrenomeAutorRevInfor{Silva}
+\anoRevInfor{2025}
+\autorRevInfor{\nomeCompletoAutorRevInfor}{UNESP}{joao@unesp.br}{0000-0000-0000-0001}
+
+\begin{document}
+\begin{resumo}
+Resumo do artigo.
+\palavraschaveRevInfor{Tema um. Tema dois.}
+\end{resumo}
+\textual
+\section{Introdução}
+Texto citando \cite{silva2020curriculo}.
+\postextual
+\bibliography{references}
+\end{document}
+#+end_src
+
+#+begin_src xml
+<article xmlns:xlink="http://www.w3.org/1999/xlink"
+         article-type="research-article" xml:lang="pt">
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="publisher-id">cdep3</journal-id>
+      <issn pub-type="epub">2525-3476</issn>
+    </journal-meta>
+    <article-meta>
+      <title-group>
+        <article-title>Título de Exemplo</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author">
+          <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0000-0000-0001</contrib-id>
+          <name><surname>Silva</surname><given-names>João</given-names></name>
+          <email>joao@unesp.br</email>
+          <aff>UNESP</aff>
+        </contrib>
+      </contrib-group>
+      <pub-date publication-format="electronic"><year>2025</year></pub-date>
+      <abstract xml:lang="pt">
+        <p>Resumo do artigo.</p>
+      </abstract>
+      <kwd-group xml:lang="pt">
+        <kwd>Tema um</kwd>
+        <kwd>Tema dois</kwd>
+      </kwd-group>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <title>Introdução</title>
+      <p>Texto citando <xref ref-type="bibr" rid="ref-silva2020curriculo">(Silva, 2020)</xref>.</p>
+    </sec>
+  </body>
+  <back>
+    <ref-list>
+      <ref id="ref-silva2020curriculo">
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name><surname>Silva</surname><given-names>Jayson Magno da</given-names></name>
+          </person-group>
+          <article-title>Currículo e tecnologias digitais</article-title>
+          <year>2020</year>
+        </element-citation>
+      </ref>
+    </ref-list>
+  </back>
+</article>
+#+end_src
+
+* 6. Ferramentas e validação
+
+| Ferramenta       | Papel no pipeline                                       | Instalação                        |
+|-------------------+-------------------------------------------------------------+---------------------------------------|
+| =bibtexparser=    | Ler =references.bib= em Python (Seção 4)                   | =pip install bibtexparser=          |
+| =xmllint=         | Validar o XML gerado contra o XSD do JATS 1.3 (já instalado no ambiente) | já disponível             |
+| =packtools=       | Validador específico da SciELO (só necessário na Fase 4, perfil SPS) | =pip install packtools=             |
+
+Comando de validação, depois de baixar o XSD oficial (Seção 1):
+
+#+begin_src bash
+xmllint --noout --schema JATS-journalpublishing1.xsd main.jats.xml
+#+end_src
+
+Sem erro nenhum impresso = XML estruturalmente válido conforme o JATS
+1.3 Journal Publishing Tag Set (não significa, por si só, que o SciELO
+vai aceitar — isso exige também o perfil SPS, Fase 4 do plano geral).
+
+* 7. Onde isto será implementado
+
+Este documento é o mapa de dados; a implementação em si (script Python +
+alvo =make xml ART=<artigo>= no =Makefile=) ainda não existe neste
+repositório e é o próximo passo depois deste tutorial. Ele deve:
+
+1. Ler =main.tex= do artigo e extrair front-matter (Seção 2) via regex
+   nos comandos listados.
+2. Ler =references.bib= (+ o compartilhado em =common-shared/bib/=) via
+   =bibtexparser= (Seção 4).
+3. Percorrer o corpo entre =\textual= e =\postextual= (Seção 3).
+4. Montar o XML final e validar com =xmllint= (Seção 6) antes de
+   considerar o build bem-sucedido.

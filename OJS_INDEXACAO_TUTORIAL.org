@@ -1,0 +1,194 @@
+#+TITLE: Tutorial: Preparando o OJS para indexação (Fase 0 e Fase 1)
+#+AUTHOR: Wagner Marques & Claude
+#+DATE: 2026-09-09
+#+OPTIONS: toc:t num:t
+
+* Visão Geral
+
+Este tutorial cobre as duas primeiras fases do plano de exportação para
+XML/indexação da Revista InFor (rodando em [[https://infor.ead.unesp.br/index.php/cdep3]],
+um OJS — *Open Journal Systems*, da PKP):
+
+- *Fase 0*: decidir, ANTES de mexer em qualquer configuração, o que cada
+  indexador realmente exige — porque isso muda o tamanho do trabalho em
+  ordens de grandeza.
+- *Fase 1*: configuração administrativa dentro do próprio OJS (painel de
+  administração), sem precisar de nenhum script ou conversão de XML ainda.
+
+A geração de um XML JATS completo a partir do LaTeX (Fase 2) é tratada em
+outro documento: =JATS_XML_MAPEAMENTO_TUTORIAL.org=. Este arquivo aqui
+NÃO exige nenhuma ferramenta local — só o navegador e a conta de
+administrador do OJS.
+
+#+begin_example
+Pré-requisitos:
+  - Conta de administrador (ou gerente de revista) no OJS da cdep3
+  - Pelo menos uma submissão já cadastrada no sistema (para testar o
+    preenchimento de metadados na Seção 2.4)
+#+end_example
+
+* 1. Fase 0 — Definindo o escopo antes de configurar qualquer coisa
+
+** 1.1 Os três "alvos" de indexação não pedem a mesma coisa
+
+| Indexador                    | O que ele realmente consome                          | Exige XML JATS completo? |
+|-------------------------------+--------------------------------------------------------+-----------------------------|
+| DOAJ / Google Scholar / BASE | Feed de metadados via *OAI-PMH* (título, resumo, autores, palavras-chave, DOI) | Não |
+| SciELO                       | XML no perfil *SPS* (SciELO Publishing Schema), um JATS mais rígido, com corpo do artigo inteiro marcado | Sim, e mais rígido que o JATS "puro" |
+| "Ter um XML disponível no OJS" | Uma galé (galley) XML anexada ao artigo publicado    | Depende — metadados bastam para muitos casos |
+
+A confusão mais comum é achar que "publicar em XML" resolve indexação em
+qualquer lugar. Na prática:
+
+- *DOAJ, Google Scholar e BASE* não leem a galé XML do artigo — eles
+  colhem os metadados que o próprio OJS já expõe automaticamente pelo
+  protocolo OAI-PMH, independente de qualquer arquivo XML existir. Isso
+  já funciona hoje, contanto que os campos de metadados de cada
+  submissão estejam completos (ver Seção 2.4).
+- *SciELO* é o único caso em que um XML JATS "genérico" não é
+  suficiente: eles exigem o perfil SPS, com o corpo do artigo inteiro
+  (seções, citações, tabelas) marcado dentro do XML — não só os
+  metadados. Isso é o assunto da Fase 2 e da Fase 4 do plano geral, não
+  deste documento.
+
+** 1.2 SciELO tem uma barreira que não é técnica
+
+Antes de investir tempo em ferramentas de conversão, vale confirmar uma
+coisa que NENHUM script resolve: a *aceitação da revista* no SciELO é uma
+avaliação editorial/bibliométrica feita pelo comitê do SciELO Brasil
+(regularidade de publicação, corpo editorial, indicadores de citação
+etc.), um processo que costuma levar meses e é conduzido pela
+coordenação/editor-chefe da revista — não por quem prepara o XML.
+
+*Ação recomendada*: antes de avançar para a Fase 4 (perfil SPS), pergunte
+à coordenação da Revista InFor se essa candidatura ao SciELO já está em
+andamento. Se ainda não está, o esforço técnico de curto prazo deve focar
+em DOAJ/Scholar/BASE (Seção 2) e num XML JATS "genérico" (Fase 2, no
+outro tutorial) — que também serve de base para o SciELO no futuro, sem
+desperdício de trabalho.
+
+** 1.3 Decisão prática para hoje
+
+Resumindo o que fazer, em ordem de esforço:
+
+1. ✅ Fácil, sem código: garantir que os metadados de cada submissão no
+   OJS estão completos (título e resumo em PT e EN, palavras-chave nos
+   dois idiomas, ORCID do autor, afiliação). Ver Seção 2.4.
+2. ✅ Fácil, sem código: confirmar que o endpoint OAI-PMH do OJS está
+   respondendo. Ver Seção 2.3.
+3. ⚙️ Médio esforço, com código: gerar um XML JATS "genérico" a partir do
+   LaTeX (Fase 2 — outro tutorial) e anexá-lo como galé no OJS.
+4. 🕐 Grande esforço, condicional: adaptar esse XML para o perfil SPS do
+   SciELO — só depois de confirmar com a coordenação que a candidatura ao
+   SciELO é real (Seção 1.2).
+
+* 2. Fase 1 — Configuração administrativa no OJS
+
+Esta seção assume um OJS 3.3 ou 3.4 (a numeração de menus pode variar
+ligeiramente entre versões — se algum item não aparecer exatamente com
+este nome, procure por um equivalente próximo na mesma tela).
+
+** 2.1 Acessando o painel administrativo
+
+1. Faça login em https://infor.ead.unesp.br/index.php/cdep3/login com a
+   conta de administrador/gerente de revista.
+2. No menu lateral esquerdo, procure *Configurações* (ou *Settings*, se o
+   idioma da interface estiver em inglês).
+
+** 2.2 Verificando/instalando o plugin "JATS Template"
+
+Este plugin (mantido pela própria PKP, pacote =pkp/jatsTemplate=) expõe
+automaticamente uma visualização em XML de cada artigo publicado,
+montada a partir dos campos de metadados já cadastrados no OJS.
+
+1. Vá em *Configurações > Site > Plugins* (ou *Settings > Website >
+   Plugins*).
+2. Na lista de *Plugins Genéricos* (Generic Plugins), procure por *JATS
+   Template Plugin*.
+   - Se aparecer na lista mas *desmarcado*: marque a caixa para ativar.
+   - Se NÃO aparecer na lista: clique na aba *Galeria de Plugins*
+     (Plugin Gallery), busque por "JATS", clique em *Instalar* e depois
+     ative como no passo anterior.
+3. Depois de ativado, abra a página pública de um artigo já publicado e
+   procure por um link ou aba "XML" perto do PDF — é esse plugin que o
+   gera.
+
+*Atenção*: por padrão esse plugin monta um XML rico em metadados, mas o
+corpo do texto (=<body>=) só sai completo se já existir uma galé HTML de
+texto completo associada ao artigo. Sem ela, o XML gerado tende a vir com
+o corpo vazio ou reduzido — o que é esperado nesta fase. O corpo completo
+via LaTeX é resolvido na Fase 2.
+
+** 2.3 Testando o endpoint OAI-PMH
+
+Esse é o mecanismo que DOAJ, Google Scholar e BASE realmente usam para
+colher os metadados da revista — e ele já vem ativo por padrão no OJS,
+sem precisar de plugin nenhum.
+
+1. Abra no navegador:
+   https://infor.ead.unesp.br/index.php/cdep3/oai
+2. Deve retornar um XML de resposta do protocolo OAI-PMH (não uma página
+   de erro 404). Para conferir que os registros de artigos aparecem,
+   teste também:
+   https://infor.ead.unesp.br/index.php/cdep3/oai?verb=ListRecords&metadataPrefix=oai_dc
+3. Se o endpoint não responder, verifique em *Configurações > Site
+   > Configuração do Site* (ou em *Ferramentas > Importar/Exportar*) se
+   há alguma opção de "Metadados" ou "OAI" desativada — normalmente não
+   há nada a ativar manualmente, mas instalações customizadas às vezes
+   bloqueiam a rota via servidor web (=.htaccess=/=nginx.conf=), o que
+   já foge do escopo administrativo do OJS e exigiria acesso ao
+   servidor.
+
+** 2.4 Conferindo o preenchimento de metadados de cada submissão
+
+Esta é, na prática, a etapa que mais aumenta a qualidade da indexação sem
+nenhum código. Para cada submissão (rascunho ou já publicada):
+
+1. Vá em *Submissões* (ou *Fluxo de Trabalho* > escolha o artigo) >
+   aba *Metadados*.
+2. Confira, para CADA um destes campos, se existe versão em *português* e
+   em *inglês* (o OJS permite alternar o idioma do formulário no topo da
+   página, ou mostra os dois campos lado a lado, dependendo da versão):
+   - Título
+   - Resumo/Abstract
+   - Palavras-chave/Keywords
+3. Confira também:
+   - *ORCID* de cada autor (campo específico no cadastro do autor, não
+     dentro do texto livre da afiliação).
+   - *Afiliação institucional* de cada autor.
+   - *DOI do artigo*, se a revista atribuir DOI (verifique em
+     *Configurações > Fluxo de trabalho > Identificadores*, se o plugin
+     de DOI estiver habilitado).
+4. Esses são exatamente os campos que compõem o mapeamento de metadados
+   (=front-matter=) descrito no outro tutorial (Seção 2 de
+   =JATS_XML_MAPEAMENTO_TUTORIAL.org=) — quanto mais completos aqui,
+   menos trabalho manual sobra na hora de gerar o XML na Fase 2.
+
+** 2.5 Anexando manualmente uma galé XML (enquanto a Fase 2 não está pronta)
+
+Mesmo antes de ter um script de conversão automático, já é possível
+testar o fluxo de publicação com um XML feito à mão ou de teste:
+
+1. Abra a submissão > aba *Produção* (Production).
+2. Em *Galés de Publicação* (Publication Galleys), clique em *Adicionar
+   Galé* (Add Galley).
+3. Escolha o rótulo/formato "XML" e faça o upload do arquivo.
+4. Salve e confira, na página pública do artigo, se o link "XML" aparece
+   ao lado do PDF.
+
+* 3. Checklist final desta etapa
+
+- [ ] Confirmado com a coordenação se a candidatura ao SciELO é real (Seção 1.2)
+- [ ] Plugin JATS Template ativado (Seção 2.2)
+- [ ] Endpoint OAI-PMH respondendo com registros (Seção 2.3)
+- [ ] Metadados PT+EN completos em pelo menos um artigo de teste (Seção 2.4)
+- [ ] ORCID e afiliação preenchidos para os autores (Seção 2.4)
+- [ ] Testado o upload manual de uma galé XML (Seção 2.5)
+
+* 4. Próximos passos
+
+Com esta fase concluída, DOAJ/Scholar/BASE já têm o que precisam via
+OAI-PMH, e a estrutura do OJS está pronta para receber a galé XML gerada
+automaticamente a partir do LaTeX. O próximo passo é a Fase 2: construir
+o conversor que lê =main.tex= + =references.bib= e produz o XML JATS —
+ver =JATS_XML_MAPEAMENTO_TUTORIAL.org=.
