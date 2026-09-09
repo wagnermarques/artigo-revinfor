@@ -453,9 +453,53 @@
 % common-shared/img/) e sua altura impressa.
 \newcommand{\@rodapeCCRevInforLogo}{cc-by-nc-sa-80x15.png}
 \newcommand{\logoCCRevInfor}[1]{\renewcommand{\@rodapeCCRevInforLogo}{#1}}
+% Linha horizontal acima do bloco. No PDF oficial da revista (temp/10-23-PB.pdf)
+% ela NÃO tem a largura da mancha de texto: atravessa a folha quase de borda a
+% borda (sobra ~0,2 cm de cada lado) e é AZUL-CLARA, fina — e não preta com a
+% largura do texto, como estava aqui. Reproduzimos as três coisas:
+%   - cor  : azul-claro amostrado do PDF oficial (#92CCDC);
+%   - largura: \paperwidth menos 2x \@rodapeCCRevInforRegraMargem;
+%   - espessura: 0,5pt.
+\definecolor{revinforRodapeLinha}{rgb}{0.573,0.800,0.863}
+\newlength{\@rodapeCCRevInforRegraMargem}
+\setlength{\@rodapeCCRevInforRegraMargem}{0.2cm}
+\newlength{\@rodapeCCRevInforRegraEsp}
+\setlength{\@rodapeCCRevInforRegraEsp}{0.5pt}
+
+% A régua propriamente dita. É um \makebox de LARGURA ZERO (não empurra nada) que
+% recua para fora da mancha com um \hspace* negativo — por isso pode ser usada
+% tanto dentro do bloco da 1ª página quanto no rodapé das demais páginas, que
+% começam no mesmo ponto (a margem esquerda do texto).
+\newcommand{\@regraRodapeRevInfor}{%
+    \makebox[0pt][l]{%
+        \hspace*{-\dimexpr1in+\oddsidemargin-\@rodapeCCRevInforRegraMargem\relax}%
+        \textcolor{revinforRodapeLinha}{%
+            \rule{\dimexpr\paperwidth-2\@rodapeCCRevInforRegraMargem\relax}%
+                 {\@rodapeCCRevInforRegraEsp}}%
+    }%
+}
+
+% Altura da régua acima da linha de base do rodapé, nas páginas 2 em diante
+% (na 1ª página a régua vai dentro do bloco da licença, logo acima da referência).
+\newlength{\@rodapeCCRevInforRegraAltura}
+\setlength{\@rodapeCCRevInforRegraAltura}{14pt}
+
+% Régua + número da página: é o rodapé das páginas a partir da 2ª. Como no PDF
+% oficial da revista, a linha azul aparece em TODAS as páginas; só a logomarca
+% CC, o texto da licença e a referência é que ficam restritos à 1ª página.
+\newcommand{\@regraRodapeRevInforFoot}{%
+    \raisebox{\@rodapeCCRevInforRegraAltura}{\@regraRodapeRevInfor}%
+}
+
+% Largura reservada à direita da referência para o número da página não
+% colidir com o texto (ver \@rodapeCCRevInforPrint).
+\newlength{\@rodapeCCRevInforNumGutter}
+\setlength{\@rodapeCCRevInforNumGutter}{1.2cm}
+
 \newlength{\@rodapeCCRevInforLogoH}
-% 0,3cm de altura no botão 80x15 dá ~1,6cm de largura -- proporção do original.
-\setlength{\@rodapeCCRevInforLogoH}{0.3cm}
+% 0,5cm de altura no botão 80x15 dá ~2,7cm de largura -- é o tamanho impresso no
+% PDF oficial da revista (temp/10-23-PB.pdf), medido na p. 7.
+\setlength{\@rodapeCCRevInforLogoH}{0.5cm}
 
 % Referência bibliográfica completa do artigo (linha acima do selo CC), no
 % padrão "SOBRENOME, Nome. Título: subtítulo. InFor, Inov. Form., Rev.
@@ -497,8 +541,43 @@
     \ifx\@anoRevInfor\@empty ano\else\@anoRevInfor\fi
 }
 
-\newcommand{\@rodapeRefRevInforText}{\autorReferenciaRevInfor. \@tituloReferenciaRevInfor. \textit{InFor, Inov. Form., Rev. NEaD-Unesp}, São Paulo, v.~X, n.~X, p.~XX-XX, \@anoReferenciaRevInfor. ISSN 2525-3476. [Para preenchimento dos editores].}
+\newcommand{\@rodapeRefRevInforText}{\autorReferenciaRevInfor. \@tituloReferenciaRevInfor. \textit{InFor, Inov. Form., Rev. NEaD-Unesp}, São Paulo, v.~X, n.~X, p.~XX-XX, \@anoReferenciaRevInfor. ISSN 2525-3476. [a preencher].}
 \newcommand{\referenciaRevInfor}[1]{\renewcommand{\@rodapeRefRevInforText}{#1}}
+
+% Bloco "régua + referência + número da página" — o rodapé COMUM a TODAS as
+% páginas do artigo. No PDF oficial da revista (temp/10-23-PB.pdf, pp. 8-32) a
+% referência bibliográfica completa aparece no pé de todas as páginas, e não só
+% na 1ª; o número da página fica à direita dela, CENTRADO verticalmente no bloco
+% (na p. 11 do oficial o "11" alinha com a 2ª das 3 linhas da referência).
+% Restritos à 1ª página ficam só a logomarca CC e a frase da licença.
+%
+% Os \parbox[c] põem os dois pedaços centrados na MESMA linha de base, de modo
+% que o número acompanhe o bloco qualquer que seja o número de linhas da
+% referência, em vez de cair sobre o texto ou sobre a régua.
+\newcommand{\@blocoRefRodapeRevInfor}{%
+    \@regraRodapeRevInfor\par
+    \vspace{4pt}%
+    \parbox[c]{\dimexpr\textwidth-\@rodapeCCRevInforNumGutter\relax}{%
+        \@rodapeRefRevInforText}%
+    \hfill
+    \parbox[c]{\@rodapeCCRevInforNumGutter}{\raggedleft\thepage}\par
+}
+
+% Rodapé das páginas 2 em diante: o mesmo bloco acima, sem a logomarca CC.
+% \parbox[t] faz a linha de base do rodapé (a \footskip abaixo da última linha
+% do texto) coincidir com a RÉGUA; a referência desce a partir dela. Se o artigo
+% desligar a referência (\referenciaRevInfor{}), sobra só a régua, como antes.
+\renewcommand{\@regraRodapeRevInforFoot}{%
+    \ifx\@rodapeRefRevInforText\empty
+        \raisebox{\@rodapeCCRevInforRegraAltura}{\@regraRodapeRevInfor}%
+    \else
+        \parbox[t]{\textwidth}{%
+            \normalfont\footnotesize\SingleSpacing
+            \setlength{\parskip}{0pt}\setlength{\parindent}{0pt}%
+            \@blocoRefRodapeRevInfor
+        }%
+    \fi
+}
 
 % Altura da linha de base do rodapé a partir da borda INFERIOR do papel.
 % Aumente para subir o selo; diminua para descê-lo.
@@ -528,10 +607,13 @@
                         % demais e invade a área de texto da página. Zeramos localmente.
                         \setlength{\parskip}{0pt}\setlength{\parindent}{0pt}
                         \ifx\@rodapeRefRevInforText\empty\else
-                            \rule{\textwidth}{0.4pt}\par
-                            \vspace{2pt}
-                            \@rodapeRefRevInforText\par
-                            \vspace{2pt}
+                            % Mesmo bloco régua+referência+número usado no rodapé
+                            % das demais páginas, para que a 1ª página não fuja
+                            % do padrão. O número é impresso AQUI DENTRO (e não
+                            % pelo rodapé do estilo 'plain', desligado nesta
+                            % página) para não sair um segundo número solto.
+                            \@blocoRefRodapeRevInfor
+                            \vspace{5pt}
                         \fi
                         \ifx\@rodapeCCRevInforLogo\empty\else
                             \raisebox{-0.15\height}{%
@@ -668,30 +750,76 @@
 % nesta classe) só o "odd" é de fato aplicado pelo LaTeX, então alternamos o
 % conteúdo NÓS MESMOS verificando a paridade de \value{page} — funciona tanto
 % em 'oneside' quanto em 'twoside', por isso definimos os dois.
+% Folga entre a ÚLTIMA linha do cabeçalho e a régua horizontal. O memoir encosta
+% o conteúdo do cabeçalho no pé da caixa de \headheight, o que deixava o texto
+% colado na régua (~2pt). No PDF oficial da revista sobram ~9pt. O \raisebox com
+% altura e profundidade ZERO sobe o bloco sem alterar o layout da página.
+\newlength{\@cabecalhoCorridoRevInforFolga}
+\setlength{\@cabecalhoCorridoRevInforFolga}{4pt}
+
+% Rebaixamento da RÉGUA do cabeçalho em relação à linha de base do campo. Medido
+% no PDF oficial (temp/10-23-PB.pdf, p. 11, a 288 dpi): a régua fica a 76,4pt do
+% topo da folha e a última linha do cabeçalho termina em 58,5pt -- ou seja, ~18pt
+% de respiro entre o texto e a régua, e não os ~5pt (0,3 linha) do memoir.
+\newlength{\@cabecalhoCorridoRevInforRegraDesc}
+\setlength{\@cabecalhoCorridoRevInforRegraDesc}{17pt}
+
+% No PDF oficial o cabeçalho corrido é impresso em CORPO 10 com entrelinha
+% SIMPLES (e não no corpo 12 / entrelinha 1,5 do texto), e o título NÃO vai em
+% itálico: só o nome próprio "Plan Ceibal" é que sai em itálico, porque já vem
+% assim de dentro de \titulo{}. Por isso aqui não há \itshape.
 \newcommand{\@meuestiloCabecalhoTexto}{%
-    \ifodd\value{page}%
-        \@cabecalhoCorridoRevInforText%
-    \else
-        \itshape\@title%
-    \fi
+    % Régua horizontal do cabeçalho. No PDF oficial ela é a MESMA régua
+    % azul-clara do rodapé (atravessa a folha quase de borda a borda), e não uma
+    % linha preta da largura da mancha. \makeheadrule só sabe desenhar
+    % {largura}{espessura}, então ele é desligado abaixo e a régua é impressa
+    % aqui, numa caixa de largura ZERO (não empurra o texto do cabeçalho) e
+    % rebaixada de \@cabecalhoCorridoRevInforRegraDesc (ver acima).
+    \makebox[0pt][l]{%
+        \raisebox{-\@cabecalhoCorridoRevInforRegraDesc}[0pt][0pt]{%
+            \@regraRodapeRevInfor}}%
+    \raisebox{\@cabecalhoCorridoRevInforFolga}[0pt][0pt]{%
+        \parbox[b]{\textwidth}{%
+            \normalfont\footnotesize\SingleSpacing
+            \setlength{\parskip}{0pt}\setlength{\parindent}{0pt}%
+            \raggedright
+            \ifodd\value{page}%
+                \@cabecalhoCorridoRevInforText%
+            \else
+                \@title%
+            \fi
+        }%
+    }%
 }
 \makeoddhead{meuestilo}{\@meuestiloCabecalhoTexto}{}{}
 \makeevenhead{meuestilo}{\@meuestiloCabecalhoTexto}{}{}
 
-%% Linha horizontal separando o cabeçalho do texto
-\makeheadrule{meuestilo}{\textwidth}{\normalrulethickness}
+%% Régua do memoir desligada: quem a desenha agora é \@meuestiloCabecalhoTexto
+%% (ver acima), para poder usar a régua azul-clara de largura total da revista.
+\makeheadrule{meuestilo}{0pt}{0pt}
 
 % O cabeçalho corrido nas páginas PARES imprime o título do artigo por
 % extenso; títulos longos quebram em 2 linhas. O \headheight padrão (14,5pt)
 % só cabe 1 linha, e o memoir avisa com "Overfull \vbox" nas páginas em que
 % isso acontece. Aumentamos para caber 2 linhas com folga.
-\setlength{\headheight}{30pt}
+\setlength{\headheight}{36pt}
+
+% Distância da última linha do TEXTO até a linha de base do rodapé. Com o bloco
+% de referência bibliográfica no pé de todas as páginas, a régua passou a ser
+% impressa NESSA linha de base (\parbox[t] em \@regraRodapeRevInforFoot) e as
+% 3 linhas da referência descem a partir dela. Os 30pt padrão jogavam o bloco
+% para fora da folha; 14pt põem a régua a 786pt do topo, a mesma altura medida
+% no PDF oficial (temp/10-23-PB.pdf, p. 11).
+\setlength{\footskip}{14pt}
 \checkandfixthelayout
 
 %% Rodapé: número de página alinhado à direita, igual ao restante do artigo
 %% (mesmo critério usado no estilo 'plain', logo abaixo).
-\makeoddfoot{meuestilo}{}{}{\thepage}
-\makeevenfoot{meuestilo}{}{}{\thepage}
+% O número da página vem DENTRO do bloco (à direita da referência), como no PDF
+% oficial; por isso o campo direito do rodapé fica vazio -- senão sairia um
+% segundo número solto sobre a régua.
+\makeoddfoot{meuestilo}{\@regraRodapeRevInforFoot}{}{}
+\makeevenfoot{meuestilo}{\@regraRodapeRevInforFoot}{}{}
 
 % Ativação automática: o abnTeX2 (\textual, em modo 'article') liga
 % \pagestyle{plain} ao entrar nos elementos textuais. Encadeamos "meuestilo"
@@ -722,8 +850,22 @@
 % \makeoddfoot/\makeevenfoot recebem {esquerda}{centro}{direita}; deixamos os
 % dois primeiros vazios e pomos \thepage à direita. (No modo 'oneside' usado
 % aqui, só o "odd" é aplicado; definimos o "even" também por robustez.)
-\makeoddfoot{plain}{}{}{\thepage}
-\makeevenfoot{plain}{}{}{\thepage}
+\makeoddfoot{plain}{\@regraRodapeRevInforFoot}{}{}
+\makeevenfoot{plain}{\@regraRodapeRevInforFoot}{}{}
+
+% EXCEÇÃO — 1ª página: nela o número já sai DENTRO do bloco de rodapé da licença
+% (ao lado da referência, como no PDF oficial da revista). O \maketitle do memoir
+% aplica a esta página o estilo 'title', que por padrão é um APELIDO de 'plain'
+% (por isso não se pode redefinir 'title' diretamente: o memoir recusa). Criamos
+% então um estilo próprio, sem nada no cabeçalho e no rodapé, e apontamos o
+% apelido 'title' para ele — assim não sai um segundo número, solto sobre a
+% linha horizontal do bloco.
+\makepagestyle{revinforprimeirapagina}
+\makeoddhead{revinforprimeirapagina}{}{}{}
+\makeevenhead{revinforprimeirapagina}{}{}{}
+\makeoddfoot{revinforprimeirapagina}{}{}{}
+\makeevenfoot{revinforprimeirapagina}{}{}{}
+\aliaspagestyle{title}{revinforprimeirapagina}
 
 
 % ---------------------------------------------------------------------------
