@@ -1,4 +1,4 @@
-.PHONY: build clean all help docker-build docker-build-editor editor
+.PHONY: build clean all help docker-build docker-build-editor editor xml
 
 # Real path of the repo root ON THE HOST. Normally just $(shell pwd).
 #
@@ -57,6 +57,8 @@ help:
 	@echo "  make clean                     Remove intermediate files from all articles"
 	@echo "  make clean ART=<folder_name>   Remove intermediate files from one article"
 	@echo "  make editor                    Launch VS Code in the browser (see CODE_SERVER_TUTORIAL.org)"
+	@echo "  make xml ART=<folder_name>     Convert main.tex -> JATS XML (see JATS_XML_MAPEAMENTO_TUTORIAL.org)"
+	@echo "                                 e.g. make xml ART=<folder> DOI=10.NNNNN/xxxxx"
 	@echo ""
 	@echo "Options:"
 	@echo "  ENGINE=pdf|xe|lua              LaTeX engine (default: pdf)"
@@ -124,6 +126,18 @@ all:
 		echo "Building $$art..."; \
 		$(MAKE) build ART=$$art; \
 	done
+
+# Convert one article's main.tex (+ references.bib) to JATS XML.
+# Usage: make xml ART=artigo_modelo_revista_infor [DOI=10.NNNNN/xxxxx]
+# Pure Python (bibtexparser only) -- no Docker/LaTeX toolchain needed, so it
+# runs straight on the host, unlike `build`. See common-commands/tex_to_jats.py
+# and JATS_XML_MAPEAMENTO_TUTORIAL.org for the field-by-field mapping.
+xml:
+	@if [ -z "$(ART)" ]; then \
+		echo "Error: Please specify the article folder using ART=<folder_name>"; \
+		exit 1; \
+	fi
+	python3 common-commands/tex_to_jats.py "$(ART)" $(if $(DOI),--doi "$(DOI)")
 
 # Remove LaTeX intermediate files. Leaves the final main*.pdf in place.
 # Usage:

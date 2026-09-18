@@ -1,0 +1,4 @@
+# Only tex_to_jats.py needs this (bib parsing for the JATS <ref-list>, see
+# Seção 4 of ../JATS_XML_MAPEAMENTO_TUTORIAL.org). build_article.py and
+# view_article.py are stdlib-only on purpose.
+bibtexparser>=2.0.0

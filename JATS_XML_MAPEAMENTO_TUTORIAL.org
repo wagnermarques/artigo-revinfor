@@ -40,7 +40,16 @@ Existem três variantes (tag sets) do JATS 1.3, cada uma com um propósito:
 | Article Authoring      | Para autores submeterem, antes da editoração  |
 
 XSD oficial para validação (usar com =xmllint=, já instalado no ambiente):
-https://jats.nlm.nih.gov/publishing/1.3/xsd/JATS-journalpublishing1.xsd
+https://jats.nlm.nih.gov/publishing/1.3/xsd/JATS-journalpublishing1-3.xsd
+
+*Atenção*: esse XSD é modular (importa =standard-modules/xlink.xsd=,
+=JATS-journalpublishing1-3-elements.xsd= etc. via =import=/=include=) — para
+=xmllint --schema= resolver essas referências é preciso baixar o *pacote
+completo* (o =.zip= disponível na mesma página), não só este arquivo
+avulso, e apontar =--schema= para o XSD dentro da pasta descompactada.
+Sem isso, =xmllint= ainda confirma se o XML está *bem formado*
+(=xmllint --noout arquivo.xml=, sem =--schema=), só não valida a estrutura
+contra o tag set.
 
 Estrutura raiz do documento:
 
@@ -524,16 +533,47 @@ Sem erro nenhum impresso = XML estruturalmente válido conforme o JATS
 1.3 Journal Publishing Tag Set (não significa, por si só, que o SciELO
 vai aceitar — isso exige também o perfil SPS, Fase 4 do plano geral).
 
-* 7. Onde isto será implementado
+* 7. Onde isto está implementado
 
-Este documento é o mapa de dados; a implementação em si (script Python +
-alvo =make xml ART=<artigo>= no =Makefile=) ainda não existe neste
-repositório e é o próximo passo depois deste tutorial. Ele deve:
+Este documento é o mapa de dados; a implementação vive em
+=common-commands/tex_to_jats.py= (script stdlib + =bibtexparser=), exposta
+também como =make xml ART=<artigo>= no =Makefile= da raiz. Ela segue os
+quatro passos abaixo, exatamente como planejado:
 
-1. Ler =main.tex= do artigo e extrair front-matter (Seção 2) via regex
-   nos comandos listados.
-2. Ler =references.bib= (+ o compartilhado em =common-shared/bib/=) via
-   =bibtexparser= (Seção 4).
-3. Percorrer o corpo entre =\textual= e =\postextual= (Seção 3).
-4. Montar o XML final e validar com =xmllint= (Seção 6) antes de
-   considerar o build bem-sucedido.
+1. Lê =main.tex= do artigo e extrai o front-matter (Seção 2) via um
+   parser de comandos LaTeX com casamento de chaves balanceado (não regex
+   ingênuo — necessário por causa do =\textit{}= aninhado dentro de
+   =\titulo{}=, ver a nota da Seção 2.2).
+2. Lê =references.bib= do artigo (+ o compartilhado em
+   =common-shared/bib/=, resolvido a partir do =\bibliography{...}= do
+   próprio =main.tex=) via =bibtexparser= (Seção 4) — mas só monta
+   =<ref>= para as chaves efetivamente citadas via =\cite=/=\citeonline=
+   no corpo, não a bibliografia inteira.
+3. Percorre o corpo entre =\textual= e =\postextual= (Seção 3):
+   =\section=/=\subsection= viram =<sec>= (aninhado), parágrafos
+   separados por linha em branco viram =<p>=, e um =\includegraphics=
+   isolado num parágrafo vira =<fig>= (Seção 3.5).
+4. Monta o XML final (com =xmlns:xlink= sempre declarado na raiz,
+   conforme Seção 1) e grava em =<artigo>/main.jats.xml=; com
+   =--xsd caminho/para/o.xsd= também roda =xmllint --schema= antes de
+   terminar (ver a ressalva sobre o pacote XSD completo na Seção 1).
+
+*Uso*:
+
+#+begin_src bash
+python3 common-commands/tex_to_jats.py artigo_modelo_revista_infor \
+    --doi 10.NNNNN/xxxxx
+# ou, via Makefile:
+make xml ART=artigo_modelo_revista_infor DOI=10.NNNNN/xxxxx
+#+end_src
+
+DOI (Seção 2.5) é um parâmetro opcional (=--doi=/=DOI=), já que não existe
+no =.tex=; volume/número/páginas (Seção 2.6) ainda não são aceitos como
+parâmetro — se precisar deles no XML gerado, edite o resultado à mão por
+enquanto.
+
+*Fora do escopo do script* (mecânico só até certo ponto, como o próprio
+mapeamento já avisa): tabelas (Seção 3.4) e qualquer macro do corpo que
+não esteja listada nas Seções 3.2/3.3 — um artigo real que use outros
+comandos abntex2/memoir no corpo vai precisar de ajuste manual no XML
+gerado.

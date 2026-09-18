@@ -1,0 +1,1218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2026-09-11 sex 16:42 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tutorial: Mapeamento de dados LaTeX -&gt; XML JATS</title>
+<meta name="author" content="Wagner Marques &amp; Claude" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Tutorial: Mapeamento de dados LaTeX -&gt; XML JATS</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org8a11c85">1. Visão Geral</a></li>
+<li><a href="#orge33fcd9">2. 1. Qual "sabor" de JATS usar</a></li>
+<li><a href="#org778151a">3. 2. Mapeamento de metadados (<code>&lt;front&gt;</code>)</a>
+<ul>
+<li><a href="#org9fa6a54">3.1. 2.1 Metadados da revista (<code>journal-meta</code>) — fixos, não vêm do artigo</a></li>
+<li><a href="#org5d50ef6">3.2. 2.2 Título do artigo</a></li>
+<li><a href="#org9a22142">3.3. 2.3 Autoria</a></li>
+<li><a href="#orgfb7a99c">3.4. 2.4 Resumo / Abstract</a></li>
+<li><a href="#org53ce112">3.5. 2.5 ISSN e identificadores do artigo</a></li>
+<li><a href="#orgc98f7b9">3.6. 2.6 Data de publicação</a></li>
+</ul>
+</li>
+<li><a href="#orgfa135e5">4. 3. Mapeamento do corpo (<code>&lt;body&gt;</code>)</a>
+<ul>
+<li><a href="#org79cfe17">4.1. 3.1 Seções</a></li>
+<li><a href="#org68f4334">4.2. 3.2 Formatação inline</a></li>
+<li><a href="#orgca684a9">4.3. 3.3 Citações no texto</a></li>
+<li><a href="#org9e3eb95">4.4. 3.4 Tabelas</a></li>
+<li><a href="#org77d6dca">4.5. 3.5 Figuras</a></li>
+</ul>
+</li>
+<li><a href="#org2166d2f">5. 4. Mapeamento das referências (<code>&lt;back&gt;&lt;ref-list&gt;</code>)</a></li>
+<li><a href="#org1b58ff1">6. 5. Exemplo completo, lado a lado</a></li>
+<li><a href="#orgda337dc">7. 6. Ferramentas e validação</a></li>
+<li><a href="#org8015880">8. 7. Onde isto será implementado</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org8a11c85" class="outline-2">
+<h2 id="org8a11c85"><span class="section-number-2">1.</span> Visão Geral</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Este documento detalha, comando por comando, como o conteúdo de
+<code>main.tex</code> (escrito com a classe <code>Article_Class_RevInfor.cls</code>) e de
+<code>references.bib</code> deve ser traduzido para <b>JATS XML</b> — o formato exigido
+por praticamente todo indexador que trabalha com texto completo (SciELO,
+PMC, e a maioria dos agregadores acadêmicos).
+</p>
+
+<p>
+Este é o mapa de dados a ser seguido pelo script conversor da Fase 2 do
+plano geral (ainda não escrito). Ele não exige nenhuma ferramenta para
+ser lido — é a referência a consultar durante a implementação do script.
+Para o contexto de quando usar isto (e o que fazer antes), ver
+<code>OJS_INDEXACAO_TUTORIAL.org</code>.
+</p>
+
+<pre class="example" id="org0981da8">
+Por que NÃO usar o Pandoc para converter main.tex direto?
+  A classe Article_Class_RevInfor.cls é uma customização pesada de
+  abnTeX2/memoir (banners, rodapés, cabeçalhos correntes) que o leitor
+  de LaTeX do Pandoc não interpreta — ele não executa macros de um
+  arquivo .cls. A boa notícia: todo o conteúdo SEMÂNTICO do artigo
+  (título, autoria, resumo, seções, citações) passa por um punhado de
+  comandos bem definidos, listados nas tabelas abaixo. Por isso o
+  caminho mais confiável é um extrator dedicado (regex/parser simples
+  em Python) que conhece só esses comandos, e não o Pandoc genérico.
+</pre>
+</div>
+</div>
+<div id="outline-container-orge33fcd9" class="outline-2">
+<h2 id="orge33fcd9"><span class="section-number-2">2.</span> 1. Qual "sabor" de JATS usar</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Existem três variantes (tag sets) do JATS 1.3, cada uma com um propósito:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Tag set</th>
+<th scope="col" class="org-left">Uso típico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Archiving and Interchange</td>
+<td class="org-left">Arquivamento de longo prazo (mais permissivo)</td>
+</tr>
+
+<tr>
+<td class="org-left"><b>Journal Publishing</b></td>
+<td class="org-left">O formato usado por revistas publicando artigos — <b>este é o que usaremos</b></td>
+</tr>
+
+<tr>
+<td class="org-left">Article Authoring</td>
+<td class="org-left">Para autores submeterem, antes da editoração</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+XSD oficial para validação (usar com <code>xmllint</code>, já instalado no ambiente):
+<a href="https://jats.nlm.nih.gov/publishing/1.3/xsd/JATS-journalpublishing1.xsd">https://jats.nlm.nih.gov/publishing/1.3/xsd/JATS-journalpublishing1.xsd</a>
+</p>
+
+<p>
+Estrutura raiz do documento:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.3 20210610//EN"
+  "JATS-journalpublishing1.dtd"&gt;
+&lt;article xmlns:xlink="http://www.w3.org/1999/xlink"
+         article-type="research-article" xml:lang="pt"&gt;
+  &lt;front&gt; ... &lt;/front&gt;   &lt;!-- metadados: Seção 2 --&gt;
+  &lt;body&gt;  ... &lt;/body&gt;    &lt;!-- corpo do artigo: Seção 3 --&gt;
+  &lt;back&gt;  ... &lt;/back&gt;    &lt;!-- referências: Seção 4 --&gt;
+&lt;/article&gt;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org778151a" class="outline-2">
+<h2 id="org778151a"><span class="section-number-2">3.</span> 2. Mapeamento de metadados (<code>&lt;front&gt;</code>)</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Fonte: preâmbulo de <code>main.tex</code> (comandos ANTES de <code>\begin{document}</code>) e o
+bloco pré-textual (entre <code>\begin{document}</code> e <code>\textual</code>).
+</p>
+</div>
+<div id="outline-container-org9fa6a54" class="outline-3">
+<h3 id="org9fa6a54"><span class="section-number-3">3.1.</span> 2.1 Metadados da revista (<code>journal-meta</code>) — fixos, não vêm do artigo</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Estes valores são os mesmos para todo artigo publicado nesta revista;
+podem ficar hard-coded no script conversor ou num arquivo de config
+separado (não fazem parte de nenhum <code>main.tex</code>):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;journal-meta&gt;
+  &lt;journal-id journal-id-type="publisher-id"&gt;cdep3&lt;/journal-id&gt;
+  &lt;journal-title-group&gt;
+    &lt;journal-title&gt;InFor, Inov. Form., Rev. NEaD-Unesp&lt;/journal-title&gt;
+  &lt;/journal-title-group&gt;
+  &lt;issn pub-type="epub"&gt;2525-3476&lt;/issn&gt;
+  &lt;publisher&gt;
+    &lt;publisher-name&gt;Universidade Estadual Paulista (UNESP) - NEaD&lt;/publisher-name&gt;
+  &lt;/publisher&gt;
+&lt;/journal-meta&gt;
+</pre>
+</div>
+
+<p>
+O ISSN <code>2525-3476</code> já está hard-coded hoje dentro de
+<code>Article_Class_RevInfor.cls</code> (linha do <code>\@rodapeRefRevInforText</code>, ver
+<code>common-shared/cls/Article_Class_RevInfor.cls</code>) — o script pode
+reaproveitar essa mesma constante para não duplicar a fonte da verdade,
+ou extraí-la de lá via regex em vez de copiar manualmente.
+</p>
+</div>
+</div>
+<div id="outline-container-org5d50ef6" class="outline-3">
+<h3 id="org5d50ef6"><span class="section-number-3">3.2.</span> 2.2 Título do artigo</h3>
+<div class="outline-text-3" id="text-3-2">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Comando LaTeX</th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\titulo{...}</code></td>
+<td class="org-left"><code>&lt;article-title&gt;</code> dentro de <code>&lt;title-group&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\tituloestrangeiroRevInfor{...}</code></td>
+<td class="org-left"><code>&lt;trans-title-group xml:lang</code>"en"&gt;&lt;trans-title&gt;=</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-latex">\titulo{Contornos do currículo e a integração de tecnologias no
+  contexto da política pública \textit{Plan Ceibal} desenvolvida no
+  Uruguai}
+...
+\tituloestrangeiroRevInfor{Curriculum outlines on the context of the
+  public policy Plan Ceibal developed in Uruguay}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;title-group&gt;
+  &lt;article-title&gt;Contornos do currículo e a integração de tecnologias
+    no contexto da política pública &lt;italic&gt;Plan Ceibal&lt;/italic&gt;
+    desenvolvida no Uruguai&lt;/article-title&gt;
+  &lt;trans-title-group xml:lang="en"&gt;
+    &lt;trans-title&gt;Curriculum outlines on the context of the public
+      policy Plan Ceibal developed in Uruguay&lt;/trans-title&gt;
+  &lt;/trans-title-group&gt;
+&lt;/title-group&gt;
+</pre>
+</div>
+
+<p>
+<b>Atenção</b>: <code>\textit{Plan Ceibal}</code> dentro de <code>\titulo{}</code> precisa virar
+<code>&lt;italic&gt;Plan Ceibal&lt;/italic&gt;</code> no XML — o extrator precisa lidar com
+comandos de formatação ANINHADOS dentro dos argumentos de <code>\titulo</code>, não
+só extrair o texto puro.
+</p>
+</div>
+</div>
+<div id="outline-container-org9a22142" class="outline-3">
+<h3 id="org9a22142"><span class="section-number-3">3.3.</span> 2.3 Autoria</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+Fonte: <code>\nomeAutorRevInfor</code>, <code>\sobrenomeAutorRevInfor</code>, <code>\anoRevInfor</code> e
+o comando composto <code>\autorRevInfor{nome}{afiliação}{email}{orcid}</code>
+(definido em <code>Article_Class_RevInfor.cls</code>, linha ~280).
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Argumento de <code>\autorRevInfor{#1}{#2}{#3}{#4}</code></th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>#1</code> nome completo (via <code>\nomeCompletoAutorRevInfor</code>)</td>
+<td class="org-left"><code>&lt;name&gt;&lt;surname&gt;=/=&lt;given-names&gt;</code> (usar os campos separados <code>\nomeAutorRevInfor=/</code>\sobrenomeAutorRevInfor=, não o #1 já concatenado)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>#2</code> afiliação</td>
+<td class="org-left"><code>&lt;aff&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>#3</code> e-mail</td>
+<td class="org-left"><code>&lt;email&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>#4</code> ORCID iD</td>
+<td class="org-left"><code>&lt;contrib-id contrib-id-type</code>"orcid"&gt;=</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-latex">\nomeAutorRevInfor{Jayson Magno da}
+\sobrenomeAutorRevInfor{Silva}
+\anoRevInfor{2025}
+\autorRevInfor
+    {\nomeCompletoAutorRevInfor}
+    {Doutor em Educação. Professor Formador I, Pesquisador Colaborador
+     na Universidade Federal do ABC (UFABC), São Paulo, Brasil.}
+    {jayson.magno@ufabc.edu.br}
+    {0000-0001-5858-2507}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;contrib-group&gt;
+  &lt;contrib contrib-type="author"&gt;
+    &lt;contrib-id contrib-id-type="orcid"&gt;https://orcid.org/0000-0001-5858-2507&lt;/contrib-id&gt;
+    &lt;name&gt;
+      &lt;surname&gt;Silva&lt;/surname&gt;
+      &lt;given-names&gt;Jayson Magno da&lt;/given-names&gt;
+    &lt;/name&gt;
+    &lt;email&gt;jayson.magno@ufabc.edu.br&lt;/email&gt;
+    &lt;aff&gt;Doutor em Educação. Professor Formador I, Pesquisador
+      Colaborador na Universidade Federal do ABC (UFABC), São Paulo,
+      Brasil.&lt;/aff&gt;
+  &lt;/contrib&gt;
+&lt;/contrib-group&gt;
+</pre>
+</div>
+
+<p>
+<b>Nota sobre múltiplos autores</b>: o modelo atual (<code>main.tex</code> de
+<code>artigo_modelo_revista_infor/</code>) só demonstra UM autor. Se um artigo real
+tiver coautoria, o extrator precisa reconhecer múltiplas chamadas de
+<code>\autorRevInfor{...}</code> no preâmbulo — cada uma vira um novo bloco
+<code>&lt;contrib&gt;</code> dentro do mesmo <code>&lt;contrib-group&gt;</code>.
+</p>
+
+<p>
+<b>Ano de publicação</b> (<code>\anoRevInfor{2025}</code>) não entra no <code>&lt;front&gt;</code> como
+parte da autoria — ele alimenta <code>&lt;pub-date&gt;</code> (Seção 2.6).
+</p>
+</div>
+</div>
+<div id="outline-container-orgfb7a99c" class="outline-3">
+<h3 id="orgfb7a99c"><span class="section-number-3">3.4.</span> 2.4 Resumo / Abstract</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+Fonte: os dois ambientes <code>resumo</code> (um sem argumento = português, um com
+<code>[Abstract]</code> = inglês) e <code>\palavraschaveRevInfor=/</code>\palavraschaveRevInfor[Keywords]=
+dentro deles.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Trecho LaTeX</th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\begin{resumo}...\end{resumo}</code> (sem argumento)</td>
+<td class="org-left"><code>&lt;abstract&gt;</code> (idioma default do artigo, pt)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\begin{resumo}[Abstract]...\end{resumo}</code></td>
+<td class="org-left"><code>&lt;trans-abstract xml:lang</code>"en"&gt;=</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\palavraschaveRevInfor{...}</code></td>
+<td class="org-left"><code>&lt;kwd-group xml:lang</code>"pt"&gt;&lt;kwd&gt;= (um por termo, separado por ".")</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\palavraschaveRevInfor[Keywords]{...}</code></td>
+<td class="org-left"><code>&lt;kwd-group xml:lang</code>"en"&gt;&lt;kwd&gt;=</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-latex">\begin{resumo}
+O presente artigo tem por objetivo refletir sobre a integração
+currículo e tecnologias digitais [...]
+
+\palavraschaveRevInfor{Currículo e Tecnologias. Plan Ceibal.
+  Computadores Portáteis. Tecnologias Digitais de Informação e
+  Comunicação. Políticas Públicas.}
+\end{resumo}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;abstract xml:lang="pt"&gt;
+  &lt;p&gt;O presente artigo tem por objetivo refletir sobre a integração
+    currículo e tecnologias digitais [...]&lt;/p&gt;
+&lt;/abstract&gt;
+&lt;kwd-group xml:lang="pt"&gt;
+  &lt;kwd&gt;Currículo e Tecnologias&lt;/kwd&gt;
+  &lt;kwd&gt;Plan Ceibal&lt;/kwd&gt;
+  &lt;kwd&gt;Computadores Portáteis&lt;/kwd&gt;
+  &lt;kwd&gt;Tecnologias Digitais de Informação e Comunicação&lt;/kwd&gt;
+  &lt;kwd&gt;Políticas Públicas&lt;/kwd&gt;
+&lt;/kwd-group&gt;
+</pre>
+</div>
+
+<p>
+<b>Regra de quebra das palavras-chave</b>: o texto vem separado por ". "
+(ponto e espaço) dentro do argumento de <code>\palavraschaveRevInfor</code>; o
+extrator deve fazer <code>split(". ")</code> e remover o ponto final do último
+termo, gerando um <code>&lt;kwd&gt;</code> por termo.
+</p>
+
+<p>
+O resumo em inglês segue exatamente o mesmo padrão, mas dentro de
+<code>&lt;trans-abstract xml:lang</code>"en"&gt;= em vez de <code>&lt;abstract&gt;</code>, e o
+<code>&lt;kwd-group xml:lang</code>"en"&gt;= correspondente.
+</p>
+</div>
+</div>
+<div id="outline-container-org53ce112" class="outline-3">
+<h3 id="org53ce112"><span class="section-number-3">3.5.</span> 2.5 ISSN e identificadores do artigo</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+<code>article-id</code> (DOI, se houver) não tem um comando correspondente em
+<code>main.tex</code> hoje — esse dado vem do próprio OJS (Seção 2.4 do outro
+tutorial), não do LaTeX. O script deve receber o DOI como parâmetro
+externo (linha de comando ou arquivo de config por artigo), não tentar
+extraí-lo do <code>.tex</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;article-id pub-id-type="doi"&gt;10.NNNNN/xxxxx&lt;/article-id&gt;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc98f7b9" class="outline-3">
+<h3 id="orgc98f7b9"><span class="section-number-3">3.6.</span> 2.6 Data de publicação</h3>
+<div class="outline-text-3" id="text-3-6">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Comando LaTeX</th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\anoRevInfor{2025}</code></td>
+<td class="org-left"><code>&lt;pub-date publication-format</code>"electronic"&gt;&lt;year&gt;=</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;pub-date publication-format="electronic"&gt;
+  &lt;year&gt;2025&lt;/year&gt;
+&lt;/pub-date&gt;
+</pre>
+</div>
+
+<p>
+Volume, número e páginas (os "X"/"XX-XX" que aparecem como placeholder
+no rodapé do PDF, ver <code>\@rodapeRefRevInforText</code> na classe) só são
+conhecidos no fechamento da edição — o extrator não tem como preenchê-los
+a partir do <code>.tex</code>; devem ser passados como parâmetros externos também,
+assim como o DOI.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfa135e5" class="outline-2">
+<h2 id="orgfa135e5"><span class="section-number-2">4.</span> 3. Mapeamento do corpo (<code>&lt;body&gt;</code>)</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Fonte: tudo entre <code>\textual</code> e <code>\postextual</code> em <code>main.tex</code>.
+</p>
+</div>
+<div id="outline-container-org79cfe17" class="outline-3">
+<h3 id="org79cfe17"><span class="section-number-3">4.1.</span> 3.1 Seções</h3>
+<div class="outline-text-3" id="text-4-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Comando LaTeX</th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\section{...}</code></td>
+<td class="org-left">novo <code>&lt;sec&gt;</code> com <code>&lt;title&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\subsection{...}</code></td>
+<td class="org-left"><code>&lt;sec&gt;</code> aninhado dentro do <code>&lt;sec&gt;</code> pai</td>
+</tr>
+
+<tr>
+<td class="org-left">parágrafo (texto separado por linha em branco)</td>
+<td class="org-left"><code>&lt;p&gt;</code></td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-latex">\section{Introdução}
+Este é o modelo refatorado para a Revista InFor. [...]
+
+Este é o modelo refatorado [...] (segundo parágrafo)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;sec&gt;
+  &lt;title&gt;Introdução&lt;/title&gt;
+  &lt;p&gt;Este é o modelo refatorado para a Revista InFor. [...]&lt;/p&gt;
+  &lt;p&gt;Este é o modelo refatorado [...] (segundo parágrafo)&lt;/p&gt;
+&lt;/sec&gt;
+</pre>
+</div>
+
+<p>
+<b>Regra prática</b>: o extrator deve tratar cada <code>\section{}</code> como um limite
+de bloco, e dentro dele quebrar o texto em <code>&lt;p&gt;</code> a cada linha em branco
+dupla (<code>\n\n</code>) do <code>.tex</code> — o mesmo critério que o próprio LaTeX usa para
+separar parágrafos.
+</p>
+</div>
+</div>
+<div id="outline-container-org68f4334" class="outline-3">
+<h3 id="org68f4334"><span class="section-number-3">4.2.</span> 3.2 Formatação inline</h3>
+<div class="outline-text-3" id="text-4-2">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Comando LaTeX</th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\textit{...}</code></td>
+<td class="org-left"><code>&lt;italic&gt;...&lt;/italic&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\textbf{...}</code></td>
+<td class="org-left"><code>&lt;bold&gt;...&lt;/bold&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\underline{...}</code></td>
+<td class="org-left"><code>&lt;underline&gt;...&lt;/underline&gt;</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Esses três já cobrem o que a classe usa no corpo do texto (o restante da
+formatação visual — banner, rodapé CC, cabeçalho corrido — é só
+aparência de PDF e não tem equivalente semântico em JATS; deve ser
+ignorado pelo extrator).
+</p>
+</div>
+</div>
+<div id="outline-container-orgca684a9" class="outline-3">
+<h3 id="orgca684a9"><span class="section-number-3">4.3.</span> 3.3 Citações no texto</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+O artigo usa <code>abntex2cite</code> (sistema autor-data). Comandos mais comuns e
+seu equivalente:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Comando LaTeX</th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\cite{chaveBib}</code></td>
+<td class="org-left"><code>&lt;xref ref-type</code>"bibr" rid="ref-chaveBib"&gt;(Autor, Ano)&lt;/xref&gt;=</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\citeonline{chaveBib}</code></td>
+<td class="org-left"><code>&lt;xref ref-type</code>"bibr" rid="ref-chaveBib"&gt;Autor (Ano)&lt;/xref&gt;=</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+O <code>rid</code> referenciado precisa bater com o <code>id</code> atribuído à entrada
+correspondente em <code>&lt;ref-list&gt;</code> (Seção 4) — o extrator deve usar a MESMA
+chave BibTeX como sufixo do <code>id</code> dos dois lados (<code>ref-chaveBib</code>), para
+garantir que os links internos funcionem.
+</p>
+
+<p>
+<b>Limitação conhecida</b>: o texto visível dentro do <code>&lt;xref&gt;</code> (o "(Autor,
+Ano)") normalmente é <b>gerado pelo BibTeX/abntex2cite na hora da
+compilação do PDF</b>, não escrito literalmente no <code>.tex</code>. O extrator não
+tem como reproduzir esse texto sem também processar o <code>.bib</code> — a
+solução prática é: para cada <code>\cite{chave}</code> encontrado, buscar a entrada
+<code>chave</code> já convertida (Seção 4) e montar "(Sobrenome, Ano)" a partir dos
+campos <code>author=/=year</code> do BibTeX.
+</p>
+</div>
+</div>
+<div id="outline-container-org9e3eb95" class="outline-3">
+<h3 id="org9e3eb95"><span class="section-number-3">4.4.</span> 3.4 Tabelas</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+A classe carrega <code>booktabs</code> e <code>tabularx</code> (ver <code>Article_Class_RevInfor.cls</code>,
+linhas ~121-131). Nenhum artigo de exemplo no repositório usa tabela
+ainda, mas o mapeamento esperado é:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex">\begin{table}
+\caption{Legenda da tabela}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Coluna A &amp; Coluna B \\
+\midrule
+valor 1 &amp; valor 2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;table-wrap&gt;
+  &lt;caption&gt;&lt;p&gt;Legenda da tabela&lt;/p&gt;&lt;/caption&gt;
+  &lt;table&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;&lt;th&gt;Coluna A&lt;/th&gt;&lt;th&gt;Coluna B&lt;/th&gt;&lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr&gt;&lt;td&gt;valor 1&lt;/td&gt;&lt;td&gt;valor 2&lt;/td&gt;&lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/table-wrap&gt;
+</pre>
+</div>
+
+<p>
+Tabelas em LaTeX têm sintaxe muito mais variada que o resto do
+documento (multicolunas, <code>\multirow</code>, alinhamentos customizados) — na
+prática, é o ponto do extrator com maior chance de precisar de ajuste
+manual por artigo, ao contrário do restante do mapeamento, que é
+mecânico.
+</p>
+</div>
+</div>
+<div id="outline-container-org77d6dca" class="outline-3">
+<h3 id="org77d6dca"><span class="section-number-3">4.5.</span> 3.5 Figuras</h3>
+<div class="outline-text-3" id="text-4-5">
+<div class="org-src-container">
+<pre class="src src-latex">\includegraphics[width=0.8\textwidth]{nome-da-imagem.png}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;fig&gt;
+  &lt;graphic xlink:href="nome-da-imagem.png"/&gt;
+&lt;/fig&gt;
+</pre>
+</div>
+
+<p>
+O arquivo de imagem referenciado precisa ser copiado/anexado junto com o
+XML na hora do upload como galé no OJS (o <code>&lt;graphic&gt;</code> só guarda o nome
+do arquivo, não os bytes da imagem).
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org2166d2f" class="outline-2">
+<h2 id="org2166d2f"><span class="section-number-2">5.</span> 4. Mapeamento das referências (<code>&lt;back&gt;&lt;ref-list&gt;</code>)</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Fonte: <code>references.bib</code> do artigo + <code>common-shared/bib/references.bib</code>
+(compartilhado entre artigos, ver a linha <code>\bibliography{...}</code> no fim de
+<code>main.tex</code>). Usar a biblioteca Python <code>bibtexparser</code> (<code>pip install
+bibtexparser</code>) para ler os dois arquivos, ao invés de regex — BibTeX tem
+sintaxe própria (chaves aninhadas, abreviações <code>@string</code>) que não vale a
+pena reimplementar.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Campo BibTeX</th>
+<th scope="col" class="org-left">Elemento JATS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">tipo da entrada (<code>@article</code>, <code>@book</code>, <code>@inproceedings</code>&#x2026;)</td>
+<td class="org-left">atributo <code>publication-type</code> de <code>&lt;element-citation&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>author</code> (<code>Sobrenome, Nome and Sobrenome2, Nome2</code>)</td>
+<td class="org-left">um <code>&lt;person-group person-group-type</code>"author"&gt;= com um <code>&lt;name&gt;</code> por autor</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>title</code></td>
+<td class="org-left"><code>&lt;article-title&gt;</code> (se <code>@article</code>) ou <code>&lt;source&gt;</code> (se <code>@book</code>)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>journal</code></td>
+<td class="org-left"><code>&lt;source&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>year</code></td>
+<td class="org-left"><code>&lt;year&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>volume</code></td>
+<td class="org-left"><code>&lt;volume&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>number</code></td>
+<td class="org-left"><code>&lt;issue&gt;</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>pages</code></td>
+<td class="org-left"><code>&lt;fpage&gt;=/=&lt;lpage&gt;</code> (<code>split("-")</code> no valor)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>doi</code></td>
+<td class="org-left"><code>&lt;pub-id pub-id-type</code>"doi"&gt;=</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>publisher</code></td>
+<td class="org-left"><code>&lt;publisher-name&gt;</code></td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-bibtex">@article{silva2020curriculo,
+  author  = {Silva, Jayson Magno da and Souza, Maria},
+  title   = {Currículo e tecnologias digitais},
+  journal = {Revista de Educação},
+  year    = {2020},
+  volume  = {15},
+  number  = {2},
+  pages   = {45--67},
+  doi     = {10.1234/redu.2020.15.2.45}
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;ref id="ref-silva2020curriculo"&gt;
+  &lt;element-citation publication-type="journal"&gt;
+    &lt;person-group person-group-type="author"&gt;
+      &lt;name&gt;&lt;surname&gt;Silva&lt;/surname&gt;&lt;given-names&gt;Jayson Magno da&lt;/given-names&gt;&lt;/name&gt;
+      &lt;name&gt;&lt;surname&gt;Souza&lt;/surname&gt;&lt;given-names&gt;Maria&lt;/given-names&gt;&lt;/name&gt;
+    &lt;/person-group&gt;
+    &lt;article-title&gt;Currículo e tecnologias digitais&lt;/article-title&gt;
+    &lt;source&gt;Revista de Educação&lt;/source&gt;
+    &lt;year&gt;2020&lt;/year&gt;
+    &lt;volume&gt;15&lt;/volume&gt;
+    &lt;issue&gt;2&lt;/issue&gt;
+    &lt;fpage&gt;45&lt;/fpage&gt;
+    &lt;lpage&gt;67&lt;/lpage&gt;
+    &lt;pub-id pub-id-type="doi"&gt;10.1234/redu.2020.15.2.45&lt;/pub-id&gt;
+  &lt;/element-citation&gt;
+&lt;/ref&gt;
+</pre>
+</div>
+
+<p>
+Note que o <code>id</code>"ref-silva2020curriculo"= usa a MESMA chave BibTeX que
+aparece dentro de <code>\cite{silva2020curriculo}</code> no corpo do texto (Seção
+3.3) — é esse casamento de chaves que faz os links internos do XML
+funcionarem.
+</p>
+</div>
+</div>
+<div id="outline-container-org1b58ff1" class="outline-2">
+<h2 id="org1b58ff1"><span class="section-number-2">6.</span> 5. Exemplo completo, lado a lado</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Um trecho mínimo de <code>main.tex</code> (título + um autor + resumo + uma seção +
+uma citação) e o XML JATS correspondente, juntando tudo o que foi
+mapeado acima:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex">\titulo{Título de Exemplo}
+\nomeAutorRevInfor{João}
+\sobrenomeAutorRevInfor{Silva}
+\anoRevInfor{2025}
+\autorRevInfor{\nomeCompletoAutorRevInfor}{UNESP}{joao@unesp.br}{0000-0000-0000-0001}
+
+\begin{document}
+\begin{resumo}
+Resumo do artigo.
+\palavraschaveRevInfor{Tema um. Tema dois.}
+\end{resumo}
+\textual
+\section{Introdução}
+Texto citando \cite{silva2020curriculo}.
+\postextual
+\bibliography{references}
+\end{document}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-xml">&lt;article xmlns:xlink="http://www.w3.org/1999/xlink"
+         article-type="research-article" xml:lang="pt"&gt;
+  &lt;front&gt;
+    &lt;journal-meta&gt;
+      &lt;journal-id journal-id-type="publisher-id"&gt;cdep3&lt;/journal-id&gt;
+      &lt;issn pub-type="epub"&gt;2525-3476&lt;/issn&gt;
+    &lt;/journal-meta&gt;
+    &lt;article-meta&gt;
+      &lt;title-group&gt;
+        &lt;article-title&gt;Título de Exemplo&lt;/article-title&gt;
+      &lt;/title-group&gt;
+      &lt;contrib-group&gt;
+        &lt;contrib contrib-type="author"&gt;
+          &lt;contrib-id contrib-id-type="orcid"&gt;https://orcid.org/0000-0000-0000-0001&lt;/contrib-id&gt;
+          &lt;name&gt;&lt;surname&gt;Silva&lt;/surname&gt;&lt;given-names&gt;João&lt;/given-names&gt;&lt;/name&gt;
+          &lt;email&gt;joao@unesp.br&lt;/email&gt;
+          &lt;aff&gt;UNESP&lt;/aff&gt;
+        &lt;/contrib&gt;
+      &lt;/contrib-group&gt;
+      &lt;pub-date publication-format="electronic"&gt;&lt;year&gt;2025&lt;/year&gt;&lt;/pub-date&gt;
+      &lt;abstract xml:lang="pt"&gt;
+        &lt;p&gt;Resumo do artigo.&lt;/p&gt;
+      &lt;/abstract&gt;
+      &lt;kwd-group xml:lang="pt"&gt;
+        &lt;kwd&gt;Tema um&lt;/kwd&gt;
+        &lt;kwd&gt;Tema dois&lt;/kwd&gt;
+      &lt;/kwd-group&gt;
+    &lt;/article-meta&gt;
+  &lt;/front&gt;
+  &lt;body&gt;
+    &lt;sec&gt;
+      &lt;title&gt;Introdução&lt;/title&gt;
+      &lt;p&gt;Texto citando &lt;xref ref-type="bibr" rid="ref-silva2020curriculo"&gt;(Silva, 2020)&lt;/xref&gt;.&lt;/p&gt;
+    &lt;/sec&gt;
+  &lt;/body&gt;
+  &lt;back&gt;
+    &lt;ref-list&gt;
+      &lt;ref id="ref-silva2020curriculo"&gt;
+        &lt;element-citation publication-type="journal"&gt;
+          &lt;person-group person-group-type="author"&gt;
+            &lt;name&gt;&lt;surname&gt;Silva&lt;/surname&gt;&lt;given-names&gt;Jayson Magno da&lt;/given-names&gt;&lt;/name&gt;
+          &lt;/person-group&gt;
+          &lt;article-title&gt;Currículo e tecnologias digitais&lt;/article-title&gt;
+          &lt;year&gt;2020&lt;/year&gt;
+        &lt;/element-citation&gt;
+      &lt;/ref&gt;
+    &lt;/ref-list&gt;
+  &lt;/back&gt;
+&lt;/article&gt;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgda337dc" class="outline-2">
+<h2 id="orgda337dc"><span class="section-number-2">7.</span> 6. Ferramentas e validação</h2>
+<div class="outline-text-2" id="text-7">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Ferramenta</th>
+<th scope="col" class="org-left">Papel no pipeline</th>
+<th scope="col" class="org-left">Instalação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>bibtexparser</code></td>
+<td class="org-left">Ler <code>references.bib</code> em Python (Seção 4)</td>
+<td class="org-left"><code>pip install bibtexparser</code></td>
+</tr>
+
+<tr>
+<td class="org-left"><code>xmllint</code></td>
+<td class="org-left">Validar o XML gerado contra o XSD do JATS 1.3 (já instalado no ambiente)</td>
+<td class="org-left">já disponível</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>packtools</code></td>
+<td class="org-left">Validador específico da SciELO (só necessário na Fase 4, perfil SPS)</td>
+<td class="org-left"><code>pip install packtools</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Comando de validação, depois de baixar o XSD oficial (Seção 1):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">xmllint --noout --schema JATS-journalpublishing1.xsd main.jats.xml
+</pre>
+</div>
+
+<p>
+Sem erro nenhum impresso = XML estruturalmente válido conforme o JATS
+1.3 Journal Publishing Tag Set (não significa, por si só, que o SciELO
+vai aceitar — isso exige também o perfil SPS, Fase 4 do plano geral).
+</p>
+</div>
+</div>
+<div id="outline-container-org8015880" class="outline-2">
+<h2 id="org8015880"><span class="section-number-2">8.</span> 7. Onde isto será implementado</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+Este documento é o mapa de dados; a implementação em si (script Python +
+alvo <code>make xml ART=&lt;artigo&gt;</code> no <code>Makefile</code>) ainda não existe neste
+repositório e é o próximo passo depois deste tutorial. Ele deve:
+</p>
+
+<ol class="org-ol">
+<li>Ler <code>main.tex</code> do artigo e extrair front-matter (Seção 2) via regex
+nos comandos listados.</li>
+<li>Ler <code>references.bib</code> (+ o compartilhado em <code>common-shared/bib/</code>) via
+<code>bibtexparser</code> (Seção 4).</li>
+<li>Percorrer o corpo entre <code>\textual</code> e <code>\postextual</code> (Seção 3).</li>
+<li>Montar o XML final e validar com <code>xmllint</code> (Seção 6) antes de
+considerar o build bem-sucedido.</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2026-09-09</p>
+<p class="author">Author: Wagner Marques &amp; Claude</p>
+<p class="date">Created: 2026-09-11 sex 16:42</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
