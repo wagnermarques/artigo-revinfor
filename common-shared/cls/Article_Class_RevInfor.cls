@@ -150,19 +150,20 @@
 % O motor é escolhido no build, ex.:  make build ART=... ENGINE=xe
 \RequirePackage{iftex}
 
-% A Revista InFor usa a fonte Arial (sans-serif) em todo o texto. Reproduzimos
-% isso com a fonte livre Arimo, clone metricamente compatível com a Arial.
+% A Revista InFor exige a fonte ARIAL, corpo 12, em todo o texto. Reproduzimos
+% isso com a fonte livre Arimo, clone metricamente compatível com a Arial (mesma
+% largura de cada letra, logo mesma quebra de linhas e de páginas). O corpo 12
+% vem da opção 12pt do \LoadClass (seção 1).
 \ifpdftex
     % ----- pdfLaTeX (motor padrão do projeto) -----
     % Permite digitar acentos direto no teclado (á, ç, ã) tratados como UTF-8.
     \RequirePackage[utf8]{inputenc}
     % Codificação T1: hifenização correta e acentos "de verdade" no PDF.
     \RequirePackage[T1]{fontenc}
-    % No pdfLaTeX usamos o helvet (Nimbus Sans, clone de Helvetica) como fonte
-    % principal -- próximo da Arial. Para a Arial "de verdade" (Arimo), compile
-    % com XeLaTeX/LuaLaTeX (ENGINE=xe ou ENGINE=lua).
-    \RequirePackage{helvet}
-    \renewcommand{\familydefault}{\sfdefault}
+    % O pacote arimo traz a Arimo também em Type 1 para o pdfLaTeX; a opção
+    % sfdefault a torna a fonte PADRÃO do documento (\familydefault), inclusive
+    % dos títulos de seção do abnTeX2, que usam \sffamily.
+    \RequirePackage[sfdefault]{arimo}
 \else
     % ----- XeLaTeX ou LuaLaTeX -----
     % Estes motores já são nativamente UTF-8: NÃO se usa inputenc/fontenc.
@@ -171,8 +172,11 @@
     % Arimo = clone livre e metricamente compatível com a Arial (vem no TeX
     % Live). É a reprodução mais fiel do padrão da Revista InFor.
     \setmainfont{Arimo}
+    % Os títulos de seção do abnTeX2 usam \sffamily: sem a linha abaixo eles
+    % sairiam em Latin Modern Sans, e não em Arial.
+    \setsansfont{Arimo}
     % Para a Arial original (se instalada na imagem/sistema), troque por:
-    % \setmainfont{Arial}
+    % \setmainfont{Arial} e \setsansfont{Arial}
 \fi
 
 % Indenta também o PRIMEIRO parágrafo de cada seção (padrão ABNT).
@@ -557,8 +561,10 @@
 \newcommand{\@blocoRefRodapeRevInfor}{%
     \@regraRodapeRevInfor\par
     \vspace{4pt}%
+    % Referência em \scriptsize (8pt): com a margem inferior de 2 cm exigida pela
+    % revista, o bloco em \footnotesize não cabia entre o texto e a borda.
     \parbox[c]{\dimexpr\textwidth-\@rodapeCCRevInforNumGutter\relax}{%
-        \@rodapeRefRevInforText}%
+        \scriptsize\@rodapeRefRevInforText}%
     \hfill
     \parbox[c]{\@rodapeCCRevInforNumGutter}{\raggedleft\thepage}\par
 }
@@ -572,7 +578,10 @@
         \raisebox{\@rodapeCCRevInforRegraAltura}{\@regraRodapeRevInfor}%
     \else
         \parbox[t]{\textwidth}{%
-            \normalfont\footnotesize\SingleSpacing
+            % \SingleSpacing* (com asterisco): a versão sem * do memoir insere
+            % um \vskip\baselineskip no início, que empurrava todo o bloco uma
+            % linha (~18pt) para baixo, para fora da margem inferior de 2 cm.
+            \normalfont\footnotesize\SingleSpacing*%
             \setlength{\parskip}{0pt}\setlength{\parindent}{0pt}%
             \@blocoRefRodapeRevInfor
         }%
@@ -590,12 +599,23 @@
 \newlength{\@rodapeCCRevInforRaise}
 \setlength{\@rodapeCCRevInforRaise}{0.3cm}
 
+% Quanto a mancha de texto da 1ª página é encurtada para o bloco da licença CC
+% não cobrir o texto (ver \@rodapeCCRevInforPrint). Aumente se o bloco ainda
+% encostar no texto; diminua para ganhar linhas na 1ª página.
+\newlength{\@rodapeCCRevInforEncurta}
+\setlength{\@rodapeCCRevInforEncurta}{24pt}
+
 % Desenha o rodapé como camada de FRENTE, só na página corrente (o '*' do
 % \AddToShipoutPictureFG* restringe à 1ª página, onde o \maketitle roda).
 % Alinha o selo à esquerda da mancha (1in + \oddsidemargin) e o fixa acima da
 % borda inferior. Nada é impresso se o texto estiver vazio.
 \newcommand{\@rodapeCCRevInforPrint}{%
     \ifx\@rodapeCCRevInforText\empty\else
+        % Este bloco é desenhado por cima da página (não ocupa espaço no texto) e
+        % é mais alto que o rodapé das demais páginas: tem a linha extra da
+        % logomarca CC. Com a margem inferior de 2 cm ele cobriria as últimas
+        % linhas do texto, então encurtamos a mancha SÓ desta página.
+        \enlargethispage{-\@rodapeCCRevInforEncurta}%
         \AddToShipoutPictureFG*{%
             \AtPageLowerLeft{%
                 \raisebox{\@rodapeCCRevInforRaise}{%
@@ -700,11 +720,14 @@
 % \setlrmarginsandblock{esquerda}{direita}{*}  -> margens laterais
 % \setulmarginsandblock{superior}{inferior}{*} -> margens superior/inferior
 % O * pede ao memoir para calcular a dimensão restante automaticamente.
-\setlrmarginsandblock{3cm}{3cm}{*}
-\setulmarginsandblock{3cm}{3cm}{*}
+% Norma da Revista InFor: superior e esquerda 3 cm; inferior e direita 2 cm.
+\setlrmarginsandblock{3cm}{2cm}{*}
+\setulmarginsandblock{3cm}{2cm}{*}
 % APLICA de fato as margens acima e recalcula o layout. Sempre necessário
-% depois de mexer nas margens do memoir.
-\checkandfixthelayout
+% depois de mexer nas margens do memoir. A opção [fixed] mantém a altura do
+% texto EXATAMENTE como pedida: sem ela, o memoir arredonda a mancha para um
+% número inteiro de linhas e a margem inferior deixa de ser 2 cm.
+\checkandfixthelayout[fixed]
 
 
 % ---------------------------------------------------------------------------
@@ -808,10 +831,10 @@
 % de referência bibliográfica no pé de todas as páginas, a régua passou a ser
 % impressa NESSA linha de base (\parbox[t] em \@regraRodapeRevInforFoot) e as
 % 3 linhas da referência descem a partir dela. Os 30pt padrão jogavam o bloco
-% para fora da folha; 14pt põem a régua a 786pt do topo, a mesma altura medida
-% no PDF oficial (temp/10-23-PB.pdf, p. 11).
-\setlength{\footskip}{14pt}
-\checkandfixthelayout
+% para fora da folha. Com a margem inferior de 2 cm exigida pela revista, a
+% régua tem de ficar logo abaixo do texto para a referência caber até a borda.
+\setlength{\footskip}{4pt}
+\checkandfixthelayout[fixed]
 
 %% Rodapé: número de página alinhado à direita, igual ao restante do artigo
 %% (mesmo critério usado no estilo 'plain', logo abaixo).
@@ -875,8 +898,9 @@
 % Tamanho do recuo (indentação) da primeira linha de cada parágrafo.
 \setlength{\parindent}{1.3cm}
 
-% Espaço vertical adicional entre um parágrafo e outro.
-\setlength{\parskip}{0.2cm}  % alternativa: \onelineskip
+% Espaço vertical adicional entre um parágrafo e outro: NENHUM, por norma da
+% Revista InFor (a separação vem só do recuo da primeira linha).
+\setlength{\parskip}{0pt}
 
 % Espaçamento entre linhas 1,5 -- exigido pelas normas da Revista InFor.
 \OnehalfSpacing
